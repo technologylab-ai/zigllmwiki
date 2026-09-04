@@ -12,10 +12,26 @@ concurrency:
 
 jobs:
   verify-windows:
-    runs-on: windows-latest
+    name: Windows runtime (${{ matrix.arch }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            runner: windows-latest
+            os_arch: X64
+            pe_machine: "8664"
+          - arch: aarch64
+            runner: windows-11-arm
+            os_arch: Arm64
+            pe_machine: "aa64"
+    runs-on: ${{ matrix.runner }}
     timeout-minutes: 45
     env:
       PYTHONDONTWRITEBYTECODE: "1"
+      ZIG_PLATFORM: ${{ matrix.arch }}-windows
+      EXPECTED_OS_ARCH: ${{ matrix.os_arch }}
+      EXPECTED_PE_MACHINE: ${{ matrix.pe_machine }}
 
     steps:
       - name: Prepare the out-of-tree evidence packet
@@ -44,9 +60,9 @@ jobs:
           if ($null -eq $releaseProperty) {
             throw "official download index has no release '$baseline'"
           }
-          $artifactProperty = $releaseProperty.Value.PSObject.Properties["x86_64-windows"]
+          $artifactProperty = $releaseProperty.Value.PSObject.Properties[$env:ZIG_PLATFORM]
           if ($null -eq $artifactProperty) {
-            throw "release '$baseline' has no x86_64-windows artifact"
+            throw "release '$baseline' has no $env:ZIG_PLATFORM artifact"
           }
           $artifact = $artifactProperty.Value
           $url = [string] $artifact.tarball
@@ -72,6 +88,16 @@ jobs:
           if ($zigExecutables.Count -ne 1) {
             throw "expected exactly one zig.exe, found $($zigExecutables.Count)"
           }
+          $zigBytes = [IO.File]::ReadAllBytes($zigExecutables[0].FullName)
+          $peOffset = [BitConverter]::ToInt32($zigBytes, 0x3c)
+          if ([BitConverter]::ToUInt16($zigBytes, 0) -ne 0x5a4d -or
+              [BitConverter]::ToUInt32($zigBytes, $peOffset) -ne 0x4550) {
+            throw "zig.exe is not a PE executable"
+          }
+          $peMachine = [BitConverter]::ToUInt16($zigBytes, $peOffset + 4).ToString("x4")
+          if ($peMachine -cne $env:EXPECTED_PE_MACHINE) {
+            throw "expected native compiler PE machine $env:EXPECTED_PE_MACHINE, got $peMachine"
+          }
           $zigDirectory = $zigExecutables[0].Directory.FullName
           $zigDirectory | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
@@ -79,7 +105,8 @@ jobs:
           [ordered]@{
             index_url = $indexUrl
             zig_version = $baseline
-            platform = "x86_64-windows"
+            platform = $env:ZIG_PLATFORM
+            zig_pe_machine = $peMachine
             archive_url = $url
             expected_sha256 = $expectedSha256
             actual_sha256 = $actualSha256
@@ -101,6 +128,10 @@ jobs:
           }
 
           $os = Get-CimInstance -ClassName Win32_OperatingSystem
+          $nativeArchitecture = [Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()
+          if ($nativeArchitecture -cne $env:EXPECTED_OS_ARCH) {
+            throw "expected OS architecture $env:EXPECTED_OS_ARCH, got $nativeArchitecture"
+          }
           $versionKey = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion"
           $commit = (& git rev-parse HEAD).Trim()
           if ($LASTEXITCODE -ne 0) {
@@ -114,6 +145,9 @@ jobs:
             os_version = $os.Version
             os_build_number = $os.BuildNumber
             os_architecture = $os.OSArchitecture
+            native_os_architecture = $nativeArchitecture
+            powershell_process_architecture = [Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture.ToString()
+            zig_platform = $env:ZIG_PLATFORM
             windows_product_name = $versionKey.ProductName
             windows_display_version = $versionKey.DisplayVersion
             windows_current_build = $versionKey.CurrentBuild
@@ -185,6 +219,60 @@ jobs:
             throw "windows_iocp_tcp_file.zig failed with exit code $LASTEXITCODE"
           }
 
+      - name: Run all five x86 Windows proofs under WOW64 on the x64 host
+        if: always() && matrix.arch == 'x86_64'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          if ([Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString() -cne "X64") {
+            throw "this WOW64 evidence gate requires an x64 Windows host"
+          }
+          $proofs = @(
+            "windows_io_mapping",
+            "threaded_blocked_read_cancel_windows",
+            "windows_apc_batch",
+            "windows_iocp_lifecycle",
+            "windows_iocp_tcp_file"
+          )
+          $binaryDirectory = Join-Path $env:RUNNER_TEMP "zig-wiki-wow64"
+          New-Item -ItemType Directory -Force -Path $binaryDirectory | Out-Null
+          $results = @()
+          foreach ($proof in $proofs) {
+            $binary = Join-Path $binaryDirectory "$proof.exe"
+            $compileLog = Join-Path $env:REVIEW_PACKET "$proof-x86-compile.log"
+            $runtimeLog = Join-Path $env:REVIEW_PACKET "$proof-wow64-runtime.log"
+            # Exact Zig 0.16 --test-no-exec links the test without executing it.
+            # The following explicit process launch supplies the runtime evidence.
+            Set-Content -Path $compileLog -Value "zig test proofs/$proof.zig -target x86-windows -femit-bin=$binary --test-no-exec" -Encoding utf8
+            & zig test "proofs/$proof.zig" -target x86-windows "-femit-bin=$binary" --test-no-exec 2>&1 | Tee-Object -FilePath $compileLog -Append
+            if ($LASTEXITCODE -ne 0) {
+              throw "$proof x86 compilation failed with exit code $LASTEXITCODE"
+            }
+            $binaryBytes = [IO.File]::ReadAllBytes($binary)
+            $peOffset = [BitConverter]::ToInt32($binaryBytes, 0x3c)
+            if ([BitConverter]::ToUInt16($binaryBytes, 0) -ne 0x5a4d -or
+                [BitConverter]::ToUInt32($binaryBytes, $peOffset) -ne 0x4550 -or
+                [BitConverter]::ToUInt16($binaryBytes, $peOffset + 4) -ne 0x014c -or
+                [BitConverter]::ToUInt16($binaryBytes, $peOffset + 24) -ne 0x010b) {
+              throw "$proof is not an x86 PE32 executable"
+            }
+            & $binary 2>&1 | Tee-Object -FilePath $runtimeLog
+            $runtimeExit = $LASTEXITCODE
+            $results += [ordered]@{
+              proof = "proofs/$proof.zig"
+              target = "x86-windows"
+              executable_pe_machine = "014c"
+              executable_sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $binary).Hash.ToLowerInvariant()
+              host_os_architecture = "X64"
+              execution = "x86 process under WOW64 on x64 Windows; not a 32-bit Windows OS"
+              runtime_exit_code = $runtimeExit
+            }
+            ConvertTo-Json -InputObject @($results) | Set-Content -Path (Join-Path $env:REVIEW_PACKET "wow64-results.json") -Encoding utf8
+            if ($runtimeExit -ne 0) {
+              throw "$proof WOW64 runtime failed with exit code $runtimeExit"
+            }
+          }
+
       - name: Run command and retrieval gates
         shell: pwsh
         run: |
@@ -216,7 +304,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: zig-wiki-windows-runtime-${{ github.run_id }}-${{ github.run_attempt }}
+          name: zig-wiki-windows-runtime-${{ matrix.arch }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/zig-wiki-windows-runtime
           if-no-files-found: error
           retention-days: 30

@@ -415,11 +415,48 @@ latency estimate. There is no deployment throughput SLO to invent from this
 fixture. Blocking Winsock connection setup and file creation are outside the
 measured cycle and protected only by the process/job watchdogs.
 
-On 2026-09-04, the new proof linked Windows PE test binaries for x86,
-x86_64, and aarch64 using exact Zig 0.16.0 on macOS. **Native execution is
-pending**; these binaries alone do not establish socket completion, batched
-error classification, file write/flush, or cancellation behavior. The original
-M3-004 native observations above remain separate evidence.
+The first native qualification ran on 2026-09-04 at
+`0bdca5a38331fe9ae0a3db04cc4a6955152969fc` in
+[run 33919878353](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33919878353).
+Exact Zig 0.16.0 passed 87/87 steps, 71/78 tests with seven platform skips,
+all five standalone Windows proofs, and 27 command/consumer tests. The host
+was x86_64 Windows Server 2025 Datacenter 24H2 build 26100.33296, image
+`win25-vs2026`/`20260824.214.3`, PowerShell 7.6.5, reported AMD EPYC 7763
+(one core/two logical processors), 8,584,425,472 bytes RAM, and NTFS on D:
+on Microsoft Virtual Disk devices. ARM64 and x86 process runtime gates are
+being added separately; cross-compilation alone remains compile-only.
+
+The standalone TCP-to-file observation completed 32 KiB in 13.3986 ms
+(2,445,628 bytes/s), with cycle p50 373.1 microseconds and p99/max 744.1
+microseconds. Checksum 4,090,822 matched the independently generated expected
+bytes. All cycles met the five-second diagnostic criterion; no watchdog fired.
+These figures include flush/readback on a small VM file and do not measure
+physical power-loss persistence, cold storage, or production capacity.
+
+| Operation | Immediate submissions | Pending submissions |
+| --- | --- | --- |
+| TCP receive | 257 | 35 |
+| TCP send | 32 | 0 |
+| File read | 0 | 65 |
+| File write | 64 | 0 |
+
+Default notification policy retained ownership until all 453 data packets were
+drained: 449 successes, three canceled receives, and one file-EOF error. The
+read-only write was a separate failed initiation without a packet. The largest
+dequeue batch contained three entries (control packets can be included), and
+peak owned data operations were two within four allocated slots. The fixture
+split frames across 127-byte receive requests, but observed zero successful
+receives shorter than the requested length; it does not claim to have forced
+that additional network short-result path.
+
+All 32 file-read and 32 file-write cancel races completed successfully;
+none returned a canceled file result. Reads validated the original payload;
+writes targeted the scratch offset. `CancelIoEx` reported two accepted requests
+and 65 not-found outcomes across the complete fixture. These observations do
+not establish which side wins on another storage stack or promise rollback.
+Regular-file immediate reads, canceled file results and physical persistence
+remain unobserved here. Both pending receives were terminally reconciled during
+shutdown before buffers, sockets, file handles and the port were released.
 
 The supported public-API shutdown strategy being tested belongs to this custom
 IOCP fixture: cancel before waiting and reconcile through the port. It does
@@ -430,12 +467,13 @@ manual APC alert is part of this new strategy.
 This page remains `source-verified` because its broad OS and implementation
 claims exceed the narrow runtime fixtures. M3-006 cannot be fully discharged
 by a hosted VM: physical power-loss persistence, controlled cold storage,
-deployment driver/error coverage, native x86/aarch64 execution, and a specified
-production workload/SLO require additional environments or requirements. A
+deployment driver/error coverage, and a specified production workload/SLO
+require additional environments or requirements. ARM64 native and x86 WOW64
+process execution are separate hosted gates now being attempted. A
 successful `FlushFileBuffers` and immediate readback are API observations,
 not power-loss recovery evidence about unidentified virtual-disk backing.
-Regular-file immediate success or cancellation wins remain unobserved unless
-the runtime counters actually report them. macOS/Linux runs skip Windows
+The x64 counters establish immediate file-write success; immediate file-read
+success and file cancellation wins remain unobserved in that run. macOS/Linux runs skip Windows
 behavior; the shipped Threaded backend remains the portable default.
 
 Related: [[std-io]], [[io-threaded]], [[select-and-batch]],

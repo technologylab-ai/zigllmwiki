@@ -310,6 +310,15 @@ class WikiCommandTests(unittest.TestCase):
         )
         self.assertEqual(report["summary"]["issues_by_category"]["evidence"], 3)
 
+    def test_isolated_checkout_beneath_cache_keeps_its_markdown(self) -> None:
+        nested = self.root / ".zig-cache" / "isolated"
+        for relative in ("wiki/note.md", "index.md", ".zig-cache/generated.md", ".git/ignored.md"):
+            path = nested / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("content\n")
+        inventory = {path.relative_to(nested).as_posix() for path in lint_wiki.markdown_files(nested)}
+        self.assertEqual(inventory, {"wiki/note.md", "index.md"})
+
     def test_lint_wrapper_preserves_machine_report(self) -> None:
         fake = {
             "schema_version": 1,

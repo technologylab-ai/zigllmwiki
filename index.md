@@ -147,6 +147,8 @@ Read this page first, then follow only the pages needed for the task.
   exact-baseline verification, and an out-of-tree review packet.
 - [Agent curation](docs/agent-curation.md) — local semantic review of a trusted
   GitHub packet, bounded edits, verification and draft-PR publication.
+- [First curator trial](reports/curation-review-33919880936-1.md) — reviewed
+  Batch allocation/ownership corrections and a retained publication failure.
 - [Verified-excerpt design](docs/decisions/0002-verified-proof-excerpts.md) —
   future proof-derived displays with provenance, without duplicated Zig.
 - [Retrieval benchmark](reports/2026-09-04-retrieval-benchmark.md) — 25 reviewed

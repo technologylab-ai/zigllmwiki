@@ -568,3 +568,30 @@ separate gh publication, bounded Markdown changes, immutable-source and
 append-only-log checks, exact-revision gates, and retained failure artifacts.
 Publication-boundary review and end-to-end runtime validation are in progress;
 no timer or autonomous PR is claimed at this entry.
+
+## [2026-09-04] runtime and maintenance | x64 TCP/file evidence and isolated-curator failure
+
+At `0bdca5a38331fe9ae0a3db04cc4a6955152969fc`, the Mac passed 87/87 Zig steps,
+69/78 tests with 9 skips; Linux omarx1 passed 87/87, 70/78 with 8 skips.
+[Read-only run 33919880936](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33919880936)
+and [Windows run 33919878353](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33919878353)
+passed, including 27 Python tests and the 25-case retrieval policy. Windows
+passed 87/87, 71/78 with 7 skips and all five standalone native proofs.
+The Windows page retains the exact x64 image, virtual disk, all TCP/file counts
+and timings, and unobserved regular-file canceled results/short receives.
+
+The first live Codex consumer read that packet and proposed a bounded semantic
+correction. Its independent caller gate rejected publication: the linter
+excluded every source candidate when the checkout itself lived beneath an
+outer `.zig-cache` directory. Cache filtering now uses paths relative to the
+checkout root; a nested-checkout regression covers this. The trial's sandbox
+also denied a loopback bind; trusted caller gates remain outside that sandbox.
+The proposal and failed result remain in the local state directory; no PR was
+published by that trial. Reviewed content findings are handled separately.
+
+Installed the omarx1 user-systemd timer, enabled for Monday 05:17 UTC; the
+preexisting manager has Linger=yes. The timer is waiting, and service routing
+and successful PR publication remain to be tested. Added the Mac's actual
+`/Users/rs/bin` Zig path to the bounded host probe. Expanded the Windows workflow
+to native ARM64 and x64 plus x86 process execution under WOW64, with compiler
+and test PE architecture checks; these new runtime gates are pending.

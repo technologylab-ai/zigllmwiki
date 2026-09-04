@@ -4,7 +4,7 @@ title: std.Io Select and Batch ownership
 kind: pattern
 status: source-verified
 zig: "0.16.0"
-summary: Select owns typed tasks and their result queue, while Batch owns a fixed set of low-level operation slots; both require explicit draining and terminal cancellation paths.
+summary: Select owns typed task results, while fixed Batch slots still require backend allocation budgeting, cleanup after wait errors, and completion draining.
 updated: 2026-09-04
 sources:
   - "[[zig-0.16.0-release-notes]]"
@@ -36,6 +36,9 @@ They solve related but different problems and expose different cleanup traps.
 
 Neither abstraction makes capacity or resource ownership disappear. Size the
 buffers from the maximum outstanding work and define who consumes every result.
+For `Select`, count accepted tasks until their results are consumed, including
+finished tasks whose results remain queued; result-buffer size does not itself
+enforce a task-admission limit.
 
 ## `Select(U)`: typed task completion
 
@@ -82,8 +85,13 @@ Once cancellation begins, do not call `await` or `awaitMany` again. Both
 the exact maximum number of active operations; Zig 0.16's initializer requires
 at least one slot and fewer than `maxInt(u32)` slots: initialization temporarily
 converts `index + 1` to an index whose maximum value is reserved for `.none`.
-Choose a much smaller application limit and assert it before allocation. After initialization it is safe to install an unconditional
-`defer batch.cancel(io)` terminal guard.
+Choose a much smaller application limit and assert it before allocation. After
+initialization it is safe to install an unconditional `defer batch.cancel(io)`
+terminal guard.
+
+Fixed operation slots do not guarantee allocation-free waits. The exact
+Threaded poll implementation can allocate additional descriptor storage during
+`awaitConcurrent`; see [[io-threaded]] for its threshold and cleanup lifetime.
 
 `add` consumes the first unused slot and returns its index. `addAt` consumes a
 specific unused slot, allowing a component to bind operation identity to its
@@ -104,6 +112,21 @@ its tagged result matches the original operation. Dequeuing returns that slot
 to the unused list, so it can be rearmed with `addAt`. Completion order is not
 submission order, and it is legal—but often harder to reason about—to await
 again before draining every already completed result.
+
+### A wait error does not release operation ownership
+
+An error from `awaitConcurrent` describes the wait or scheduling attempt, not
+the terminal outcome of every operation. In particular, Windows Threaded can
+return `error.Timeout` while its pending list is still nonempty. Keep the batch
+storage, referenced buffers, and handles alive; if abandoning the batch, use
+the cancellation-and-drain protocol below before releasing them. A deadline
+on the wait does not also bound cancellation or cleanup.
+
+This follows from `Io.Batch.awaitConcurrent` and Threaded's
+`batchAwaitConcurrent` in [[zig-0.16.0-stdlib]] and
+[[zig-0.16-windows-io-source]]. The existing Windows timeout/cancel witness
+uses an explicit alert to release the initial cancellation wait; it does not
+prove unassisted shutdown progress.
 
 ## Batch cancellation
 
@@ -134,8 +157,10 @@ tests. The select test puts owned allocations in task results, consumes one
 through `await`, then loops over `cancel` until all remaining ownership is
 released. The batch test supplies exactly two fixed operation slots, reads two
 separate files, accepts arbitrary completion order, dispatches results by tag,
-and verifies slot indexes/data. It ran with `std.testing.io` on aarch64 macOS on
-2026-09-04.
+counts completions, and verifies byte counts and data. It arms indexes 0 and 1
+but does not assert the returned `completion.index` values; that mapping is
+supported here by the `Batch.addAt`/`next` source contract. It ran with
+`std.testing.io` on aarch64 macOS on 2026-09-04.
 
 The Windows-specific [APC/batch proof](../proofs/windows_apc_batch.zig) ran with
 Zig 0.16.0 on x86_64 Windows Server 2025 build 26100.33296 on 2026-09-04.
@@ -148,14 +173,16 @@ not inherit the earlier macOS-only runtime label as a portable guarantee.
 ## Review checklist
 
 - Is capacity derived from the maximum outstanding tasks or operations?
+- Does the allocation budget include backend scratch storage during waits?
 - Can any result carry ownership, and which path drains/releases it?
 - Can eager `async` execution alter the intended race or deadline?
 - Does correctness require the explicit failure-bearing concurrent variant?
 - Is completion identity independent of completion order?
 - Does shutdown stop admission before cancellation and reconcile raced success?
+- Does a wait error retain ownership until terminal cleanup completes?
 - Can every slot be shown to move exactly once back to unused state?
 
-Related: [[async-vs-concurrent]], [[cancellation]],
+Related: [[async-vs-concurrent]], [[io-threaded]], [[cancellation]],
 [[task-lifetimes-and-structured-concurrency]],
 [[static-allocation-and-constant-work]], [[io-uring]],
 [[windows-iocp-and-overlapped-io]].

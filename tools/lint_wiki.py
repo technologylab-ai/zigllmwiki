@@ -22,11 +22,16 @@ MAINTAINED_ZIG_FILES = [
     *sorted((ROOT / "proofs").glob("**/*.zig")),
 ]
 ZIG_LINE_LENGTH_MAX = 100
-ALL_MARKDOWN = [
-    path
-    for path in ROOT.glob("**/*.md")
-    if ".git" not in path.parts and ".zig-cache" not in path.parts
-]
+def markdown_files(root: Path) -> list[Path]:
+    # A checkout may itself live beneath another repository's ignored cache.
+    # Only directories inside this checkout determine its content exclusions.
+    return [
+        path for path in root.glob("**/*.md")
+        if not {".git", ".zig-cache"}.intersection(path.relative_to(root).parts)
+    ]
+
+
+ALL_MARKDOWN = markdown_files(ROOT)
 WIKILINK = re.compile(r"!?\[\[([^\]]+)\]\]")
 KEY = re.compile(r"^([A-Za-z0-9_-]+):(?:\s*(.*))?$")
 PROOF = re.compile(r"^\s+-\s+(proofs/[^\s]+\.zig)\s*$")

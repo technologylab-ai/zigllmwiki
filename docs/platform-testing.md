@@ -33,7 +33,7 @@ recorded on 2026-09-04, rather than a guarantee of SSH availability:
 | --- | --- | --- |
 | `maxross`, the user's M3 Max Mac | `ssh maxross` from `omarx1` | Preferred for resource-heavy portable builds, cross-compilation, analysis, and macOS runtime gates. |
 | `omarx1`, Linux | `ssh omarx1` from the Mac | Linux runtime gates and continued authoring/builds when the Mac is unavailable. |
-| GitHub-hosted Windows runner | Manual GitHub Actions dispatch below | Windows x86_64 runtime gates. |
+| GitHub-hosted Windows runner | Manual GitHub Actions dispatch below | Windows x86_64 and ARM64 native gates, plus x86 processes under WOW64. |
 
 When working on `omarx1`, prefer offloading expensive portable work to
 `maxross` when reachable. A bounded availability probe is:
@@ -146,7 +146,7 @@ claim.
 ## Windows through GitHub Actions
 
 Windows runtime evidence currently comes from GitHub-hosted Windows VMs via
-`runs-on: windows-latest`. No local Windows VM on `maxross` or `omarx1`, or
+a matrix of `windows-latest` (x64) and `windows-11-arm` (ARM64). No local Windows VM on `maxross` or `omarx1`, or
 self-hosted Windows runner, is part of this repository's testing setup.
 The common verifier also cross-compiles Windows proofs on macOS and Linux;
 those builds provide compile-only evidence. The most recently recorded hosted
@@ -163,7 +163,7 @@ gh run list --workflow windows-runtime-verify.yml --limit 1
 gh run watch RUN_ID --exit-status
 ```
 
-The workflow has `contents: read` only. It downloads the `x86_64-windows`
+The workflow has `contents: read` only. It downloads the matching `x86_64-windows` or `aarch64-windows`
 archive named by `.zig-version` from Zig's official release index, verifies the
 published SHA-256, records the runner image, exact Windows build/UBR, CPU, RAM,
 logical filesystems and reported disk models, runs the common Zig verifier,
@@ -171,7 +171,21 @@ then explicitly runs `windows_io_mapping.zig`,
 `threaded_blocked_read_cancel_windows.zig`, `windows_apc_batch.zig`,
 `windows_iocp_lifecycle.zig`, and `windows_iocp_tcp_file.zig` natively. It also runs the command/retrieval gates
 and fails if verification changes the checkout. Logs and host metadata are
-uploaded for 30 days even when an earlier step fails.
+uploaded for 30 days even when an earlier step fails. Artifacts are named
+`zig-wiki-windows-runtime-ARCH-RUN-ATTEMPT`; keep the two native environments
+separate. The installer validates the compiler PE machine and actual OS
+architecture, so an emulated compiler is not mislabeled as native ARM64.
+
+The x64 job additionally builds each of the five Windows proofs using exact
+0.16.0 `--test-no-exec -target x86-windows`, verifies PE32/I386 headers, executes
+each binary under WOW64, and records SHA-256 and exit status. This is runtime
+evidence for 32-bit processes on that 64-bit OS, not a native 32-bit Windows OS.
+Native ARM64 execution uses the ARM64 compiler and its own full gate.
+
+The [January 2026 GitHub runner announcement](https://github.blog/changelog/2026-01-29-arm64-standard-runners-are-now-available-in-private-repositories/)
+establishes standard ARM64 runner availability for private repositories. An
+older public-only restriction must not be used to skip an available gate.
+Actual allocation, image/build, and success still require a completed run.
 
 Use `gh run download RUN_ID -D TEMPORARY_DIRECTORY` to inspect the packet. The
 first reference host was x86_64 Windows Server 2025 Datacenter 24H2, build

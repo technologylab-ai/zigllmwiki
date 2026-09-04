@@ -24,7 +24,8 @@ produce Zig 0.16.x code that:
 - **Running now:** M3-006 Windows qualification, L-009 maintenance-agent
   connection and a fresh semantic audit. Selected storage/recovery curation
   is complete as source synthesis.
-  These are active agent assignments; remote gates start only after integration.
+  The first x64/Linux gates passed; native ARM64/WOW64 and a successful
+  curator PR are being validated. Agent assignments are reported when started.
 - **Latest completed content:** M1-001, M1-003, and M1-006 now document and
   prove `std.process.Init`/capability threading, `Select`/`Batch` ownership, and
   the complete `std.Io` synchronization-primitives surface. The six requested
@@ -204,7 +205,8 @@ hybrid search when thresholds fail or real agent queries demonstrate misses.
   evidence. Future source selection remains question-driven; old Zig syntax
   must not enter guidance without an exact 0.16 proof.
 - Extend the three-platform matrix with workload-specific filesystem/device,
-  cold-storage, durability, and native architecture runners.
+  cold-storage and durability evidence; the native ARM64/WOW64 gates are
+  implemented and awaiting their first runtime result.
 - Verified-excerpt design is complete in
   [ADR 0002](docs/decisions/0002-verified-proof-excerpts.md): proof files remain
   canonical, future exports require provenance/drift gates, and wiki Zig fences

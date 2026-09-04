@@ -44,9 +44,22 @@ implementation support, or configured capacity becomes
 `error.ConcurrencyUnavailable`. It does not silently run the task inline.
 
 The allocator passed to `Threaded.init` must be thread-safe. The implementation
-documents that it is used by task dispatch. Avoiding task dispatch permits a
-failing allocator, but ordinary file and network calls may still have their own
-resource behavior and must be inspected individually.
+uses it for task dispatch and some operation paths. Avoiding task dispatch
+alone does not establish that a failing allocator is sufficient; inspect the
+operations and their capacity thresholds too.
+
+For [[select-and-batch|Batch]], the exact 0.16.0 poll-based
+`batchAwaitConcurrent` path has a 64-entry stack `pollfd` buffer. At the 65th
+poll descriptor it uses a slice sized to the batch's entire operation-storage
+capacity, allocating it with the Threaded allocator if no slice is retained
+from an earlier wait. Allocation failure returns
+`error.ConcurrencyUnavailable`. The spill allocation is retained in
+`Batch.userdata` until `batchCancel` frees it, even if all completion results
+have been drained. Caller-provided operation slots therefore bound admission
+without guaranteeing allocation-free waits. This is source evidence from
+`poll_buffer_len`, `batchAwaitConcurrent`, and `batchCancel` in
+[[zig-0.16.0-stdlib]], not a portable `std.Io` allocation contract or a Windows
+implementation rule.
 
 ## Cancellation of blocking calls
 
@@ -89,5 +102,6 @@ ran with Zig 0.16.0; exact environments are retained in
 Those fixtures do not establish cancellation for arbitrary devices or calls.
 
 Related: [[async-vs-concurrent]], [[cancellation]],
+[[select-and-batch]], [[windows-iocp-and-overlapped-io]],
 [[task-lifetimes-and-structured-concurrency]],
 [[static-allocation-and-constant-work]], [[evented-io-backends]].

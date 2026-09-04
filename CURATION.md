@@ -88,7 +88,8 @@ when a concrete systems-programming question needs them.
 The Microsoft SDK slice at `5f2625b6782d3e9c0df08756583c527a0a2872ca` also
 now covers public Winsock, batched dequeue and flush/result APIs in
 [[microsoft-windows-winsock-batched-file-io]]. The bounded TCP-to-file proof is
-registered; native results remain pending until a named Windows gate passes.
+registered and ran on x64 Windows in run 33919878353; architecture expansion
+and deployment qualification remain separate gates.
 
 ## TigerBeetle — current slice
 
