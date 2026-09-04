@@ -145,6 +145,8 @@ ran on x86_64 Omarchy 4.0.2 with Linux `7.1.9-arch1-2` and Zig 0.16.0 on
 pipe read before the watchdog releases it. The
 [Windows blocked-read harness](../proofs/threaded_blocked_read_cancel_windows.zig)
 constructs a synchronous NT named pipe through the exact Threaded
-implementation and compiles for x86, x86_64, and aarch64 Windows. It has not
-run on Windows, so the NT interruption path remains source/compile-verified
-only.
+implementation and compiles for x86, x86_64, and aarch64 Windows. It ran with
+Zig 0.16.0 on x86_64 Windows Server 2025 Datacenter 24H2, build 26100.33296, on
+2026-09-04 and proved that `NtCancelSynchronousIoFile` interrupts and joins the
+blocked pipe read before the watchdog releases it. The exact environment and
+logs are retained by [Actions run 33910260004](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33910260004).

@@ -33,11 +33,12 @@ produce Zig 0.16.x code that:
   cross-platform I/O syntheses. `Future`/`Group` ownership, protection, and
   `recancel` have a macOS `Io.Threaded` proof.
 - **Latest platform evidence:** Linux blocked-read cancellation and low-level
-  `io_uring` proofs ran on `omarx1`; the exact Windows Zig mapping compiles for
-  x86, x86_64, and aarch64 Windows; and M3-005 now exposes the cross-platform
-  backend choice and its missing Windows-runtime gate.
-- **Queued, not running:** M1-005 Windows cancellation runtime evidence and
-  M3-004 Windows runtime/load evidence.
+  `io_uring` proofs ran on `omarx1`; the exact Windows Zig mapping and blocked
+  synchronous pipe cancellation ran on Windows Server 2025 while continuing to
+  compile for x86, x86_64, and aarch64; and M3-005 exposes the remaining custom
+  IOCP/load evidence gate.
+- **Queued, not running:** M3-004 custom IOCP lifecycle/load evidence and L-009
+  review-packet-to-PR automation.
 - **Backend:** intentionally deferred; the Obsidian-first ADR remains in force.
 
 Source status is tracked as `discovered → selected → captured → synthesized →
@@ -66,7 +67,7 @@ M0 exited on 2026-09-04 after the first unsupervised semantic pass produced a
 reviewable report and deterministic graph scoring without weakening the
 existing verification rules.
 
-## M1: `std.Io` field guide (in progress)
+## M1: `std.Io` field guide (done)
 
 | ID | Status | Deliverable / exit condition |
 | --- | --- | --- |
@@ -74,7 +75,7 @@ existing verification rules.
 | M1-002 | done | `Future` and `Group` ownership/lifetime page plus terminal-path proof. |
 | M1-003 | done | `Select` and `Batch` ownership, fixed capacity, result draining, cancellation traps, and runtime proof. |
 | M1-004 | done | `async` versus `concurrent`, including saturated runtime evidence. |
-| M1-005 | queued | Task semantics and blocked pipe-read cancellation are runtime-proved on macOS and Linux; the exact Windows NT cancellation paths are source/compile-verified, but Windows blocked-call runtime evidence still needs a host. |
+| M1-005 | done | Task semantics and blocked pipe-read cancellation are runtime-proved on macOS, Linux, and Windows; exact Windows APC/IOCP cancellation breadth remains the platform-specific M3-004 gate. |
 | M1-006 | done | `Event`, `Queue`, `Mutex`, `RwLock`, `Condition`, `Semaphore`, and futex semantics plus six runtime tests. |
 | M1-007 | done | Clock domains, durations, timestamps, one-deadline budgets, timeout conversion, cancelable sleeping, strict-clock guard caveats, and five runtime tests. |
 | M1-008 | done | Files, directories, buffered readers/writers, exclusive read limits, flush versus truncation, atomic publication, and the directory-durability seam plus three runtime tests. |
@@ -85,6 +86,10 @@ existing verification rules.
 
 Exit condition: every public recommendation has a 0.16.x source citation; every
 behavioral trap has a runnable proof; Threaded-specific facts are labeled.
+
+M1 exited on 2026-09-04 after the Windows Server 2025 run completed the
+three-platform blocked-read cancellation matrix. This does not promote custom
+IOCP behavior or arbitrary Windows devices into runtime-verified claims.
 
 ## M2: TigerStyle in Zig (done)
 
@@ -121,7 +126,7 @@ Keep interface design separate from backend implementation.
 | M3-001 | done | Pinned TigerBeetle `src/io` map distinguishing Linux `io_uring`, Darwin `kqueue` readiness plus synchronous file I/O, and Windows IOCP/overlapped I/O. |
 | M3-002 | done | Linux kernel/feature floors, finite queues, registered-file/buffer ownership, target/cancel CQE reconciliation, exact Zig-layer readiness, and three Zig 0.16 runtime tests on `omarx1`. |
 | M3-003 | done | Apple-primary `kqueue`, Dispatch I/O, and POSIX AIO lifecycles; exact Zig 0.16 Dispatch/Kqueue mapping and defects; a Zig/C adapter; macOS runtime proof; and bounded comparative evidence. |
-| M3-004 | queued | Microsoft-primary IOCP lifecycle and exact Zig 0.16 Threaded/APC/NtDll mapping are synthesized; the proof compiles for three Windows architectures, while Windows runtime/load evidence still needs a host. |
+| M3-004 | queued | Microsoft-primary IOCP lifecycle and exact Zig 0.16 Threaded/APC/NtDll mapping are synthesized; mapping and synchronous blocked-read cancellation ran on Windows Server 2025, while APC race breadth plus a custom IOCP lifecycle/load proof remain. |
 | M3-005 | done | Cross-platform decision table selects portable Threaded or platform-specific file/network backends with guarantees, limits, unsupported cases, ownership, resource models, and exact evidence gates. |
 
 | Platform | Research and proof targets |

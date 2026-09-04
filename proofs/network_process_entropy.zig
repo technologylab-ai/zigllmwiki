@@ -1,4 +1,5 @@
 const std = @import("std");
+const builtin = @import("builtin");
 
 const Io = std.Io;
 const net = Io.net;
@@ -58,8 +59,12 @@ test "host names and IP literals are validated before network operations" {
 
 test "process.run owns bounded captured output" {
     const io = std.testing.io;
+    const argv: []const []const u8 = if (builtin.os.tag == .windows)
+        &.{ "cmd.exe", "/d", "/s", "/c", "echo|set /p=out & echo|set /p=err 1>&2 & exit /b 7" }
+    else
+        &.{ "/bin/sh", "-c", "printf out; printf err >&2; exit 7" };
     const result = try std.process.run(std.testing.allocator, io, .{
-        .argv = &.{ "/bin/sh", "-c", "printf out; printf err >&2; exit 7" },
+        .argv = argv,
         .stdout_limit = .limited(3),
         .stderr_limit = .limited(3),
         .timeout = .{ .deadline = Io.Clock.Timestamp.fromNow(io, .{
@@ -77,10 +82,14 @@ test "process.run owns bounded captured output" {
 
 test "process.run rejects output above its inclusive limit" {
     const io = std.testing.io;
+    const argv: []const []const u8 = if (builtin.os.tag == .windows)
+        &.{ "cmd.exe", "/d", "/s", "/c", "echo|set /p=abc" }
+    else
+        &.{ "/bin/sh", "-c", "printf abc" };
     try std.testing.expectError(
         error.StreamTooLong,
         std.process.run(std.testing.allocator, io, .{
-            .argv = &.{ "/bin/sh", "-c", "printf abc" },
+            .argv = argv,
             .stdout_limit = .limited(2),
             .stderr_limit = .nothing,
         }),

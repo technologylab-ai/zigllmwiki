@@ -395,6 +395,27 @@ def fetch_json_url(url: str, timeout: float = 15.0) -> object:
         raise FetchError(f"invalid JSON from {parsed.netloc}: {error}") from error
 
 
+def fetch_git_remote_head(url: str, timeout: float = 15.0) -> str:
+    """Read a public Git remote's HEAD without requiring GitHub API scopes."""
+    try:
+        result = subprocess.run(
+            ["git", "ls-remote", url, "HEAD"],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+        )
+    except (OSError, subprocess.TimeoutExpired) as error:
+        raise FetchError(f"unable to read Git HEAD from {urlparse(url).netloc}: {error}") from error
+    if result.returncode != 0:
+        detail = result.stderr.strip() or f"git exited with status {result.returncode}"
+        raise FetchError(f"unable to read Git HEAD from {urlparse(url).netloc}: {detail}")
+    fields = result.stdout.strip().split()
+    if len(fields) != 2 or fields[1] != "HEAD" or not COMMIT_HASH.fullmatch(fields[0]):
+        raise FetchError(f"Git remote returned a malformed HEAD for {urlparse(url).netloc}")
+    return fields[0].casefold()
+
+
 def pinned_commit(revision: str, url: str) -> str | None:
     """Find an immutable commit in frontmatter, falling back to its URL."""
     for value in (revision, url):
@@ -524,7 +545,13 @@ def review_report(
             "records": records,
         }
         try:
-            latest = latest_remote_revision(str(group["kind"]), fetch(endpoint))
+            kind = str(group["kind"])
+            if kind == "github-gist" and fetch_json is None:
+                git_endpoint = f"https://gist.github.com/{group['identity']}.git"
+                output["endpoint"] = git_endpoint
+                latest = fetch_git_remote_head(git_endpoint, timeout=timeout)
+            else:
+                latest = latest_remote_revision(kind, fetch(endpoint))
             output["latest_revision"] = latest
             advanced = []
             uncheckable = []

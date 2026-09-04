@@ -5,9 +5,11 @@ from __future__ import annotations
 
 import hashlib
 import json
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from tools import lint_wiki, wiki
 
@@ -248,6 +250,27 @@ class WikiCommandTests(unittest.TestCase):
                 [{"version": "a" * 40}],
             ),
             "a" * 40,
+        )
+
+    def test_public_gist_head_does_not_require_api_scope(self) -> None:
+        completed = subprocess.CompletedProcess(
+            args=["git", "ls-remote"],
+            returncode=0,
+            stdout=f"{'a' * 40}\tHEAD\n",
+            stderr="",
+        )
+        with mock.patch.object(wiki.subprocess, "run", return_value=completed) as run:
+            revision = wiki.fetch_git_remote_head(
+                "https://gist.github.com/example.git", timeout=7.0
+            )
+
+        self.assertEqual(revision, "a" * 40)
+        run.assert_called_once_with(
+            ["git", "ls-remote", "https://gist.github.com/example.git", "HEAD"],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=7.0,
         )
 
     def test_lint_issue_schema_names_stale_and_broken_evidence(self) -> None:

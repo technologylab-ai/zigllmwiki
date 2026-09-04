@@ -16,6 +16,8 @@ proofs.
   the wiki.
 - Run `zig build verify` before accepting content changes.
 - Run `tools/verify_linux_ssh.sh omarx1` for the complete Linux runtime suite.
+- Dispatch `Windows runtime verification` in GitHub Actions for the exact
+  Windows host/proof suite and retained evidence packet.
 - Use `python3 tools/wiki.py query ...`, `lint`, plan-only `ingest`/`upgrade`,
   and read-only `review` as documented in [AGENTS.md](AGENTS.md).
 - Use [ROADMAP.md](ROADMAP.md) as the persistent project plan.

@@ -107,12 +107,12 @@ agent is currently working on it.
 
 | Roadmap item | Execution | Current boundary / next artifact |
 | --- | --- | --- |
-| M1-005 cancellation | queued | `Future`, `Group`, `recancel`, protection, and blocked pipe reads are proved on macOS and Linux; Windows runtime evidence still needs a host. |
+| M1-005 cancellation | done | `Future`, `Group`, `recancel`, and protection are proved, and blocked pipe reads are runtime-proved on macOS, Linux, and Windows. |
 | M2-009 bounded-memory/layout curation | done | Reservation, finite working state, retained output, representation lifetime, and stable-handle consequences are synthesized. |
 | M2-010 retry/defer curation | done | Both retry-loop essays and the defer-pattern essay are synthesized into one-deadline retry and terminal cleanup guidance. |
 | M3-003 macOS evented I/O | done | Primary `kqueue`/AIO/Dispatch lifecycles, exact Zig mappings and defects, an actual Dispatch I/O adapter, macOS runtime evidence, and a bounded comparison are recorded. |
 | M3-002 Linux evented I/O | done | Kernel/feature floors, registered resources, cancellation races, and real Zig 0.16 `omarx1` evidence are integrated. |
-| M3-004 Windows evented I/O | queued | Exact Zig mapping and three-architecture cross-target proof are integrated; no Windows runtime host is available. |
+| M3-004 Windows evented I/O | queued | Exact Zig mapping and Threaded synchronous cancellation ran on Windows Server 2025; APC race breadth plus custom IOCP lifecycle/load evidence remain. |
 | M3-005 backend decision table | done | File/network choices, guarantees, limits, unsupported paths, ownership, resource models, and evidence gates are synthesized across all three platforms. |
 
 M1-001 is complete: [[process-init-and-capabilities]] synthesizes the official

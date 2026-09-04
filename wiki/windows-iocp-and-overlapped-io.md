@@ -195,25 +195,27 @@ is nonblocking.
 
 ## Evidence and missing runtime work
 
-The [cross-target proof](../proofs/windows_io_mapping.zig) checks the exact Zig
+The [mapping proof](../proofs/windows_io_mapping.zig) checks the exact Zig
 0.16 Windows type surface, confirms that `Io.Evented` is unavailable, confirms
 the relevant NtDll declarations and absence of stdlib IOCP bindings, and
 constructs a fixed-slot Windows `Io.Batch` operation. It was compiled as PE
 test executables for `x86-windows`, `x86_64-windows`, and `aarch64-windows`
-with Zig 0.16.0 on 2026-09-04. Cross-compilation is compile evidence only; the
-test was not executed on Windows.
+with Zig 0.16.0 on 2026-09-04. It also ran natively on x86_64 Windows Server
+2025 Datacenter 24H2, build 26100.33296. Cross-compilation remains compile
+evidence for the other two architectures.
 
 The
 [blocked-read cancellation harness](../proofs/threaded_blocked_read_cancel_windows.zig)
 constructs the same synchronous NT named-pipe shape used by Threaded process
 pipes, starts a read on an owned concurrent task, and expects cancellation to
-interrupt it before a watchdog write. It also compiles for all three Windows
-architectures, but its behavioral assertion has not run.
+interrupt it before a watchdog write. It ran successfully on that same Windows
+Server 2025 host and still compiles for all three Windows architectures. The
+exact host metadata and both native logs are retained by
+[Actions run 33910260004](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33910260004).
 
-A Windows host still needs to exercise, with watchdogs and exact OS version
-recorded:
+Windows-specific work still needs to exercise, with watchdogs and exact OS
+version recorded:
 
-- cancellation of a worker blocked in synchronous file or named-pipe I/O;
 - immediate and pending APC completion paths, including buffer lifetime;
 - `Batch.cancel` racing success and cancellation on asynchronous handles;
 - each expected NTSTATUS-to-Zig error path that matters to the application;
@@ -221,9 +223,11 @@ recorded:
 - `CancelIoEx` races, shutdown draining, completion backlog bounds, and handle
   closure only after every terminal packet is reconciled.
 
-Until those tests run, this page remains `source-verified`, not
-`runtime-verified`. The shipped Threaded backend is the production default;
-the custom IOCP design is a platform-backend research target.
+This page remains `source-verified`, not broadly `runtime-verified`: one host
+proves the narrow mapping and synchronous cancellation harness, not the APC,
+device, custom-IOCP, or load matrix. The shipped Threaded backend is the
+production default; the custom IOCP design is a platform-backend research
+target.
 
 Related: [[std-io]], [[io-threaded]], [[select-and-batch]],
 [[tigerbeetle-io]], [[evented-io-backends]], [[cancellation]],

@@ -9,9 +9,10 @@ and which gaps must not be mistaken for completed work.
 The repository is a usable Obsidian-first, agent-first Zig 0.16.0 systems
 knowledge base. M0 (trustworthy foundation), M2 (TigerStyle in Zig), and the
 cross-platform M3 decision synthesis are complete. M1 covers the public
-`std.Io` field-guide surface targeted by the roadmap, except for behavioral
-Windows blocked-call cancellation evidence. The exact Windows implementation
-mapping and test harnesses compile, but no Windows test has run.
+`std.Io` field-guide surface targeted by the roadmap, including blocked-call
+cancellation on macOS, Linux, and Windows. The exact Windows implementation
+mapping and synchronous cancellation harness ran, but custom IOCP and broader
+APC/device/load behavior remain unproved.
 
 The active compiler is exactly the value in `.zig-version`: `0.16.0`. Do not
 silently follow Zig master, 0.15 examples, or a future 0.16 patch. The installed
@@ -106,7 +107,7 @@ with an assumption that one “evented” label has portable semantics.
 | --- | --- | --- |
 | macOS arm64 | Full local verification; Threaded task/cancellation proofs; blocked pipe-read interruption; Dispatch I/O adapter and experimental Dispatch mapping; all portable proofs. | Product kqueue reactor/load tests, cold-storage matrix, Dispatch cancellation/write/durability matrix. |
 | Linux x86_64 (`ssh omarx1`) | Zig 0.16.0 blocked pipe-read cancellation; low-level `io_uring` finite SQ/probing, registered file+buffer lifetime, and target/cancel CQE reconciliation. | Older kernels, other filesystems/devices, resource tags, multishot behavior, high-level `std.Io.Uring` readiness, and decision-grade load measurements. |
-| Windows | Mapping and blocked-read harness compile for x86, x86_64, and aarch64 Windows. | All runtime behavior: synchronous cancellation, APC races, batch cancellation, custom IOCP immediate-success/cancel/shutdown paths, and load evidence. |
+| Windows Server 2025 Datacenter 24H2, x86_64, build 26100.33296 | Mapping and synchronous blocked-read cancellation ran with Zig 0.16.0; both harnesses also compile for x86, x86_64, and aarch64 Windows. | APC races, batch/device cancellation breadth, custom IOCP immediate-success/cancel/shutdown paths, and load evidence. |
 
 Rerun the complete current tree on Linux with:
 
@@ -134,9 +135,9 @@ up that directory. It does not alter the remote user's checkout.
 
 ## Honest remaining work
 
-1. Obtain a Windows runner, run the registered Windows tests, record exact OS
-   version, and add watchdog-backed APC/IOCP lifecycle and load evidence before
-   promoting any Windows runtime claim.
+1. Extend the established Windows runner from synchronous Threaded
+   cancellation into watchdog-backed APC/batch/device and custom IOCP lifecycle
+   and load evidence before promoting those broader claims.
 2. Extend the platform performance matrix only for a concrete workload,
    hardware, filesystem/device, queue depth, and correctness witness.
 3. Continue selected TigerBeetle storage/recovery/operations ingestion by a

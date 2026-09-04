@@ -410,3 +410,19 @@ lexical query layer. The first local run produced MRR 1.0, hit@3 1.0, and
 recall@5 0.98, so hybrid retrieval is not justified by current evidence. The
 benchmark is not production telemetry; its dated report records adversarial,
 multilingual, scale, latency, and independent-labeling gaps.
+
+## [2026-09-04] runtime | Windows mapping and blocked-read cancellation
+
+Added a manual, read-only Windows Actions runner that checksum-verifies the
+exact Zig release, records host/toolchain metadata, runs the full verifier and
+the Windows proofs explicitly, and retains its evidence packet for 30 days.
+The first run executed the exact `std.Io` mapping and synchronous named-pipe
+cancellation proofs successfully on x86_64 Windows Server 2025 Datacenter 24H2,
+build 26100.33296, with Zig 0.16.0.
+
+That run also exposed repository-wide Windows portability failures rather than
+hiding them: checkout CRLF conversion invalidated byte-identical snapshots and
+formatting, and the process proof hard-coded `/bin/sh`. The follow-up enforces
+LF through `.gitattributes`, selects `cmd.exe` on Windows, and makes the public
+Gist revision check independent of repository-token API scope. Custom IOCP,
+APC/batch/device race breadth, and load evidence remain M3-004 work.

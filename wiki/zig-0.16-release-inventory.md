@@ -79,7 +79,7 @@ its declared scope and preserved the primary-source link.
 | I/O as an Interface | integrated | [[std-io]], [[io-threaded]], and [[evented-io-backends]]. |
 | Future | integrated | [[task-lifetimes-and-structured-concurrency]] and executable cancellation proofs. |
 | Group | integrated | [[task-lifetimes-and-structured-concurrency]] and executable cancellation proofs. |
-| Cancelation | integrated | [[cancellation]]; task semantics and macOS/Linux blocked-call runtime evidence are integrated, while Windows runtime remains M1-005. |
+| Cancelation | integrated | [[cancellation]]; task semantics and blocked pipe-read runtime evidence are integrated on macOS, Linux, and Windows. |
 | Batch | integrated | [[select-and-batch]] covers `Select`, fixed operation storage, result ownership, cancellation, and partial completion. |
 | Sync Primitives | integrated | [[io-synchronization-primitives]] covers `Event`, `Queue`, `Mutex`, `RwLock`, `Condition`, `Semaphore`, and futex operations. |
 | Entropy | integrated | [[entropy-and-deterministic-randomness]] distinguishes process-state randomness from cancelable fresh external entropy and its failure semantics. |
