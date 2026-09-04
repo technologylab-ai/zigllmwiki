@@ -92,3 +92,58 @@ ordering, cancellation races, and terminal cleanup.
 M3-003 and M3-004 are now active with their completed source evidence and
 remaining dispatch-I/O, Zig adapter, and platform-runtime work stated
 separately.
+
+## [2026-09-04] ingest | portable local-source snapshots
+
+Imported byte-identical snapshots of the `fi` Zig 0.16 migration guide and all
+three zig-hermit timeout proof artifacts. The source records preserve their
+original repository commits, absolute origin paths, and individual SHA-256
+values. Wiki verification now recomputes each declared snapshot hash, making
+the evidence portable without treating copied experimental code as an active
+wiki proof. C-003 is complete.
+
+## [2026-09-04] ingest | Zig 0.16 release-note scope inventory
+
+Inventoried every named table-of-contents topic in the official Zig 0.16.0
+release notes. Each topic now routes to already-integrated guidance, a numbered
+roadmap destination, a version/platform watch, or an explicit out-of-scope
+decision. This closes C-004 without duplicating the release document or
+pretending queued standard-library work is already complete.
+
+## [2026-09-04] lint | graph scoring and first semantic audit
+
+Added deterministic JSON graph health through `zig build graph`. Each wiki page
+is scored for index discovery, non-index backlinks, outward conceptual links,
+and cited source records; true orphans now fail ordinary verification. Added a
+reusable semantic-audit procedure and the first dated review report.
+
+The audit corrected three overstated release-inventory dispositions and added
+a natural version-baseline backlink. It found no orphan or weak pages and
+retained the remaining Linux, macOS, and Windows runtime gaps as active roadmap
+evidence rather than promoting source inspection into runtime verification.
+L-004 and M0 are complete; M1/M2 content expansion remains active in parallel.
+
+## [2026-09-04] ingest | process initialization and capability threading
+
+Completed M1-001 from the installed Zig 0.16 `process.zig`, `start.zig`, and the
+portable `fi` migration guide. The new page keeps `std.process.Init` at the
+executable composition root, records allocator/environment/argument/preopen
+ownership, and shows how to pass narrower capabilities into libraries without
+hardcoding an I/O implementation.
+
+The registered proof is compiled both as tests and as an executable; ordinary
+verification runs a real `main(init: std.process.Init)`, uses the allocating
+cross-platform argument iterator, and supplies caller-owned I/O/allocators to a
+leaf operation.
+
+## [2026-09-04] ingest | Select and Batch ownership
+
+Completed M1-003 from the installed Zig 0.16 `Io.zig` contract. The new page
+separates typed `Select` tasks from low-level fixed-storage `Batch` operations,
+including eager versus required concurrency, completion identity, partial
+draining, cancellation races, and the Select cancellation-buffer deadlock
+precondition.
+
+The proof returns owned memory through two select branches and drains every
+result, then drives two file reads through a two-slot batch while accepting
+arbitrary completion order and dispatching by result tag/index.

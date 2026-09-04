@@ -54,6 +54,9 @@ see [[evented-io-backends]].
 - Cancellation is a request that may race with successful completion. Cleanup
   must handle both results and release the future/group resource. See
   [[cancellation]].
+- A `Select` needs enough result capacity for terminal cancellation, while a
+  `Batch` needs fixed operation storage and raced-completion draining. See
+  [[select-and-batch]].
 - Do not log every propagating I/O error from `errdefer`; expected cancellation
   may be handled by the owner. See [[error-context]].
 - File writers are buffered; missing flushes and multiple independent writers
@@ -64,6 +67,10 @@ see [[evented-io-backends]].
 Make the `std.Io` owner visible near the application's allocator and resource
 owners. State which implementation a behavioral claim assumes, and put limits,
 cancellation, allocation lifetime, and cleanup in the same design discussion.
+
+[[process-init-and-capabilities]] shows how a Zig 0.16 executable obtains that
+capability from `std.process.Init` without coupling reusable libraries to the
+whole process initializer.
 
 Related: [[zig-0.16-baseline]], [[io-threaded]], [[async-vs-concurrent]],
 [[cancellation]], [[error-context]], [[tigerstyle]].

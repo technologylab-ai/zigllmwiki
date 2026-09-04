@@ -77,4 +77,4 @@ Choose the ownership shape and the scheduling guarantee independently.
 - Does a timer consume another scheduling unit unnecessarily?
 
 Related: [[std-io]], [[io-threaded]], [[cancellation]],
-[[evented-io-backends]], [[tigerstyle]].
+[[select-and-batch]], [[evented-io-backends]], [[tigerstyle]].

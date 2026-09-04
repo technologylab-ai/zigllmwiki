@@ -1,0 +1,110 @@
+const std = @import("std");
+
+fn work(io: std.Io, ms: i64) std.Io.Cancelable!void {
+    return std.Io.sleep(io, .fromMilliseconds(ms), .awake);
+}
+fn sleepSeconds(io: std.Io, s: i64) std.Io.Cancelable!void {
+    return std.Io.sleep(io, .fromSeconds(s), .awake);
+}
+const Selection = union(enum) {
+    work: std.Io.Cancelable!void,
+    timeout: std.Io.Cancelable!void,
+};
+
+/// A: Select, both branches dispatched with `async`.
+fn selectAsync(io: std.Io, work_ms: i64, timeout_s: i64) !i64 {
+    const t0 = std.Io.Timestamp.now(io, .awake);
+    var buf: [2]Selection = undefined;
+    var sel: std.Io.Select(Selection) = .init(io, &buf);
+    defer sel.cancelDiscard();
+    sel.async(.work, work, .{ io, work_ms });
+    sel.async(.timeout, sleepSeconds, .{ io, timeout_s });
+    _ = try sel.await();
+    return t0.untilNow(io, .awake).toMilliseconds();
+}
+
+/// B: Select, both branches dispatched with `concurrent`.
+fn selectConcurrent(io: std.Io, work_ms: i64, timeout_s: i64) !i64 {
+    const t0 = std.Io.Timestamp.now(io, .awake);
+    var buf: [2]Selection = undefined;
+    var sel: std.Io.Select(Selection) = .init(io, &buf);
+    defer sel.cancelDiscard();
+    try sel.concurrent(.work, work, .{ io, work_ms });
+    try sel.concurrent(.timeout, sleepSeconds, .{ io, timeout_s });
+    _ = try sel.await();
+    return t0.untilNow(io, .awake).toMilliseconds();
+}
+
+const Waker = struct {
+    fn run(io: std.Io, done: *std.Io.Event, ms: i64) std.Io.Cancelable!void {
+        defer done.set(io);
+        return work(io, ms);
+    }
+};
+
+/// C: Event deadline, work spawned with `async`.
+fn eventAsync(io: std.Io, work_ms: i64, timeout_s: i64) !i64 {
+    const t0 = std.Io.Timestamp.now(io, .awake);
+    var done: std.Io.Event = .unset;
+    var fut = io.async(Waker.run, .{ io, &done, work_ms });
+    done.waitTimeout(io, .{ .duration = .{ .clock = .awake, .raw = .fromSeconds(timeout_s) } }) catch {
+        _ = fut.cancel(io) catch {};
+        return t0.untilNow(io, .awake).toMilliseconds();
+    };
+    _ = fut.await(io) catch {};
+    return t0.untilNow(io, .awake).toMilliseconds();
+}
+
+/// D: Event deadline, work spawned with `concurrent`.
+fn eventConcurrent(io: std.Io, work_ms: i64, timeout_s: i64) !i64 {
+    const t0 = std.Io.Timestamp.now(io, .awake);
+    var done: std.Io.Event = .unset;
+    var fut = try io.concurrent(Waker.run, .{ io, &done, work_ms });
+    done.waitTimeout(io, .{ .duration = .{ .clock = .awake, .raw = .fromSeconds(timeout_s) } }) catch {
+        _ = fut.cancel(io) catch {};
+        return t0.untilNow(io, .awake).toMilliseconds();
+    };
+    _ = fut.await(io) catch {};
+    return t0.untilNow(io, .awake).toMilliseconds();
+}
+
+/// E: what the slide currently shows -- only the timeout branch changed.
+fn selectMixed(io: std.Io, work_ms: i64, timeout_s: i64) !i64 {
+    const t0 = std.Io.Timestamp.now(io, .awake);
+    var buf: [2]Selection = undefined;
+    var sel: std.Io.Select(Selection) = .init(io, &buf);
+    defer sel.cancelDiscard();
+    sel.async(.work, work, .{ io, work_ms });
+    try sel.concurrent(.timeout, sleepSeconds, .{ io, timeout_s });
+    _ = try sel.await();
+    return t0.untilNow(io, .awake).toMilliseconds();
+}
+
+fn hog(io: std.Io, s: i64) std.Io.Cancelable!void {
+    return std.Io.sleep(io, .fromSeconds(s), .awake);
+}
+
+pub fn main(init: std.process.Init) !void {
+    const a = try init.minimal.args.toSlice(init.arena.allocator());
+    const load = try std.fmt.parseInt(usize, a[1], 10);
+    const work_ms = try std.fmt.parseInt(i64, a[2], 10);
+    const limit = if (a.len > 3) try std.fmt.parseInt(usize, a[3], 10) else 0;
+
+    var custom: std.Io.Threaded = if (limit > 0) .init(init.gpa, .{ .async_limit = .limited(limit) }) else undefined;
+    defer if (limit > 0) custom.deinit();
+    const io = if (limit > 0) custom.io() else init.io;
+
+    var hogs: std.Io.Group = .init;
+    defer hogs.cancel(io);
+    var i: usize = 0;
+    while (i < load) : (i += 1) hogs.concurrent(io, hog, .{ io, @as(i64, 30) }) catch break;
+
+    std.debug.print("work {d} ms, deadline 3 s, {d} busy tasks, async_limit {s}\n", .{
+        work_ms, i, if (limit > 0) "raised" else "default (cores-1)",
+    });
+    std.debug.print("  A  Select   + async      {d} ms\n", .{try selectAsync(io, work_ms, 3)});
+    std.debug.print("  B  Select   + concurrent {d} ms\n", .{try selectConcurrent(io, work_ms, 3)});
+    std.debug.print("  C  Event    + async      {d} ms\n", .{try eventAsync(io, work_ms, 3)});
+    std.debug.print("  D  Event    + concurrent {d} ms\n", .{try eventConcurrent(io, work_ms, 3)});
+    std.debug.print("  E  only the timeout made concurrent {d} ms\n", .{try selectMixed(io, work_ms, 3)});
+}

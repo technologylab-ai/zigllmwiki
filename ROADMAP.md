@@ -17,52 +17,56 @@ produce Zig 0.16.x code that:
 
 ## Progress snapshot — 2026-09-04
 
-- **Active milestone:** M0 is not complete; C-003, C-004, and L-004 remain.
+- **Foundation milestone:** M0 is complete. Portable local evidence, the full
+  Zig 0.16 release-note scope inventory, deterministic graph scoring, and the
+  first semantic lint report are all in place.
 - **M1/M2 content expansion is active in parallel:** M1-005 and M2-009 are
   explicitly `active` in the milestone tables below. Selected M1/M2 work is
-  running before M0 exits because it directly constrains the seed pages.
-- **Latest completed content:** the six requested matklad essays and five
+  already running because it directly constrains the seed pages.
+- **Latest completed content:** M1-001 and M1-003 now document and prove
+  `std.process.Init`/capability threading and `Select`/`Batch` ownership. The six requested
+  matklad essays and five
   TigerBeetle documents are joined by structured-concurrency, `io_uring`,
   bounded error-diagnostics, full TigerStyle-coverage, and pinned TigerBeetle
   cross-platform I/O syntheses. `Future`/`Group` ownership, protection, and
   `recancel` have a macOS `Io.Threaded` proof.
-- **Current next slice:** complete M1-005 with Linux and Windows
-  blocked-syscall evidence, finish the macOS dispatch-I/O and Windows Zig-source
-  maps, and close the next TigerStyle gaps at integer boundaries.
+- **Current next slice:** M1-006 synchronization primitives, while M1-005
+  platform evidence and M2 integer boundaries remain active content work.
 - **Backend:** intentionally deferred; the Obsidian-first ADR remains in force.
 
 Source status is tracked as `discovered → selected → captured → synthesized →
 proved` in [CURATION.md](CURATION.md). “Captured” never implies that guidance
 has been written, and conceptual material does not require a code proof.
 
-## Current milestone — M0: trustworthy foundation (active)
+## M0: trustworthy foundation (done)
 
 | ID | Lane | Status | Deliverable / exit condition |
 | --- | --- | --- | --- |
 | C-001 | content | done | Zig 0.16.0 baseline and source hierarchy recorded. |
 | C-002 | content | done | Seed pages for `std.Io`, async vs concurrent, backend readiness, and TigerStyle. |
-| C-003 | content | next | Import portable snapshots of the local migration guide and hermit proofs while retaining their hashes and origins. |
-| C-004 | content | next | Turn the full Zig 0.16 release notes into a scoped topic inventory; do not duplicate the release notes. |
+| C-003 | content | done | Byte-identical portable snapshots of the local migration guide and hermit proofs retain repository commits, origins, and SHA-256 values checked by `zig build verify`. |
+| C-004 | content | done | Every named Zig 0.16 release-note topic is routed to integrated guidance, a numbered queue item, upgrade/platform watch, or explicit out-of-scope decision. |
 | C-005 | content | done | Pin and synthesize the six requested matklad posts on allocation, cancellation, `Io.Threaded`, diagnostics, typed indexes, and formatting. |
 | C-006 | content | done | Curate the first TigerBeetle engineering-doc slice and publish a transfer-oriented corpus map. |
 | C-007 | content | done | Add a source ledger that exposes discovered, selected, captured, synthesized, and proved states. |
 | L-001 | LLM | done | Repository agent contract defines query, ingest, lint, and upgrade operations. |
 | L-002 | LLM | done | Discoverable repo-local `zig-wiki` skill exposes those operations to Codex. |
 | L-003 | LLM | done | Mechanical verification checks compiler version, page schema, links, proof paths, and executable proofs. |
-| L-004 | LLM | next | Add orphan/backlink quality scoring and a semantic lint prompt/report format. |
+| L-004 | LLM | done | `zig build graph` scores discovery, conceptual backlinks, outward navigation, and source evidence; true orphans fail verification; the reusable semantic audit produced its first dated report. |
 | L-005 | LLM | done | Record revision-pinned source archaeology and distinguish history, rationale, inference, and current guarantees. |
 | B-001 | backend | done | Obsidian-first ADR; no application backend in M0. |
 
-M0 exits when C-003, C-004, and L-004 are done and the first unsupervised lint
-pass produces a reviewable report without weakening verification rules.
+M0 exited on 2026-09-04 after the first unsupervised semantic pass produced a
+reviewable report and deterministic graph scoring without weakening the
+existing verification rules.
 
 ## M1: `std.Io` field guide (active)
 
 | ID | Status | Deliverable / exit condition |
 | --- | --- | --- |
-| M1-001 | next | `std.process.Init` and explicit capability threading page. |
+| M1-001 | done | `std.process.Init` and explicit capability threading page plus an executable entry-point proof. |
 | M1-002 | done | `Future` and `Group` ownership/lifetime page plus terminal-path proof. |
-| M1-003 | next | `Select` and `Batch` ownership, result, and cleanup page. |
+| M1-003 | done | `Select` and `Batch` ownership, fixed capacity, result draining, cancellation traps, and runtime proof. |
 | M1-004 | done | `async` versus `concurrent`, including saturated runtime evidence. |
 | M1-005 | active | Cancellation acknowledgement, `recancel`, protection, cleanup, and blocked-syscall platform matrix. Task semantics and a blocked pipe read are proved on macOS; Linux/Windows syscall interruption remains. |
 | M1-006 | next | `Event`, `Queue`, `Mutex`, `RwLock`, `Condition`, `Semaphore`, and `Futex`. |
@@ -164,7 +168,8 @@ After M0:
 
 ## Research queue
 
-- Complete Zig 0.16 release-note coverage, especially all `std.Io` subtopics.
+- Advance the queued Zig 0.16 release-note topics using
+  [[zig-0.16-release-inventory]], especially all `std.Io` subtopics.
 - Add primary macOS and Windows documentation beside the source-verified
   TigerBeetle I/O comparison; no runtime proof is implied by source inspection.
 - Work through the selected matklad clusters in `CURATION.md`; do not promote

@@ -19,6 +19,12 @@ Read this page first, then follow only the pages needed for the task.
 ## Current Zig
 
 - [[zig-0.16-baseline]] — active version, evidence standard, and upgrade rule.
+- [[zig-0.16-release-inventory]] — every named 0.16 release-note topic routed
+  to current guidance, a numbered roadmap item, a watch, or an explicit
+  out-of-scope decision.
+- [[process-init-and-capabilities]] — use `std.process.Init` at the executable
+  root and thread narrower I/O, allocation, configuration, and authority into
+  components.
 - [[std-io]] — the explicit I/O capability and implementation landscape.
 - [[io-threaded]] — how the production Zig 0.16 implementation schedules and
   cancels blocking work.
@@ -28,6 +34,8 @@ Read this page first, then follow only the pages needed for the task.
   recovery boundaries.
 - [[task-lifetimes-and-structured-concurrency]] — `Future`/`Group` ownership,
   state generations, serialized callbacks, and child processes.
+- [[select-and-batch]] — typed task races, fixed low-level operation slots,
+  completion identity, result draining, and cancellation-buffer traps.
 - [[error-context]] — structured diagnostics without misreporting handled
   cancellation.
 - [[error-handling-and-diagnostics]] — typed recovery codes, invariant failures,
@@ -75,3 +83,6 @@ Read this page first, then follow only the pages needed for the task.
   intent for agents maintaining guidance.
 - [Maintenance log](log.md) — append-only history.
 - [Obsidian-first decision](docs/decisions/0001-obsidian-first.md).
+- [Semantic lint procedure](tools/semantic_lint.md) and
+  [latest report](reports/2026-09-04-semantic-lint.md) — repeatable agent audit
+  plus reviewable findings.

@@ -19,5 +19,5 @@ fallback, allocation, and thread growth.
 Do not carry file line numbers into wiki claims: paths and declarations are
 stable enough for retrieval, while line numbers create copied state.
 
-Relevant pages: [[std-io]], [[async-vs-concurrent]], and
-[[evented-io-backends]].
+Relevant pages: [[process-init-and-capabilities]], [[std-io]],
+[[async-vs-concurrent]], [[select-and-batch]], and [[evented-io-backends]].

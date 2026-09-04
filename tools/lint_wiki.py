@@ -3,6 +3,9 @@
 
 from __future__ import annotations
 
+import argparse
+import hashlib
+import json
 import re
 import subprocess
 import sys
@@ -65,7 +68,128 @@ def links_outside_fences(text: str) -> list[str]:
     return targets
 
 
+def resolved_link(
+    raw_target: str,
+    stems: dict[str, list[Path]],
+    paths: set[str],
+) -> Path | None:
+    """Resolve an already-extracted wikilink to a repository-relative path."""
+    target = raw_target.split("|", 1)[0].split("#", 1)[0].strip()
+    if not target:
+        return None
+    if "/" in target:
+        normalized = target.removesuffix(".md").lstrip("/")
+        if normalized in paths:
+            return Path(f"{normalized}.md")
+        return None
+
+    target_name = target[:-3] if target.endswith(".md") else target
+    matches = stems.get(target_name, [])
+    return matches[0] if len(matches) == 1 else None
+
+
+def graph_report(
+    stems: dict[str, list[Path]],
+    paths: set[str],
+    baseline: str,
+) -> dict[str, object]:
+    """Return deterministic, count-based graph signals for semantic review."""
+    wiki_paths = {path.relative_to(ROOT) for path in WIKI_FILES}
+    source_paths = {path.relative_to(ROOT) for path in SOURCE_FILES}
+    index_path = Path("index.md")
+    inbound_wiki: dict[Path, set[Path]] = defaultdict(set)
+    outbound_wiki: dict[Path, set[Path]] = defaultdict(set)
+    source_evidence: dict[Path, set[Path]] = defaultdict(set)
+
+    for path in WIKI_FILES:
+        relative = path.relative_to(ROOT)
+        for raw_target in links_outside_fences(path.read_text(encoding="utf-8")):
+            target = resolved_link(raw_target, stems, paths)
+            if target in wiki_paths and target != relative:
+                outbound_wiki[relative].add(target)
+                inbound_wiki[target].add(relative)
+            elif target in source_paths:
+                source_evidence[relative].add(target)
+
+    pages: list[dict[str, object]] = []
+    for relative in sorted(wiki_paths - {index_path}, key=str):
+        conceptual_backlinks = inbound_wiki[relative] - {index_path}
+        indexed = index_path in inbound_wiki[relative]
+        outgoing_count = len(outbound_wiki[relative])
+        source_count = len(source_evidence[relative])
+
+        # The score is deliberately structural, not a semantic truth score.
+        # Index discovery: 30; non-index backlinks: 30; outward navigation: 20;
+        # cited source records: 20. Partial credit exposes thin connections.
+        score = 30 if indexed else 0
+        score += 30 if len(conceptual_backlinks) >= 2 else 15 * len(conceptual_backlinks)
+        score += 20 if outgoing_count >= 2 else 10 * outgoing_count
+        score += 20 if source_count >= 2 else 10 * source_count
+
+        if not inbound_wiki[relative]:
+            band = "orphan"
+        elif score < 60:
+            band = "weak"
+        elif score < 80:
+            band = "connected"
+        else:
+            band = "strong"
+
+        pages.append(
+            {
+                "path": relative.as_posix(),
+                "score": score,
+                "band": band,
+                "indexed": indexed,
+                "conceptual_backlinks": sorted(
+                    path.as_posix() for path in conceptual_backlinks
+                ),
+                "outgoing_wiki_links": sorted(
+                    path.as_posix() for path in outbound_wiki[relative]
+                ),
+                "source_evidence_links": sorted(
+                    path.as_posix() for path in source_evidence[relative]
+                ),
+            }
+        )
+
+    edges = sum(len(targets) for targets in outbound_wiki.values())
+    return {
+        "schema_version": 1,
+        "zig_baseline": baseline,
+        "scoring": {
+            "index_discovery": 30,
+            "conceptual_backlinks": "15 for one, 30 for two or more",
+            "outgoing_wiki_links": "10 for one, 20 for two or more",
+            "source_evidence_links": "10 for one, 20 for two or more",
+            "bands": {
+                "orphan": "no inbound wiki link",
+                "weak": "inbound but score below 60",
+                "connected": "score 60-79",
+                "strong": "score 80-100",
+            },
+        },
+        "summary": {
+            "wiki_pages_excluding_index": len(pages),
+            "directed_wiki_edges": edges,
+            "orphans": sum(page["band"] == "orphan" for page in pages),
+            "weak": sum(page["band"] == "weak" for page in pages),
+            "connected": sum(page["band"] == "connected" for page in pages),
+            "strong": sum(page["band"] == "strong" for page in pages),
+        },
+        "pages": pages,
+    }
+
+
 def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--graph-report",
+        action="store_true",
+        help="emit a deterministic JSON graph/backlink report after verification",
+    )
+    args = parser.parse_args()
+
     failures: list[str] = []
     baseline = (ROOT / ".zig-version").read_text(encoding="utf-8").strip()
     actual = subprocess.run(
@@ -142,6 +266,30 @@ def main() -> int:
                 if not meta.get(required):
                     failures.append(f"{relative}: missing source key {required}")
 
+            for key, snapshot_name in sorted(meta.items()):
+                if not key.startswith("snapshot"):
+                    continue
+
+                hash_key = key.replace("snapshot", "sha256", 1)
+                expected_hash = meta.get(hash_key)
+                if not expected_hash:
+                    failures.append(
+                        f"{relative}: {key} has no corresponding {hash_key}"
+                    )
+                    continue
+
+                snapshot = ROOT / snapshot_name
+                if not snapshot.is_file():
+                    failures.append(f"{relative}: missing snapshot {snapshot_name}")
+                    continue
+
+                actual_hash = hashlib.sha256(snapshot.read_bytes()).hexdigest()
+                if actual_hash != expected_hash:
+                    failures.append(
+                        f"{relative}: {snapshot_name} sha256 is {actual_hash}, "
+                        f"expected {expected_hash}"
+                    )
+
         for line in lines:
             match = PROOF.match(line)
             if match and not (ROOT / match.group(1)).is_file():
@@ -173,16 +321,29 @@ def main() -> int:
                     f"{path.relative_to(ROOT)}: ambiguous wikilink [[{raw_target}]] -> {rendered}"
                 )
 
+    report = graph_report(stems, paths, baseline)
+    report_pages = report["pages"]
+    assert isinstance(report_pages, list)
+    for page in report_pages:
+        assert isinstance(page, dict)
+        if page["band"] == "orphan":
+            failures.append(
+                f"{page['path']}: orphan wiki page has no inbound wiki link"
+            )
+
     if failures:
         print("wiki verification failed:", file=sys.stderr)
         for failure in failures:
             print(f"- {failure}", file=sys.stderr)
         return 1
 
-    print(
-        f"wiki verification passed: {len(WIKI_FILES)} pages, "
-        f"{len(SOURCE_FILES)} sources, Zig {actual}"
-    )
+    if args.graph_report:
+        print(json.dumps(report, indent=2, sort_keys=True))
+    else:
+        print(
+            f"wiki verification passed: {len(WIKI_FILES)} pages, "
+            f"{len(SOURCE_FILES)} sources, Zig {actual}"
+        )
     return 0
 
 

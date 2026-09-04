@@ -20,6 +20,16 @@ The current matklad snapshot is commit
 commit `47aeb2212a255273dda508288412e537d11e4b7c`. A later revision gets new source
 records; it does not silently rewrite captured evidence.
 
+The local `fi` migration guide and zig-hermit timeout experiments also have
+byte-identical portable snapshots. Their source records retain the original
+repository commits and absolute origin paths, while verification recomputes the
+snapshot SHA-256 values on every `zig build verify` run.
+
+The official Zig 0.16 release notes are fully inventoried by named section in
+[[zig-0.16-release-inventory]]. The inventory routes topics by decision and
+roadmap destination; it does not copy the release notes or claim that queued
+topics have already been synthesized.
+
 ## matklad — synthesized now
 
 | Source | Status | Wiki effect |
@@ -86,6 +96,14 @@ when a concrete systems-programming question needs them.
 | M1-005 cancellation | active | `Future`, `Group`, `recancel`, protection, and a blocked pipe read are proved on macOS; add blocked-syscall evidence on Linux and Windows. |
 | M2-009 source curation | active | Structured-concurrency, error/diagnostics, and invariant/review clusters are synthesized; bounded-memory/layout and time/retry clusters remain selected. |
 | M3 evented I/O | active research | Primary Linux/Apple/Microsoft lifecycles and TigerBeetle's three backends are synthesized; dispatch I/O, Zig adapters, kernel-version detail, and platform runtime proofs remain. |
+
+M1-001 is complete: [[process-init-and-capabilities]] synthesizes the official
+Zig 0.16 initializer/startup source and the local migration guide, with a real
+entry-point proof executed by `zig build verify`.
+
+M1-003 is complete from the installed Zig 0.16 `Io.zig` contract:
+[[select-and-batch]] distinguishes typed task results from fixed low-level
+operation slots and proves result draining plus arbitrary completion order.
 
 ## Immediate curation order
 

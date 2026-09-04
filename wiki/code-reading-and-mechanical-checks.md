@@ -75,8 +75,10 @@ protected.
 
 This wiki's `zig build verify` is such an entry point: it checks the pinned Zig
 version, Markdown schema and links, proof registration, formatting, and all
-executable proofs. M0's L-004 still needs backlink/orphan scoring and a semantic
-lint report; current automation must not be described as complete.
+executable proofs. `zig build graph` emits deterministic link-health scores,
+and [the semantic lint procedure](../tools/semantic_lint.md) turns their review
+into a dated report. Link counts are triage signals, never substitutes for
+checking the meaning and evidence of a recommendation.
 
 ## Process effects worth transferring
 

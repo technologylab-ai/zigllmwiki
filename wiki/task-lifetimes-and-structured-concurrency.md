@@ -112,5 +112,5 @@ added to the platform matrix.
 - Does a supposedly serialized callback ever suspend or re-enter?
 - What happens to child processes after `SIGKILL`, crash, or power loss?
 
-Related: [[cancellation]], [[io-threaded]], [[io-uring]],
+Related: [[cancellation]], [[select-and-batch]], [[io-threaded]], [[io-uring]],
 [[static-allocation-and-constant-work]], [[deterministic-simulation-testing]].

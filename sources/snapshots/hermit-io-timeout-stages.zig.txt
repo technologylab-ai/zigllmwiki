@@ -1,0 +1,119 @@
+const std = @import("std");
+
+fn fastWork(io: std.Io, ms: i64) std.Io.Cancelable!void {
+    return std.Io.sleep(io, .fromMilliseconds(ms), .awake);
+}
+
+fn slowSleep(io: std.Io, seconds: i64) std.Io.Cancelable!void {
+    return std.Io.sleep(io, .fromSeconds(seconds), .awake);
+}
+
+/// The naive shape: race the work against a sleep.
+fn raced(io: std.Io, work_ms: i64, timeout_s: i64) !struct { await_ms: i64, total_ms: i64 } {
+    const started = std.Io.Timestamp.now(io, .awake);
+    var await_ms: i64 = 0;
+    {
+        const Selection = union(enum) {
+            work: std.Io.Cancelable!void,
+            timeout: std.Io.Cancelable!void,
+        };
+        var buffer: [2]Selection = undefined;
+        var selection: std.Io.Select(Selection) = .init(io, &buffer);
+        defer selection.cancelDiscard();
+
+        selection.async(.work, fastWork, .{ io, work_ms });
+        const after_work_async = started.untilNow(io, .awake).toMilliseconds();
+        selection.async(.timeout, slowSleep, .{ io, timeout_s });
+        const after_timeout_async = started.untilNow(io, .awake).toMilliseconds();
+        _ = try selection.await();
+        await_ms = started.untilNow(io, .awake).toMilliseconds();
+        std.debug.print("   async(work) returned at {d} ms | async(timeout) returned at {d} ms | await at {d} ms\n",
+            .{ after_work_async, after_timeout_async, await_ms });
+    }
+    return .{ .await_ms = await_ms, .total_ms = started.untilNow(io, .awake).toMilliseconds() };
+}
+
+/// Select, but demanding real concurrency for both branches.
+fn racedConcurrent(io: std.Io, work_ms: i64, timeout_s: i64) !i64 {
+    const started = std.Io.Timestamp.now(io, .awake);
+    const Selection = union(enum) {
+        work: std.Io.Cancelable!void,
+        timeout: std.Io.Cancelable!void,
+    };
+    var buffer: [2]Selection = undefined;
+    var selection: std.Io.Select(Selection) = .init(io, &buffer);
+    defer selection.cancelDiscard();
+
+    selection.concurrent(.work, fastWork, .{ io, work_ms }) catch |err| {
+        std.debug.print("   concurrent(work) failed: {t}\n", .{err});
+        return -1;
+    };
+    selection.concurrent(.timeout, slowSleep, .{ io, timeout_s }) catch |err| {
+        std.debug.print("   concurrent(timeout) failed: {t}\n", .{err});
+        return -2;
+    };
+    _ = try selection.await();
+    return started.untilNow(io, .awake).toMilliseconds();
+}
+
+/// The pattern: the work wakes the deadline.
+fn deadline(io: std.Io, work_ms: i64, timeout_s: i64) !i64 {
+    const started = std.Io.Timestamp.now(io, .awake);
+    const Task = struct {
+        fn run(task_io: std.Io, done: *std.Io.Event, ms: i64) std.Io.Cancelable!void {
+            defer done.set(task_io);
+            return std.Io.sleep(task_io, .fromMilliseconds(ms), .awake);
+        }
+    };
+    var done: std.Io.Event = .unset;
+    var future = io.concurrent(Task.run, .{ io, &done, work_ms }) catch |err| {
+        std.debug.print("   concurrent(work) failed: {t}\n", .{err});
+        return -1;
+    };
+    done.waitTimeout(io, .{ .duration = .{ .clock = .awake, .raw = .fromSeconds(timeout_s) } }) catch {
+        _ = future.cancel(io) catch {};
+        return started.untilNow(io, .awake).toMilliseconds();
+    };
+    _ = future.await(io) catch {};
+    return started.untilNow(io, .awake).toMilliseconds();
+}
+
+fn hog(io: std.Io, seconds: i64) std.Io.Cancelable!void {
+    return std.Io.sleep(io, .fromSeconds(seconds), .awake);
+}
+
+pub fn main(init: std.process.Init) !void {
+    const args = try init.minimal.args.toSlice(init.arena.allocator());
+    var async_limit: usize = 0;
+    if (args.len > 3) async_limit = try std.fmt.parseInt(usize, args[3], 10);
+
+    var custom: std.Io.Threaded = if (async_limit > 0)
+        .init(init.gpa, .{ .async_limit = .limited(async_limit) })
+    else
+        undefined;
+    defer if (async_limit > 0) custom.deinit();
+    const io = if (async_limit > 0) custom.io() else init.io;
+    if (async_limit > 0) std.debug.print("async_limit raised to {d}\n", .{async_limit});
+    var load: usize = 0;
+    if (args.len > 1) load = try std.fmt.parseInt(usize, args[1], 10);
+    var work_ms: i64 = 100;
+    if (args.len > 2) work_ms = try std.fmt.parseInt(i64, args[2], 10);
+
+    var hogs: std.Io.Group = .init;
+    defer hogs.cancel(io);
+    var i: usize = 0;
+    while (i < load) : (i += 1) {
+        hogs.concurrent(io, hog, .{ io, @as(i64, 30) }) catch |err| {
+            std.debug.print("could not spawn hog {d}: {t}\n", .{ i, err });
+            break;
+        };
+    }
+    std.debug.print("background tasks occupying the runtime: {d}\n", .{i});
+
+    const r = try raced(io, work_ms, 3);
+    std.debug.print("Select+sleep : await returned after {d} ms, function returned after {d} ms\n", .{ r.await_ms, r.total_ms });
+    const c = try racedConcurrent(io, work_ms, 3);
+    std.debug.print("Select+concurrent: returned after {d} ms\n", .{c});
+    const d = try deadline(io, work_ms, 3);
+    std.debug.print("Event+deadline: function returned after {d} ms\n", .{d});
+}

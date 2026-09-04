@@ -108,6 +108,8 @@ Related: [[io-threaded]], [[async-vs-concurrent]],
 [[io-uring]], [[macos-kqueue-and-aio]],
 [[windows-iocp-and-overlapped-io]].
 Also see [[task-lifetimes-and-structured-concurrency]].
+For result-buffer sizing and terminal draining in task/operation aggregators,
+see [[select-and-batch]].
 
 ## Runtime evidence
 
