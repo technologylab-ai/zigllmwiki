@@ -3,5 +3,4 @@ __pycache__/
 *.pyc
 .zig-cache/
 zig-out/
-.obsidian/workspace.json
-.obsidian/workspace-mobile.json
+.obsidian/
