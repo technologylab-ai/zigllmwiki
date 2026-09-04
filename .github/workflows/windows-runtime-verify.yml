@@ -169,55 +169,240 @@ jobs:
       - name: Run full exact-baseline verification
         shell: pwsh
         run: |
-          & zig build verify --summary all 2>&1 | Tee-Object -FilePath (Join-Path $env:REVIEW_PACKET "zig-build-verify.log")
-          if ($LASTEXITCODE -ne 0) {
-            throw "zig build verify failed with exit code $LASTEXITCODE"
+          $log = Join-Path $env:REVIEW_PACKET "zig-build-verify.log"
+          Set-Content -Path $log -Value "zig build verify --summary all (native $env:ZIG_PLATFORM compiler)" -Encoding utf8
+          & zig build verify --summary all 2>&1 | Tee-Object -FilePath $log -Append
+          $verifyExit = $LASTEXITCODE
+          [ordered]@{
+            compiler_platform = $env:ZIG_PLATFORM
+            command = "zig build verify --summary all"
+            exit_code = $verifyExit
+          } | ConvertTo-Json | Set-Content -Path (Join-Path $env:REVIEW_PACKET "native-full-verify.json") -Encoding utf8
+          if ($verifyExit -ne 0) {
+            throw "zig build verify failed with exit code $verifyExit"
           }
 
-      - name: Run Windows I/O mapping proof natively
+      - name: Compile then execute each Windows proof natively
         if: always()
         shell: pwsh
         run: |
-          & zig test proofs/windows_io_mapping.zig 2>&1 | Tee-Object -FilePath (Join-Path $env:REVIEW_PACKET "windows-io-mapping-native.log")
-          if ($LASTEXITCODE -ne 0) {
-            throw "windows_io_mapping.zig failed with exit code $LASTEXITCODE"
+          $ErrorActionPreference = "Stop"
+          $proofs = @(
+            @{ source = "windows_io_mapping"; log = "windows-io-mapping" },
+            @{ source = "threaded_blocked_read_cancel_windows"; log = "windows-blocked-read-cancel" },
+            @{ source = "windows_apc_batch"; log = "windows-apc-batch" },
+            @{ source = "windows_iocp_lifecycle"; log = "windows-iocp-lifecycle" },
+            @{ source = "windows_iocp_tcp_file"; log = "windows-iocp-tcp-file" }
+          )
+          $binaryDirectory = Join-Path $env:RUNNER_TEMP "zig-wiki-native"
+          New-Item -ItemType Directory -Force -Path $binaryDirectory | Out-Null
+          $results = @()
+          $failed = 0
+          foreach ($proof in $proofs) {
+            $source = "proofs/$($proof.source).zig"
+            $binary = Join-Path $binaryDirectory "$($proof.source).exe"
+            $compileLog = Join-Path $env:REVIEW_PACKET "$($proof.log)-native-compile.log"
+            $runtimeLog = Join-Path $env:REVIEW_PACKET "$($proof.log)-native.log"
+            Set-Content -Path $compileLog -Value "zig test $source -femit-bin=$binary --test-no-exec" -Encoding utf8
+            & zig test $source "-femit-bin=$binary" --test-no-exec 2>&1 | Tee-Object -FilePath $compileLog -Append
+            $compileExit = $LASTEXITCODE
+            $runtimeExit = $null
+            $binaryHash = $null
+            if ($compileExit -eq 0) {
+              $binaryBytes = [IO.File]::ReadAllBytes($binary)
+              $peOffset = [BitConverter]::ToInt32($binaryBytes, 0x3c)
+              $machine = [BitConverter]::ToUInt16($binaryBytes, $peOffset + 4).ToString("x4")
+              if ($machine -cne $env:EXPECTED_PE_MACHINE) {
+                throw "$source emitted $machine instead of native $env:EXPECTED_PE_MACHINE"
+              }
+              $binaryHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $binary).Hash.ToLowerInvariant()
+              Set-Content -Path $runtimeLog -Value "Executing native $env:ZIG_PLATFORM PE: $binary" -Encoding utf8
+              & $binary 2>&1 | Tee-Object -FilePath $runtimeLog -Append
+              $runtimeExit = $LASTEXITCODE
+              if ($runtimeExit -ne 0) { $failed++ }
+            } else {
+              Set-Content -Path $runtimeLog -Value "NOT EXECUTED: compiler exit code $compileExit" -Encoding utf8
+              $failed++
+            }
+            $results += [ordered]@{
+              proof = $source
+              compiler_platform = $env:ZIG_PLATFORM
+              compiler_exit_code = $compileExit
+              runtime_exit_code = $runtimeExit
+              executable_sha256 = $binaryHash
+              execution = "native compiler; native test executable only if compilation succeeded"
+            }
+            ConvertTo-Json -InputObject @($results) | Set-Content -Path (Join-Path $env:REVIEW_PACKET "native-proof-results.json") -Encoding utf8
+          }
+          if ($failed -ne 0) {
+            throw "$failed native proof compile/execution failures; see separate phase logs"
           }
 
-      - name: Run blocked-read cancellation proof natively
-        if: always()
+      - name: Diagnose ARM64 native compiler CPU and LLVM variants
+        if: always() && matrix.arch == 'aarch64'
         shell: pwsh
         run: |
-          & zig test proofs/threaded_blocked_read_cancel_windows.zig 2>&1 | Tee-Object -FilePath (Join-Path $env:REVIEW_PACKET "windows-blocked-read-cancel-native.log")
-          if ($LASTEXITCODE -ne 0) {
-            throw "threaded_blocked_read_cancel_windows.zig failed with exit code $LASTEXITCODE"
+          $ErrorActionPreference = "Stop"
+          $variants = @(
+            @{ name = "default"; flags = @() },
+            @{ name = "baseline"; flags = @("-target", "aarch64-windows", "-mcpu=baseline") },
+            @{ name = "llvm"; flags = @("-fllvm") },
+            @{ name = "baseline-llvm"; flags = @("-target", "aarch64-windows", "-mcpu=baseline", "-fllvm") }
+          )
+          $binaryDirectory = Join-Path $env:RUNNER_TEMP "zig-wiki-arm-diagnostics"
+          New-Item -ItemType Directory -Force -Path $binaryDirectory | Out-Null
+          $results = @()
+          foreach ($proof in @("windows_apc_batch", "windows_iocp_tcp_file")) {
+            foreach ($variant in $variants) {
+              $label = "$proof-$($variant.name)"
+              $binary = Join-Path $binaryDirectory "$label.exe"
+              $compileLog = Join-Path $env:REVIEW_PACKET "$label-diagnostic-compile.log"
+              $runtimeLog = Join-Path $env:REVIEW_PACKET "$label-diagnostic-runtime.log"
+              $arguments = @("test", "proofs/$proof.zig", "-femit-bin=$binary", "--test-no-exec") + $variant.flags
+              Set-Content -Path $compileLog -Value ("zig " + ($arguments -join " ")) -Encoding utf8
+              & zig @arguments 2>&1 | Tee-Object -FilePath $compileLog -Append
+              $compileExit = $LASTEXITCODE
+              $runtimeExit = $null
+              $binaryHash = $null
+              if ($compileExit -eq 0) {
+                $binaryBytes = [IO.File]::ReadAllBytes($binary)
+                $peOffset = [BitConverter]::ToInt32($binaryBytes, 0x3c)
+                if ([BitConverter]::ToUInt16($binaryBytes, $peOffset + 4) -ne 0xaa64) {
+                  throw "$label did not emit ARM64"
+                }
+                $binaryHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $binary).Hash.ToLowerInvariant()
+                Set-Content -Path $runtimeLog -Value "Executing native ARM64 diagnostic: $binary" -Encoding utf8
+                & $binary 2>&1 | Tee-Object -FilePath $runtimeLog -Append
+                $runtimeExit = $LASTEXITCODE
+              } else {
+                Set-Content -Path $runtimeLog -Value "NOT EXECUTED: compiler exit code $compileExit" -Encoding utf8
+              }
+              $results += [ordered]@{
+                proof = "proofs/$proof.zig"
+                variant = $variant.name
+                arguments = $arguments
+                compiler_exit_code = $compileExit
+                runtime_exit_code = $runtimeExit
+                executable_sha256 = $binaryHash
+              }
+              ConvertTo-Json -InputObject @($results) -Depth 4 | Set-Content -Path (Join-Path $env:REVIEW_PACKET "arm-native-compiler-diagnostics.json") -Encoding utf8
+            }
           }
 
-      - name: Run APC batch and device cancellation proofs natively
-        if: always()
+      - name: Install exact x64 Zig separately for ARM64 compiler diagnosis
+        if: always() && matrix.arch == 'aarch64'
         shell: pwsh
         run: |
-          & zig test proofs/windows_apc_batch.zig 2>&1 | Tee-Object -FilePath (Join-Path $env:REVIEW_PACKET "windows-apc-batch-native.log")
-          if ($LASTEXITCODE -ne 0) {
-            throw "windows_apc_batch.zig failed with exit code $LASTEXITCODE"
+          $ErrorActionPreference = "Stop"
+          $baseline = (Get-Content -Raw ".zig-version").Trim()
+          $index = Invoke-RestMethod -Uri "https://ziglang.org/download/index.json" -TimeoutSec 30
+          $artifact = $index.PSObject.Properties[$baseline].Value.PSObject.Properties["x86_64-windows"].Value
+          $expected = ([string] $artifact.shasum).ToLowerInvariant()
+          if ($expected -notmatch '^[0-9a-f]{64}$') { throw "invalid x64 compiler checksum" }
+          $archive = Join-Path $env:RUNNER_TEMP "zig-x64-diagnostic.zip"
+          Invoke-WebRequest -Uri $artifact.tarball -TimeoutSec 180 -OutFile $archive
+          $actual = (Get-FileHash -Algorithm SHA256 -LiteralPath $archive).Hash.ToLowerInvariant()
+          if ($actual -cne $expected) { throw "x64 diagnostic compiler checksum mismatch" }
+          $directory = Join-Path $env:RUNNER_TEMP "zig-x64-diagnostic"
+          Expand-Archive -LiteralPath $archive -DestinationPath $directory -Force
+          $executables = @(Get-ChildItem -Path $directory -Filter zig.exe -File -Recurse)
+          if ($executables.Count -ne 1) { throw "expected exactly one x64 diagnostic compiler" }
+          $compiler = $executables[0].FullName
+          $bytes = [IO.File]::ReadAllBytes($compiler)
+          $peOffset = [BitConverter]::ToInt32($bytes, 0x3c)
+          if ([BitConverter]::ToUInt16($bytes, $peOffset + 4) -ne 0x8664) {
+            throw "diagnostic compiler is not x64"
           }
+          $version = (& $compiler version).Trim()
+          if ($LASTEXITCODE -ne 0 -or $version -cne $baseline) {
+            throw "x64 diagnostic compiler does not execute as exact Zig $baseline"
+          }
+          "DIAGNOSTIC_X64_ZIG=$compiler" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          [ordered]@{
+            archive_url = $artifact.tarball
+            expected_sha256 = $expected
+            actual_sha256 = $actual
+            zig_version = $version
+            compiler_pe_machine = "8664"
+            host_os_architecture = [Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()
+            compiler_execution = "x64 compiler under Windows ARM64 emulation"
+          } | ConvertTo-Json | Set-Content -Path (Join-Path $env:REVIEW_PACKET "arm-x64-compiler-download.json") -Encoding utf8
 
-      - name: Run custom IOCP lifecycle and bounded workload natively
-        if: always()
+      - name: Compile ARM64 proofs with emulated x64 Zig then execute ARM64 binaries
+        if: always() && matrix.arch == 'aarch64'
         shell: pwsh
         run: |
-          & zig test proofs/windows_iocp_lifecycle.zig 2>&1 | Tee-Object -FilePath (Join-Path $env:REVIEW_PACKET "windows-iocp-lifecycle-native.log")
-          if ($LASTEXITCODE -ne 0) {
-            throw "windows_iocp_lifecycle.zig failed with exit code $LASTEXITCODE"
+          $ErrorActionPreference = "Stop"
+          if ([Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString() -cne "Arm64") {
+            throw "native ARM64 execution requires an ARM64 OS"
           }
+          $proofs = @("windows_io_mapping", "threaded_blocked_read_cancel_windows", "windows_apc_batch", "windows_iocp_lifecycle", "windows_iocp_tcp_file")
+          $binaryDirectory = Join-Path $env:RUNNER_TEMP "zig-wiki-arm-from-x64"
+          New-Item -ItemType Directory -Force -Path $binaryDirectory | Out-Null
+          $results = @()
+          $failed = 0
+          foreach ($proof in $proofs) {
+            $binary = Join-Path $binaryDirectory "$proof.exe"
+            $compileLog = Join-Path $env:REVIEW_PACKET "$proof-arm-from-x64-compile.log"
+            $runtimeLog = Join-Path $env:REVIEW_PACKET "$proof-arm-from-x64-runtime.log"
+            Set-Content -Path $compileLog -Value "x64 Zig: test proofs/$proof.zig -target aarch64-windows -mcpu=baseline --test-no-exec -femit-bin=$binary" -Encoding utf8
+            & $env:DIAGNOSTIC_X64_ZIG test "proofs/$proof.zig" -target aarch64-windows -mcpu=baseline --test-no-exec "-femit-bin=$binary" 2>&1 | Tee-Object -FilePath $compileLog -Append
+            $compileExit = $LASTEXITCODE
+            $runtimeExit = $null
+            $binaryHash = $null
+            if ($compileExit -eq 0) {
+              $bytes = [IO.File]::ReadAllBytes($binary)
+              $peOffset = [BitConverter]::ToInt32($bytes, 0x3c)
+              if ([BitConverter]::ToUInt16($bytes, $peOffset + 4) -ne 0xaa64) {
+                throw "$proof did not emit native ARM64"
+              }
+              $binaryHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $binary).Hash.ToLowerInvariant()
+              Set-Content -Path $runtimeLog -Value "Executing ARM64 PE on ARM64 Windows: $binary" -Encoding utf8
+              & $binary 2>&1 | Tee-Object -FilePath $runtimeLog -Append
+              $runtimeExit = $LASTEXITCODE
+              if ($runtimeExit -ne 0) { $failed++ }
+            } else {
+              Set-Content -Path $runtimeLog -Value "NOT EXECUTED: compiler exit code $compileExit" -Encoding utf8
+              $failed++
+            }
+            $results += [ordered]@{
+              proof = "proofs/$proof.zig"
+              compiler_platform = "x86_64-windows under ARM64 emulation"
+              target = "aarch64-windows"
+              cpu = "baseline"
+              executable_pe_machine = $(if ($compileExit -eq 0) { "aa64" } else { $null })
+              compiler_exit_code = $compileExit
+              runtime_exit_code = $runtimeExit
+              executable_sha256 = $binaryHash
+              execution = "native ARM64 test executable after cross-compilation by emulated x64 Zig"
+            }
+            ConvertTo-Json -InputObject @($results) | Set-Content -Path (Join-Path $env:REVIEW_PACKET "arm-from-x64-results.json") -Encoding utf8
+          }
+          if ($failed -ne 0) { throw "$failed ARM64 proof compile/execution failures via x64 compiler" }
 
-      - name: Run TCP-to-file IOCP qualification natively
-        if: always()
+      - name: Diagnose full ARM64 target verification using emulated x64 compiler
+        if: always() && matrix.arch == 'aarch64'
         shell: pwsh
         run: |
-          & zig test proofs/windows_iocp_tcp_file.zig 2>&1 | Tee-Object -FilePath (Join-Path $env:REVIEW_PACKET "windows-iocp-tcp-file-native.log")
-          if ($LASTEXITCODE -ne 0) {
-            throw "windows_iocp_tcp_file.zig failed with exit code $LASTEXITCODE"
-          }
+          $ErrorActionPreference = "Stop"
+          # Ensure compiler subprocesses and the assembly inspector resolve
+          # the same explicit x64 compiler; the project target remains ARM64.
+          $compilerDirectory = Split-Path -Parent $env:DIAGNOSTIC_X64_ZIG
+          $env:PATH = "$compilerDirectory;$env:PATH"
+          $log = Join-Path $env:REVIEW_PACKET "arm-full-verify-x64-compiler.log"
+          Set-Content -Path $log -Value "Exact x64 Zig under ARM64 emulation; project target aarch64-windows, CPU baseline; assembly inspector default host is x64" -Encoding utf8
+          & $env:DIAGNOSTIC_X64_ZIG build verify -Dtarget=aarch64-windows -Dcpu=baseline --summary all 2>&1 | Tee-Object -FilePath $log -Append
+          $verifyExit = $LASTEXITCODE
+          [ordered]@{
+            compiler_platform = "x86_64-windows under ARM64 emulation"
+            project_target = "aarch64-windows"
+            project_cpu = "baseline"
+            generated_code_inspector_target = "x64 compiler default host; separate ARM64 assembly check follows"
+            verify_exit_code = $verifyExit
+          } | ConvertTo-Json | Set-Content -Path (Join-Path $env:REVIEW_PACKET "arm-full-verify-x64-compiler.json") -Encoding utf8
+          if ($verifyExit -ne 0) { throw "full ARM64 target verification via x64 compiler failed: $verifyExit" }
+          & python3 tools/inspect_generated_code.py --source proofs/error_path_catalog.zig --symbol bounded_sum_u32 --output-dir .zig-cache/generated-code-arm64 --optimize ReleaseSafe --target aarch64-windows --cpu baseline --zig $env:DIAGNOSTIC_X64_ZIG 2>&1 | Tee-Object -FilePath (Join-Path $env:REVIEW_PACKET "arm64-generated-code.json")
+          if ($LASTEXITCODE -ne 0) { throw "explicit ARM64 generated-code inspection failed" }
 
       - name: Run all five x86 Windows proofs under WOW64 on the x64 host
         if: always() && matrix.arch == 'x86_64'
@@ -274,6 +459,7 @@ jobs:
           }
 
       - name: Run command and retrieval gates
+        if: always()
         shell: pwsh
         run: |
           & python3 -m unittest tools.test_wiki_commands tools.test_retrieval_benchmark tools.test_curate_review tools.test_curate_scheduled -v 2>&1 | Tee-Object -FilePath (Join-Path $env:REVIEW_PACKET "command-tests.log")
