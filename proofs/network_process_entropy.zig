@@ -60,13 +60,15 @@ test "host names and IP literals are validated before network operations" {
 test "process.run owns bounded captured output" {
     const io = std.testing.io;
     const argv: []const []const u8 = if (builtin.os.tag == .windows)
-        &.{ "cmd.exe", "/d", "/s", "/c", "echo|set /p=out & echo|set /p=err 1>&2 & exit /b 7" }
+        &.{ "cmd.exe", "/d", "/c", "echo out&echo err 1>&2&exit /b 7" }
     else
         &.{ "/bin/sh", "-c", "printf out; printf err >&2; exit 7" };
+    const expected_stdout = if (builtin.os.tag == .windows) "out\r\n" else "out";
+    const expected_stderr = if (builtin.os.tag == .windows) "err\r\n" else "err";
     const result = try std.process.run(std.testing.allocator, io, .{
         .argv = argv,
-        .stdout_limit = .limited(3),
-        .stderr_limit = .limited(3),
+        .stdout_limit = .limited(expected_stdout.len),
+        .stderr_limit = .limited(expected_stderr.len),
         .timeout = .{ .deadline = Io.Clock.Timestamp.fromNow(io, .{
             .raw = .fromSeconds(5),
             .clock = .awake,
@@ -75,22 +77,23 @@ test "process.run owns bounded captured output" {
     defer std.testing.allocator.free(result.stdout);
     defer std.testing.allocator.free(result.stderr);
 
-    try std.testing.expectEqualSlices(u8, "out", result.stdout);
-    try std.testing.expectEqualSlices(u8, "err", result.stderr);
+    try std.testing.expectEqualSlices(u8, expected_stdout, result.stdout);
+    try std.testing.expectEqualSlices(u8, expected_stderr, result.stderr);
     try std.testing.expectEqual(std.process.Child.Term{ .exited = 7 }, result.term);
 }
 
 test "process.run rejects output above its inclusive limit" {
     const io = std.testing.io;
     const argv: []const []const u8 = if (builtin.os.tag == .windows)
-        &.{ "cmd.exe", "/d", "/s", "/c", "echo|set /p=abc" }
+        &.{ "cmd.exe", "/d", "/c", "echo abc" }
     else
         &.{ "/bin/sh", "-c", "printf abc" };
+    const output_len = if (builtin.os.tag == .windows) "abc\r\n".len else "abc".len;
     try std.testing.expectError(
         error.StreamTooLong,
         std.process.run(std.testing.allocator, io, .{
             .argv = argv,
-            .stdout_limit = .limited(2),
+            .stdout_limit = .limited(output_len - 1),
             .stderr_limit = .nothing,
         }),
     );
