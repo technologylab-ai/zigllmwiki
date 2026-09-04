@@ -462,3 +462,27 @@ contract. Windows execution of the new harnesses is still pending at this
 entry. An early Linux development archive captured proof files during agent
 edits and failed formatting/registration lint; it is not runtime evidence for
 the new work and will be superseded by clean-commit gates.
+
+## [2026-09-04] runtime | first M3-004 Windows results and fixture corrections
+
+Clean commit `1fa9d1aba72604894c907c5862af3f3f8b0e7783` passed Linux on
+`omarx1` with 82/82 steps, 70/77 tests, and 7 skips. Windows
+[run 33914988881](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33914988881)
+used Zig 0.16.0 on x86_64 Windows Server 2025 Datacenter 24H2 build
+26100.33296. The APC harness passed: raw empty-read/quota-write returned
+`PENDING`, preloaded-read/small-write returned `SUCCESS`, idle batch cancel
+remained unfinished in the 100ms observation then completed after an explicit
+`NtAlertThread`, and NPFS direct/batch cancellation and retained success passed.
+The separate native batch race observed 3 successes and 29 cancellations;
+the full-verifier invocation observed 31 and 1. Neither distribution is required.
+
+Both custom IOCP pipe notification modes passed immediate/pending, cancellation,
+bounded load, and shutdown checks, but the regular-file fixture failed its
+`File.flags.nonblocking` assertion. Exact source inspection found that
+`dirOpenFileWtf16` requests asynchronous NT mode for `follow_symlinks = false`
+yet hard-codes false wrapper metadata. Replacing that fixture with an explicit
+NT open avoids the inconsistency; this failure did not measure kernel mode.
+The complete Windows gate was 80/82 steps, 69/77 tests, 7 skips, 1 failure.
+The checkout-status step also failed because empty `git status` output never
+created its `Tee-Object` file; explicit packet creation fixes this separate
+workflow error. No full Windows success is claimed for this run.

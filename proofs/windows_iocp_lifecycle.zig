@@ -189,13 +189,32 @@ const Harness = struct {
     fn initFiles(self: *Harness, dir: std.Io.Dir) !void {
         try self.initPort();
         for (&self.slots, 0..) |*slot, index| {
-            // Exact 0.16 Threaded fixture: follow_symlinks=false opens this
-            // ordinary file in ASYNCHRONOUS mode. It is not a portable promise.
-            const file = try dir.openFile(std.testing.io, "iocp", .{
-                .follow_symlinks = false,
-            });
-            slot.handle = file.handle;
-            try std.testing.expect(file.flags.nonblocking);
+            // Select the actual NT handle mode explicitly. Zig 0.16's
+            // dirOpenFileWtf16 no-follow path chooses ASYNCHRONOUS but still
+            // reports File.flags.nonblocking=false, so do not use that
+            // wrapper's metadata as an asynchronous fixture witness.
+            const name_w = std.unicode.utf8ToUtf16LeStringLiteral("iocp");
+            var name = windows.UNICODE_STRING.init(name_w);
+            var status_block: windows.IO_STATUS_BLOCK = undefined;
+            var handle: windows.HANDLE = undefined;
+            const status = windows.ntdll.NtOpenFile(
+                &handle,
+                .{ .STANDARD = .{ .SYNCHRONIZE = true }, .GENERIC = .{ .READ = true } },
+                &.{ .RootDirectory = dir.handle, .ObjectName = &name },
+                &status_block,
+                .{ .READ = true },
+                .{ .IO = .ASYNCHRONOUS, .NON_DIRECTORY_FILE = true },
+            );
+            if (status == .PENDING) {
+                // This local fixture requires completed open setup. Do not
+                // unwind a potentially kernel-owned setup status block.
+                failFast(79);
+            }
+            if (status != .SUCCESS) {
+                std.debug.print("IOCP NtOpenFile setup failed: {s}\n", .{@tagName(status)});
+                return error.FileFixtureOpenFailed;
+            }
+            slot.handle = handle;
             try self.associate(index);
         }
     }
@@ -390,8 +409,6 @@ const Harness = struct {
     ) void {
         std.mem.sort(i64, samples, {}, std.sort.asc(i64));
         const measured = .{
-            .mode = if (self.skip_success) "skip-success" else "default",
-            .build = @tagName(builtin.mode),
             .slots = slot_limit,
             .transfer_bytes = transfer_bytes,
             .rounds = load_rounds,
@@ -412,7 +429,15 @@ const Harness = struct {
             .packets = self.metrics.packets - before.packets,
             .checksum = self.metrics.checksum - before.checksum,
         };
-        std.debug.print("IOCP {s}: {any}\n", .{ fixture, measured });
+        std.debug.print(
+            "IOCP {s}: mode={s} build={s} {any}\n",
+            .{
+                fixture,
+                if (self.skip_success) "skip-success" else "default",
+                @tagName(builtin.mode),
+                measured,
+            },
+        );
     }
 };
 

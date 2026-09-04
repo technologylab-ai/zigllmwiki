@@ -158,6 +158,13 @@ Windows lessons that must not regress:
 - New native harnesses must keep control blocks and buffers live until terminal
   reconciliation even on a failed assertion. A process watchdog may terminate
   a stuck proof; it must not unwind a stack still borrowed by the kernel.
+- Zig 0.16.0 `dirOpenFileWtf16` requests asynchronous mode when not following
+  symlinks but returns `File.flags.nonblocking = false`. Use explicit NT/Win32
+  opens for a custom overlapped fixture instead of inferring mode from this
+  wrapper metadata. The first M3-004 run caught that mismatch.
+- PowerShell `Tee-Object` does not create a file when a clean `git status`
+  emits nothing. Capture status as an array and explicitly write the packet
+  file before checking it; a missing file is not a dirty checkout.
 
 ## Scheduled source/retrieval review
 

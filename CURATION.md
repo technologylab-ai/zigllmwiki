@@ -114,7 +114,7 @@ agent is currently working on it.
 | M2-010 retry/defer curation | done | Both retry-loop essays and the defer-pattern essay are synthesized into one-deadline retry and terminal cleanup guidance. |
 | M3-003 macOS evented I/O | done | Primary `kqueue`/AIO/Dispatch lifecycles, exact Zig mappings and defects, an actual Dispatch I/O adapter, macOS runtime evidence, and a bounded comparison are recorded. |
 | M3-002 Linux evented I/O | done | Kernel/feature floors, registered resources, cancellation races, and real Zig 0.16 `omarx1` evidence are integrated. |
-| M3-004 Windows evented I/O | running | Both proof implementations and source review are complete. The continuation agent owns publication and platform gates; Windows runtime evidence is pending. |
+| M3-004 Windows evented I/O | running | First Windows gate passed APC/NPFS and custom IOCP pipe paths. Fixture and packet fixes are complete; all subagents finished. The continuation agent owns the new runtime gate and publication. |
 | M3-005 backend decision table | done | File/network choices, guarantees, limits, unsupported paths, ownership, resource models, and evidence gates are synthesized across all three platforms. |
 
 M1-001 is complete: [[process-init-and-capabilities]] synthesizes the official

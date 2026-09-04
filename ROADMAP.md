@@ -21,9 +21,10 @@ produce Zig 0.16.x code that:
 - **Foundation milestone:** M0 is complete. Portable local evidence, the full
   Zig 0.16 release-note scope inventory, deterministic graph scoring, and the
   first semantic lint report are all in place.
-- **Running now:** M3-004. The continuation agent owns publication and platform
-  gates. Both proof subagents and primary-source review have finished; all
-  three Windows architectures compile. Hosted runtime evidence is pending.
+- **Running now:** M3-004. The first Windows run passed APC/NPFS and IOCP pipe
+  paths. The regular-file fixture and empty-status packet fixes are complete;
+  all subagents have finished. The continuation agent owns the new hosted
+  runtime gate and evidence publication.
 - **Latest completed content:** M1-001, M1-003, and M1-006 now document and
   prove `std.process.Init`/capability threading, `Select`/`Batch` ownership, and
   the complete `std.Io` synchronization-primitives surface. The six requested
@@ -125,7 +126,7 @@ Keep interface design separate from backend implementation.
 | M3-001 | done | Pinned TigerBeetle `src/io` map distinguishing Linux `io_uring`, Darwin `kqueue` readiness plus synchronous file I/O, and Windows IOCP/overlapped I/O. |
 | M3-002 | done | Linux kernel/feature floors, finite queues, registered-file/buffer ownership, target/cancel CQE reconciliation, exact Zig-layer readiness, and three Zig 0.16 runtime tests on `omarx1`. |
 | M3-003 | done | Apple-primary `kqueue`, Dispatch I/O, and POSIX AIO lifecycles; exact Zig 0.16 Dispatch/Kqueue mapping and defects; a Zig/C adapter; macOS runtime proof; and bounded comparative evidence. |
-| M3-004 | running | Extend the existing Windows evidence with bounded APC/batch/device cancellation and a custom IOCP lifecycle/load proof; retain exact tested branches, limits, watchdogs, shutdown ownership, and runtime-versus-compile scope. |
+| M3-004 | running | APC/batch/NPFS and custom IOCP pipe paths ran; correct the regular-file fixture and empty checkout-status packet, then rerun complete Windows and final publication gates. |
 | M3-005 | done | Cross-platform decision table selects portable Threaded or platform-specific file/network backends with guarantees, limits, unsupported cases, ownership, resource models, and exact evidence gates. |
 
 | Platform | Research and proof targets |

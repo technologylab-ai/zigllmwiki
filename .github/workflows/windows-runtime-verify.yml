@@ -192,12 +192,14 @@ jobs:
         if: always()
         shell: pwsh
         run: |
-          & git status --porcelain --untracked-files=all 2>&1 | Tee-Object -FilePath (Join-Path $env:REVIEW_PACKET "repository-status.txt")
+          $checkoutStatus = @(& git status --porcelain --untracked-files=all 2>&1)
           if ($LASTEXITCODE -ne 0) {
             throw "git status failed with exit code $LASTEXITCODE"
           }
-          $checkoutStatus = [string](Get-Content -Raw (Join-Path $env:REVIEW_PACKET "repository-status.txt"))
-          if ($checkoutStatus.Trim()) {
+          $statusText = $checkoutStatus -join "`n"
+          Set-Content -Path (Join-Path $env:REVIEW_PACKET "repository-status.txt") -Value $statusText -Encoding utf8
+          if ($statusText.Trim()) {
+            Write-Output $statusText
             throw "verification modified the checkout"
           }
 

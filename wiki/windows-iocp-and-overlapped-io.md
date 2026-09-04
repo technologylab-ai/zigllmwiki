@@ -68,6 +68,14 @@ that handle call `NtReadFile` or `NtWriteFile` without an APC routine. If such
 an operation runs in an `Io` task, concurrency comes from the Threaded worker,
 not from IOCP or kernel completion dispatch.
 
+There is an exact-release metadata seam for `follow_symlinks = false`:
+`dirOpenFileWtf16` requests `ASYNCHRONOUS` from `NtCreateFile`, but both its
+unlocked and locked return paths still set `File.flags.nonblocking = false`.
+Do not infer the underlying handle mode solely from that returned flag in this
+case. The first IOCP fixture run observed the false flag; source inspection
+establishes the differing creation argument. The custom proof instead opens
+its handle explicitly. See [[zig-0.16-windows-io-source]].
+
 Task cancellation of a worker blocked in this synchronous region uses
 `NtCancelSynchronousIoFile` against the worker thread. `NOT_FOUND` is treated
 as a race that may mean the syscall has not started, so the canceling side can
@@ -229,10 +237,9 @@ The IOCP proof uses one-packet `GetQueuedCompletionStatus` dequeue and bounded
 submission batches. It does not exercise `GetQueuedCompletionStatusEx` or
 Winsock. Aborted results do not imply byte rollback: race fixtures close their
 pipe only after the writer and target are terminal, then create a fresh pair.
-The regular-file fixture uses the exact 0.16.0
-`openFile(.follow_symlinks = false)` implementation to obtain an asynchronous
-handle and checks its flag; that is an implementation fixture, not a portable
-API promise that symlink policy selects a scheduling mechanism.
+The regular-file fixture uses an explicit NT asynchronous open rooted at its
+owned temporary directory, rather than depending on symlink policy or the
+inconsistent `File.flags.nonblocking` metadata described above.
 
 Watchdogs bound the test's willingness to wait: the APC harness has a 20-second
 process watchdog; IOCP has a 3-second drain deadline and a separate 30-second
