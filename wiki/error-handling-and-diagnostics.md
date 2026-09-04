@@ -102,5 +102,11 @@ ignore expected cancellation, or emit diagnostics. It should include the final
 error code, relevant structured context, and correlation identity exactly once.
 Lower layers should enrich evidence, not independently produce duplicate logs.
 
+Turn each expected terminal condition into an ownership-aware test row using
+[[error-path-catalogs-and-fault-injection]]. Use
+[[lower-dimensional-api-contracts]] to keep the public result no broader than
+the caller's actual recovery decisions.
+
 Related: [[error-context]], [[cancellation]], [[tigerstyle]],
-[[static-allocation-and-constant-work]].
+[[static-allocation-and-constant-work]],
+[[design-revision-and-exception-policy]].

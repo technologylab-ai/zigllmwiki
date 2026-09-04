@@ -27,6 +27,32 @@ Choose the operation from the request:
 - **Upgrade:** follow the release-upgrade operation in `AGENTS.md`; preserve old
   evidence, invalidate claims before re-verifying them, and report every gap.
 
+Use the repository command layer before manual work:
+
+- `python3 tools/wiki.py query TERMS... --format json` returns a deterministic,
+  read-only ranking with each page's Zig/platform scope, sources, and proofs.
+- `python3 tools/wiki.py ingest SOURCE --revision REVISION --format json`
+  screens obvious moving names, reports a revision-syntax assessment, and emits
+  a read-only ingest plan. It does not verify a remote revision's immutability.
+  For local files it computes and checks SHA-256. It never creates or rewrites
+  a record.
+- `python3 tools/wiki.py lint --format json` runs `zig build verify` and emits
+  versioned machine-readable issues. Use `--deterministic-only` only for focused
+  structural diagnosis when proof execution is intentionally deferred.
+- `python3 tools/wiki.py upgrade VERSION --format json` inventories pages,
+  proofs, and source records but never changes `.zig-version`. Pass
+  `--compiler /exact/path/to/zig` to confirm the target compiler before edits.
+- `python3 tools/wiki.py review --format json` performs a bounded read-only
+  network check for coarse upstream-head differences and newer Zig releases.
+  Treat every finding as an inspection prompt, never as rewrite authorization.
+- `python3 tools/retrieval_benchmark.py --enforce-policy` protects the reviewed
+  lexical-query regression set. Its result is not production relevance data.
+
+The JSON field `mutates_repository` is the command boundary, not authorization
+to skip the full agent workflow. `ingest` and `upgrade` are plan-only because a
+deterministic wrapper cannot establish semantic correctness or platform runtime
+evidence. Apply their plans as reviewable edits under `AGENTS.md`.
+
 Prefer editing an existing page over adding a near-duplicate. Keep source facts,
 inferences, measurements, and recommendations visibly distinct. Never turn
 `std.Io` into shorthand for evented I/O or `async` into shorthand for guaranteed

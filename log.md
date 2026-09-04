@@ -308,3 +308,105 @@ A registered Zig/C Blocks adapter performs an actual Dispatch I/O read, while
 a second test initializes Zig's Dispatch backend and completes an asynchronous
 positional read. A seven-run hot-cache comparison is retained with strict
 limitations: it measures this wrapper shape, not production backend quality.
+
+## [2026-09-04] ingest | state lifetime, buffer hygiene, and division intent
+
+Completed M2-011 with focused rules for one authoritative mutable state,
+smallest scopes, near-use calculation and validation, const borrowing above
+TigerStyle's 16-byte review threshold, and viral in-place initialization for
+address-sensitive values. The guidance treats the threshold as project policy,
+not a Zig ABI guarantee, and requires ownership or revalidation across every
+suspension gap.
+
+The companion buffer/arithmetic guidance prevents stale-tail disclosure,
+rejects native struct memory as a wire format, separates ordinary zeroing from
+secure erasure, and names exact, floor, and ceiling division semantics. Three
+Zig 0.16 tests exercise large-value borrowing, nested final-address identity,
+complete fixed-buffer initialization and reuse clearing, remainder rejection,
+signed floor/ceiling behavior, and division by zero.
+
+## [2026-09-04] ingest | Linux io_uring and blocked-call cancellation
+
+Completed M3-002 on `omarx1` with Zig 0.16.0, x86_64 Linux
+`7.1.9-arch1-2`, and enabled `io_uring`. Three low-level ring tests prove
+finite submission capacity plus opcode probing, registered file/buffer
+ownership after the original descriptor closes, and separate target/cancel CQE
+reconciliation. A fourth test proves that `Io.Threaded` cancellation interrupts
+and joins a worker blocked in a Linux pipe read.
+
+The guide now distinguishes the low-level `std.os.linux.IoUring` wrapper from
+the incomplete high-level `std.Io.Uring` backend and retains explicit gaps for
+older kernels, filesystems/devices, multishot operations, resource tags,
+performance, and product-load behavior. `tools/verify_linux_ssh.sh` preserves a
+repeatable full-suite runner using the temporary workspace on `omarx1`.
+
+## [2026-09-04] ingest | exact Zig Windows I/O mapping
+
+Expanded M3-004 with the exact Zig 0.16 Windows source and a compile-only proof
+for x86, x86_64, and aarch64 Windows. The synthesis corrects a critical
+assumption: `std.Io.Threaded` is not IOCP. It combines synchronous worker I/O
+with selected APC-based NtDll/AFD paths, while Windows `Io.Evented` is `void`.
+IOCP remains a custom backend design with stable `OVERLAPPED` and terminal
+cancellation ownership. Windows runtime and load evidence remain queued.
+
+## [2026-09-04] ingest | cross-platform I/O backend decision table
+
+Completed M3-005 with an agent-facing decision matrix for the `std.Io`
+contract, shipped Threaded implementation, low- and high-level Linux uring,
+macOS kqueue/Dispatch choices, Windows APC/NtDll behavior, and custom IOCP.
+Every row separates file from network behavior and records limits, unsupported
+operations, cancellation ownership, allocation/resources, and exact evidence.
+
+## [2026-09-04] maintenance | deterministic agent command layer
+
+Added read-only `query` and `lint` commands plus plan-only `ingest` and
+`upgrade` commands. Versioned JSON exposes page scope/evidence and stable lint
+codes; local-source ingest validates SHA-256, and upgrade planning never changes
+`.zig-version`. Seven focused Python tests protect the non-mutation and schema
+contracts.
+
+## [2026-09-04] ingest | TigerStyle design and tooling closure
+
+Completed M2-012 and the rule-by-rule TigerStyle pass: all 71 principles in the
+pinned revision now map to focused guidance, with zero partial or missing rows.
+The new pages define replaceable design sketches, zero-safety-debt and bounded
+exception policy, dependency admission, the deliberate Python/Zig tooling seam,
+exact Zig 0.16 diagnostic and safety controls, lower-dimensional APIs, and an
+ownership-aware error-path/fault-injection catalog.
+
+Two Zig tests traverse every injected pipeline error and validate cleanup plus
+forbidden publication. The generated-code tool verifies the exact compiler,
+emits ReleaseSafe assembly for a focused exported leaf, locates its symbol, and
+reports source and assembly hashes; an assembly hash remains change evidence,
+not a portable performance threshold.
+
+## [2026-09-04] ingest | Zig 0.16 API migration traps and queue closure
+
+Audited every release-inventory row that still pointed at a completed M1, M2,
+or M3 deliverable. The new migration map captures current language and
+representation changes, arena/container ownership, memory-map synchronization,
+selective walking, optional access time, explicit process/path policy,
+reader/writer allocation APIs, build diagnostics and temporary files, and
+Smith/crash-corpus behavior.
+
+All named Zig 0.16 release-note topics now resolve to integrated guidance, a
+specific watch decision, or explicit out-of-scope reasoning; none remain in a
+stale queued state. Windows AFD/NtDll topics are linked to the source-verified
+platform mapping, while actual Windows behavioral and load evidence remains a
+separate queued roadmap gate. Bundled Linux/macOS/MinGW headers are kept as
+toolchain watches rather than misreported as runtime support floors.
+
+## [2026-09-04] maintenance | scheduled review and retrieval policy
+
+Added a weekly/manual GitHub Actions workflow that installs the exact
+checksum-verified Zig baseline, runs every registered proof and command test,
+checks pinned-source heads and Zig releases, evaluates retrieval, proves the
+checkout stayed unchanged, and uploads a 30-day review packet. Its repository
+permission is deliberately read-only: a separately authorized coding agent is
+still required to inspect a packet and propose a content-changing pull request.
+
+Established a reviewed 25-query regression set for the deterministic index and
+lexical query layer. The first local run produced MRR 1.0, hit@3 1.0, and
+recall@5 0.98, so hybrid retrieval is not justified by current evidence. The
+benchmark is not production telemetry; its dated report records adversarial,
+multilingual, scale, latency, and independent-labeling gaps.

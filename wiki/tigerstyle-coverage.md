@@ -27,7 +27,7 @@ platforms:
 
 This inventory is complete for TigerStyle at commit
 `47aeb2212a255273dda508288412e537d11e4b7c`. “Inventory complete” does not mean
-"all guidance complete." The current tally is 53 covered, 10 partial, and 8
+"all guidance complete." The current tally is 71 covered, 0 partial, and 0
 missing principles.
 
 ## Design stance
@@ -35,9 +35,9 @@ missing principles.
 | Principle | Coverage | Current guidance / target |
 | --- | --- | --- |
 | Order goals as safety, performance, then developer experience. | covered | [[tigerstyle]] |
-| Treat simplicity as a disciplined revision that advances all three goals. | partial | [[tigerstyle]]; add design-review examples. |
-| Spend design effort before implementation and operations make change expensive. | partial | [[tigerstyle]], [[source-archaeology]]; add design-sketch template. |
-| Do not knowingly carry technical debt that violates the design goals. | partial | [[tigerstyle]]; define exception and review policy for this wiki's projects. |
+| Treat simplicity as a disciplined revision that advances all three goals. | covered | [[design-revision-and-exception-policy]] requires explicit ownership, failure, bounds, arithmetic, alternatives, and falsification passes before implementation. |
+| Spend design effort before implementation and operations make change expensive. | covered | [[design-revision-and-exception-policy]] supplies a one-page design-sketch template and replaceable revision sequence; [[source-archaeology]] preserves the accepted why. |
+| Do not knowingly carry technical debt that violates the design goals. | covered | [[design-revision-and-exception-policy]] makes known correctness/safety debt a release blocker and gives non-strict seams an owned bounded-exception record. |
 
 ## Safety
 
@@ -56,15 +56,15 @@ missing principles.
 | Assert positive and negative spaces; test valid, invalid, and valid-to-invalid transitions. | covered | [[invariants-and-assertions]] proves a unique valid result and every invalid candidate; [[deterministic-simulation-testing]] scales the technique. |
 | Build the mental model first; assertions and fuzzing test understanding but cannot prove absence of bugs. | covered | [[deterministic-simulation-testing]]. |
 | Allocate all memory at startup; do not allocate, free, and reuse dynamically afterward. | covered | [[static-allocation-and-constant-work]]. |
-| Declare variables in the smallest scope and minimize simultaneous live names. | missing | Planned scope/cache-invalidation page. |
+| Declare variables in the smallest scope and minimize simultaneous live names. | covered | [[state-scope-and-in-place-initialization]] makes derived values short-lived and keeps distinct domains explicit. |
 | Limit functions to 70 lines and prefer an inverse-hourglass shape. | covered | [[function-shape-and-control-flow]] combines the hard review bound, architectural-size caveat, applied decomposition, and review checklist. |
 | Centralize branches and push repetitive mechanics into non-branching leaves. | covered | [[function-shape-and-control-flow]] and its parent/leaf batch transition proof. |
 | Centralize state mutation; keep parent state local and leaf computations pure where practical. | covered | [[function-shape-and-control-flow]] keeps mutation in the controller after a narrow leaf computes its candidate delta. |
-| Enable and respect the strictest compiler warnings from day one. | missing | Planned build-policy page; determine exact Zig 0.16 applicability. |
+| Enable and respect the strictest compiler warnings from day one. | covered | [[build-diagnostics-and-generated-code]] records that Zig 0.16 has no general Zig-source warning level, then maps the rule to compile errors, safety modes, explicit foreign-source flags, sanitizers, target/mode matrices, and repository checks. |
 | Decouple external event arrival from internal work cadence to preserve batching and work bounds. | covered | [[performance-sketches-and-batching]] gives external callbacks an eligibility role while a bounded control plane owns cadence and flush triggers. |
 | Replace compound conditions and long `else if` chains with explicit nested cases. | covered | [[function-shape-and-control-flow]] and its exhaustively tested nested admission tree. |
 | State invariants positively; prefer `index < count` over reasoning through negation. | covered | [[invariants-and-assertions]]. |
-| Handle every error path and test non-fatal errors explicitly. | partial | [[error-handling-and-diagnostics]], [[cancellation]]; add fault-injection proof catalog. |
+| Handle every error path and test non-fatal errors explicitly. | covered | [[error-path-catalogs-and-fault-injection]] defines producer/state/ownership/retry/bound/observation rows and proves exhaustive Zig 0.16 fault-tag traversal across four non-fatal paths. |
 | Always record why a decision exists. | covered | [[source-archaeology]] and the source-record contract. |
 | Pass library options explicitly rather than inheriting defaults that may change. | covered | [[naming-comments-and-api-shape]] and its Zig 0.16 explicit-options fixture. |
 
@@ -78,7 +78,7 @@ missing principles.
 | Separate control and data planes so expensive assertions stay off regular hot loops. | covered | [[performance-sketches-and-batching]] defines the ownership split while retaining entry, local, and return-path invariants; its Zig 0.16 proof separates the loops. |
 | Batch network, disk, memory, and CPU work to amortize overhead. | covered | [[performance-sketches-and-batching]] models each resource, finite queues, backpressure, and size/deadline/shutdown flush triggers. |
 | Give CPUs predictable, sufficiently large, branch-light chunks of work. | covered | [[performance-sketches-and-batching]] and its proof feed dense bounded slices to a stand-alone data-plane loop. |
-| Make machine-code intent explicit rather than depending blindly on optimization. | partial | [[trustworthy-microbenchmarks]] and [[performance-sketches-and-batching]] provide the reproducible harness; a generated-code inspection workflow remains. |
+| Make machine-code intent explicit rather than depending blindly on optimization. | covered | [[build-diagnostics-and-generated-code]] provides an exact-version/target/CPU/mode inspection workflow and a reporting tool against a proved stand-alone symbol; [[trustworthy-microbenchmarks]] retains correctness and measurement boundaries. |
 | Extract hot loops into functions with primitive arguments and no broad `self` dependency. | covered | The data-plane function proved by [[performance-sketches-and-batching]] accepts only dense key/value slices and has no server pointer, allocator, I/O, or callbacks. |
 
 ## Developer experience — naming and documentation
@@ -108,14 +108,14 @@ missing principles.
 
 | Principle | Coverage | Current guidance / target |
 | --- | --- | --- |
-| Avoid duplicate variables and aliases that can diverge. | missing | Planned scope/cache-invalidation page. |
-| Pass values larger than 16 bytes by `*const` when copies are not intended. | missing | Planned Zig 0.16 ABI/copy-semantics proof. |
-| Initialize large or immovable structs in place; recognize that in-place initialization is viral. | missing | Planned pointer-stability page and proof. |
-| Shrink scope and the number of variables in play. | missing | Planned scope/cache-invalidation page. |
-| Calculate and check values near use to reduce place-of-check/place-of-use gaps. | missing | Planned scope/cache-invalidation page. |
-| Prefer lower-dimensional signatures and return types when they preserve the contract. | partial | [[error-handling-and-diagnostics]] covers error-set dimensionality; general API page remains. |
-| Keep functions run-to-completion so preconditions remain true; suspension changes the invariant model. | partial | [[task-lifetimes-and-structured-concurrency]] serialized-callback rules. |
-| Zero unused buffer bytes and padding to prevent disclosure and nondeterministic representations. | partial | [[integer-widths-and-boundaries]] and the persistence proof initialize every emitted byte and validate reserved space; reusable buffers and native-struct padding still need focused coverage. |
+| Avoid duplicate variables and aliases that can diverge. | covered | [[state-scope-and-in-place-initialization]] defines one-authority and derived-value rules. |
+| Pass values larger than 16 bytes by `*const` when copies are not intended. | covered | [[state-scope-and-in-place-initialization]] and its proof apply the threshold while rejecting an ABI overclaim. |
+| Initialize large or immovable structs in place; recognize that in-place initialization is viral. | covered | [[state-scope-and-in-place-initialization]] propagates final-address initialization through a containing object and proves pointer identity. |
+| Shrink scope and the number of variables in play. | covered | [[state-scope-and-in-place-initialization]] gives boundary and loop rules without collapsing distinct domains. |
+| Calculate and check values near use to reduce place-of-check/place-of-use gaps. | covered | [[state-scope-and-in-place-initialization]] applies conversion, validation, generation, and suspension rules. |
+| Prefer lower-dimensional signatures and return types when they preserve the contract. | covered | [[lower-dimensional-api-contracts]] maps caller obligations to truthful result shapes and its proof uses `PipelineError!void` without erasing terminal failure or ownership state. |
+| Keep functions run-to-completion so preconditions remain true; suspension changes the invariant model. | covered | [[state-scope-and-in-place-initialization]] requires task ownership, serialization, locking, or generation revalidation across suspension. |
+| Zero unused buffer bytes and padding to prevent disclosure and nondeterministic representations. | covered | [[buffer-hygiene-and-division-intent]] and its proof cover full initialization, reused storage, native padding, and the secure-erasure boundary. |
 | Visually group acquisition with its corresponding `defer` cleanup. | covered | [[bounded-retries-and-cleanup]] places cleanup at acquisition and treats ownership transfer as an explicit state change. |
 
 ## Developer experience — arithmetic and formatting
@@ -123,7 +123,7 @@ missing principles.
 | Principle | Coverage | Current guidance / target |
 | --- | --- | --- |
 | Treat index, count, and byte size as distinct domains with explicit conversions. | covered | [[integer-widths-and-boundaries]] and its Zig 0.16 checked-arithmetic proof; [[newtype-indexes]] for compact handle types. |
-| Express division rounding intent with exact, floor, or ceiling operations. | missing | Planned integer-arithmetic proof. |
+| Express division rounding intent with exact, floor, or ceiling operations. | covered | [[buffer-hygiene-and-division-intent]] and its Zig 0.16 proof distinguish rounding, remainders, zero, signed values, and overflow. |
 | Run `zig fmt`. | covered | [[steering-zig-fmt]], [[naming-comments-and-api-shape]], and repository format verification. |
 | Use four-space indentation. | covered | [[naming-comments-and-api-shape]] and Zig 0.16 formatting enforce canonical indentation. |
 | Limit code to 100 columns and use trailing commas to request canonical wrapping. | covered | [[steering-zig-fmt]] covers layout steering; repository lint separately enforces TigerStyle's hard 100-character ceiling for maintained Zig sources. |
@@ -133,20 +133,25 @@ missing principles.
 
 | Principle | Coverage | Current guidance / target |
 | --- | --- | --- |
-| Treat dependencies as supply-chain, safety, performance, installation, and longevity costs. | partial | [[tigerbeetle-engineering-corpus]]; define project-specific acceptance criteria rather than blindly copying zero-dependency policy. |
-| Keep the toolset small and standardize on Zig for project tooling where it reduces platform and type-system variance. | partial | This repository uses Zig for proof orchestration but still uses Python for Markdown linting; record this as a deliberate seam, not strict compliance. |
+| Treat dependencies as supply-chain, safety, performance, installation, and longevity costs. | covered | [[design-revision-and-exception-policy]] defines a project acceptance gate for transitive trust, bounds, platform/install behavior, hot-path evidence, isolation, upgrades, rollback, and removal. |
+| Keep the toolset small and standardize on Zig for project tooling where it reduces platform and type-system variance. | covered | [[design-revision-and-exception-policy]] records `TOOL-001`: Zig owns executable/runtime evidence while standard-library-only Python 3.10+ owns development-time Markdown and reporting, with explicit review triggers. |
 
-## Next closure order
+## Closure and continuing audit
 
-The remaining gaps are tracked by M2-011 and M2-012: scope and duplicate state,
-large-value/in-place lifetime, place-of-check/use, suspension, reusable-buffer
-clearing, division intent, design exception policy, strict diagnostics,
-fault-injection coverage, generated-code inspection, and dependency/tooling
-policy.
+All 71 principles in the pinned TigerStyle revision now have focused guidance
+and every local Zig code claim has Zig 0.16 evidence. This closes inventory coverage,
+not automatic conformance: each concrete subsystem must still apply the design
+sketch, exception/dependency gates, error catalog, platform runtime matrix, and
+review checklist to its own workload and fault model.
 
 Related: [[tigerstyle]], [[tigerbeetle-engineering-corpus]],
 [[static-allocation-and-constant-work]], [[deterministic-simulation-testing]],
 [[integer-widths-and-boundaries]], [[code-reading-and-mechanical-checks]],
 [[trustworthy-microbenchmarks]], [[performance-sketches-and-batching]],
 [[function-shape-and-control-flow]], [[naming-comments-and-api-shape]],
-[[bounded-retries-and-cleanup]], [[tigerstyle-seams-with-zig-and-os]].
+[[bounded-retries-and-cleanup]], [[state-scope-and-in-place-initialization]],
+[[buffer-hygiene-and-division-intent]], [[tigerstyle-seams-with-zig-and-os]],
+[[design-revision-and-exception-policy]],
+[[build-diagnostics-and-generated-code]],
+[[error-path-catalogs-and-fault-injection]],
+[[lower-dimensional-api-contracts]].

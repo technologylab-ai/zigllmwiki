@@ -1,0 +1,149 @@
+name: Zig wiki read-only review
+
+on:
+  schedule:
+    - cron: "17 4 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: zig-wiki-read-only-review
+  cancel-in-progress: false
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+
+    steps:
+      - name: Check out the reviewed revision
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Prepare the out-of-tree review packet
+        shell: bash
+        run: |
+          review_packet="$RUNNER_TEMP/zig-wiki-review"
+          mkdir -p "$review_packet"
+          printf 'REVIEW_PACKET=%s\n' "$review_packet" >> "$GITHUB_ENV"
+
+      - name: Install the exact Zig baseline from the official index
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          from urllib.request import Request, urlopen
+
+          baseline = Path(".zig-version").read_text(encoding="utf-8").strip()
+          index_request = Request(
+              "https://ziglang.org/download/index.json",
+              headers={"User-Agent": "zigllmwiki-verification/1"},
+          )
+          with urlopen(index_request, timeout=30) as response:
+              index = json.load(response)
+          release = index.get(baseline)
+          if not isinstance(release, dict):
+              raise SystemExit(f"official download index has no release {baseline!r}")
+          artifact = release.get("x86_64-linux")
+          if not isinstance(artifact, dict):
+              raise SystemExit(f"release {baseline!r} has no x86_64-linux artifact")
+          url = artifact.get("tarball")
+          expected = artifact.get("shasum")
+          if not isinstance(url, str) or not isinstance(expected, str):
+              raise SystemExit("official artifact metadata omitted tarball or shasum")
+
+          archive = Path(os.environ["RUNNER_TEMP"]) / f"zig-{baseline}.tar.xz"
+          digest = hashlib.sha256()
+          download_request = Request(
+              url,
+              headers={"User-Agent": "zigllmwiki-verification/1"},
+          )
+          with urlopen(download_request, timeout=60) as response, archive.open("wb") as output:
+              while chunk := response.read(1024 * 1024):
+                  digest.update(chunk)
+                  output.write(chunk)
+          actual = digest.hexdigest()
+          if actual.casefold() != expected.casefold():
+              raise SystemExit(
+                  f"Zig archive digest mismatch: expected {expected}, got {actual}"
+              )
+
+          packet = Path(os.environ["REVIEW_PACKET"])
+          (packet / "requested-zig-version.txt").write_text(
+              baseline + "\n", encoding="utf-8"
+          )
+          (packet / "zig-download.txt").write_text(
+              f"url={url}\nsha256={actual}\n", encoding="utf-8"
+          )
+          PY
+
+          baseline="$(tr -d '\r\n' < .zig-version)"
+          install_root="$RUNNER_TEMP/zig-install"
+          mkdir -p "$install_root"
+          tar --extract --xz \
+            --file "$RUNNER_TEMP/zig-${baseline}.tar.xz" \
+            --directory "$install_root" \
+            --strip-components=1
+          printf '%s\n' "$install_root" >> "$GITHUB_PATH"
+
+      - name: Verify the exact compiler and every registered proof
+        shell: bash
+        run: |
+          expected="$(tr -d '\r\n' < .zig-version)"
+          actual="$(zig version)"
+          printf '%s\n' "$actual" | tee "$REVIEW_PACKET/actual-zig-version.txt"
+          if [[ "$actual" != "$expected" ]]; then
+            echo "expected Zig $expected, got $actual" >&2
+            exit 1
+          fi
+          zig build verify --summary all 2>&1 | tee "$REVIEW_PACKET/zig-build-verify.log"
+
+      - name: Run deterministic command and benchmark tests
+        if: always()
+        shell: bash
+        run: |
+          python3 -m unittest \
+            tools.test_wiki_commands \
+            tools.test_retrieval_benchmark \
+            -v 2>&1 | tee "$REVIEW_PACKET/python-tests.log"
+
+      - name: Review pinned sources and Zig releases
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          python3 tools/wiki.py review --format json \
+            > "$REVIEW_PACKET/source-and-release-review.json"
+
+      - name: Evaluate current retrieval quality
+        if: always()
+        shell: bash
+        run: |
+          python3 tools/retrieval_benchmark.py \
+            --format json \
+            --enforce-policy \
+            > "$REVIEW_PACKET/retrieval-benchmark.json"
+
+      - name: Prove maintenance commands did not rewrite the checkout
+        if: always()
+        shell: bash
+        run: |
+          git status --porcelain --untracked-files=all \
+            | tee "$REVIEW_PACKET/repository-status.txt"
+          test ! -s "$REVIEW_PACKET/repository-status.txt"
+
+      - name: Upload the review packet
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: zig-wiki-review-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/zig-wiki-review
+          if-no-files-found: error
+          retention-days: 30

@@ -15,9 +15,15 @@ proofs.
 - Coding agents should read [AGENTS.md](AGENTS.md) before consulting or editing
   the wiki.
 - Run `zig build verify` before accepting content changes.
+- Run `tools/verify_linux_ssh.sh omarx1` for the complete Linux runtime suite.
+- Use `python3 tools/wiki.py query ...`, `lint`, plan-only `ingest`/`upgrade`,
+  and read-only `review` as documented in [AGENTS.md](AGENTS.md).
 - Use [ROADMAP.md](ROADMAP.md) as the persistent project plan.
 - Use [CURATION.md](CURATION.md) to see which sources are merely discovered,
   pinned, synthesized, or backed by executable proof.
+- Read [HANDOFF.md](HANDOFF.md) when continuing the project in a fresh agent
+  session; it records exact platform evidence, deliberate decisions, and honest
+  remaining gaps.
 
 The required compiler version is recorded in [.zig-version](.zig-version).
 The initial baseline is Zig 0.16.0, the current stable 0.16.x release as of
@@ -29,12 +35,16 @@ The initial baseline is Zig 0.16.0, the current stable 0.16.x release as of
 sources/            pinned source records; evidence is not rewritten
 wiki/               maintained synthesis and cross-links
 proofs/             executable Zig evidence referenced by wiki pages
+benchmarks/          reviewed agent-retrieval regression queries
+tools/               query, lint, review, benchmark, and evidence utilities
+.github/workflows/   read-only scheduled review packet
 .agents/skills/     repo-scoped coding-agent workflow for wiki operations
 index.md             content map read before retrieval
 log.md               append-only maintenance history
 AGENTS.md            schema and maintenance contract
 ROADMAP.md           work across content, LLM, and backend lanes
 CURATION.md          transparent source-selection and ingestion ledger
+HANDOFF.md           durable continuation state and platform evidence matrix
 ```
 
 ## Why there is no backend yet

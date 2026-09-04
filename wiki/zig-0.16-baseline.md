@@ -44,3 +44,4 @@ record remaining gaps in `log.md`.
 See [[std-io]] for the defining 0.16 library change.
 Use [[zig-0.16-release-inventory]] to route every named release-note topic to
 current guidance, planned work, an upgrade watch, or an explicit scope decision.
+Use [[zig-0.16-api-migration-traps]] when repairing a stale pre-0.16 code shape.

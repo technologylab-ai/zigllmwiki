@@ -1,0 +1,173 @@
+name: Windows runtime verification
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: zig-wiki-windows-runtime-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify-windows:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+
+    steps:
+      - name: Prepare the out-of-tree evidence packet
+        shell: pwsh
+        run: |
+          $packet = Join-Path $env:RUNNER_TEMP "zig-wiki-windows-runtime"
+          New-Item -ItemType Directory -Force -Path $packet | Out-Null
+          "REVIEW_PACKET=$packet" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Check out the reviewed revision
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Install the exact Zig baseline from the official index
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $baseline = (Get-Content -Raw -Path ".zig-version").Trim()
+          if ($baseline -notmatch '^\d+\.\d+\.\d+$') {
+            throw ".zig-version is not an exact stable version: $baseline"
+          }
+
+          $headers = @{ "User-Agent" = "zigllmwiki-windows-verification/1" }
+          $indexUrl = "https://ziglang.org/download/index.json"
+          $index = Invoke-RestMethod -Uri $indexUrl -Headers $headers -TimeoutSec 30
+          $releaseProperty = $index.PSObject.Properties[$baseline]
+          if ($null -eq $releaseProperty) {
+            throw "official download index has no release '$baseline'"
+          }
+          $artifactProperty = $releaseProperty.Value.PSObject.Properties["x86_64-windows"]
+          if ($null -eq $artifactProperty) {
+            throw "release '$baseline' has no x86_64-windows artifact"
+          }
+          $artifact = $artifactProperty.Value
+          $url = [string] $artifact.tarball
+          $expectedSha256 = ([string] $artifact.shasum).ToLowerInvariant()
+          if ([string]::IsNullOrWhiteSpace($url) -or
+              $expectedSha256 -notmatch '^[0-9a-f]{64}$') {
+            throw "official artifact metadata omitted a valid tarball or shasum"
+          }
+
+          $archive = Join-Path $env:RUNNER_TEMP "zig-$baseline-windows.zip"
+          Invoke-WebRequest -Uri $url -Headers $headers -TimeoutSec 180 -OutFile $archive
+          $actualSha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $archive).Hash.ToLowerInvariant()
+          if ($actualSha256 -cne $expectedSha256) {
+            throw "Zig archive digest mismatch: expected $expectedSha256, got $actualSha256"
+          }
+
+          $extractRoot = Join-Path $env:RUNNER_TEMP "zig-install"
+          New-Item -ItemType Directory -Force -Path $extractRoot | Out-Null
+          Expand-Archive -LiteralPath $archive -DestinationPath $extractRoot -Force
+          $zigExecutables = @(
+            Get-ChildItem -Path $extractRoot -Filter "zig.exe" -File -Recurse
+          )
+          if ($zigExecutables.Count -ne 1) {
+            throw "expected exactly one zig.exe, found $($zigExecutables.Count)"
+          }
+          $zigDirectory = $zigExecutables[0].Directory.FullName
+          $zigDirectory | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+          $actualBytes = (Get-Item -LiteralPath $archive).Length
+          [ordered]@{
+            index_url = $indexUrl
+            zig_version = $baseline
+            platform = "x86_64-windows"
+            archive_url = $url
+            expected_sha256 = $expectedSha256
+            actual_sha256 = $actualSha256
+            declared_bytes = [string] $artifact.size
+            actual_bytes = $actualBytes
+          } | ConvertTo-Json | Set-Content -Path (Join-Path $env:REVIEW_PACKET "zig-download.json") -Encoding utf8
+
+      - name: Record the exact Windows host and Zig toolchain
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $expected = (Get-Content -Raw -Path ".zig-version").Trim()
+          $actual = (& zig version).Trim()
+          if ($LASTEXITCODE -ne 0) {
+            throw "zig version failed with exit code $LASTEXITCODE"
+          }
+          if ($actual -cne $expected) {
+            throw "expected Zig $expected, got $actual"
+          }
+
+          $os = Get-CimInstance -ClassName Win32_OperatingSystem
+          $versionKey = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion"
+          $commit = (& git rev-parse HEAD).Trim()
+          if ($LASTEXITCODE -ne 0) {
+            throw "git rev-parse failed with exit code $LASTEXITCODE"
+          }
+          [ordered]@{
+            repository_commit = $commit
+            runner_image = $env:ImageOS
+            runner_image_version = $env:ImageVersion
+            os_caption = $os.Caption
+            os_version = $os.Version
+            os_build_number = $os.BuildNumber
+            os_architecture = $os.OSArchitecture
+            windows_product_name = $versionKey.ProductName
+            windows_display_version = $versionKey.DisplayVersion
+            windows_current_build = $versionKey.CurrentBuild
+            windows_update_build_revision = $versionKey.UBR
+            windows_full_build = "$($versionKey.CurrentBuild).$($versionKey.UBR)"
+            powershell_version = $PSVersionTable.PSVersion.ToString()
+            zig_version = $actual
+          } | ConvertTo-Json | Tee-Object -FilePath (Join-Path $env:REVIEW_PACKET "host-and-toolchain.json")
+
+          & zig env 2>&1 | Tee-Object -FilePath (Join-Path $env:REVIEW_PACKET "zig-env.txt")
+          if ($LASTEXITCODE -ne 0) {
+            throw "zig env failed with exit code $LASTEXITCODE"
+          }
+
+      - name: Run full exact-baseline verification
+        shell: pwsh
+        run: |
+          & zig build verify --summary all 2>&1 | Tee-Object -FilePath (Join-Path $env:REVIEW_PACKET "zig-build-verify.log")
+          if ($LASTEXITCODE -ne 0) {
+            throw "zig build verify failed with exit code $LASTEXITCODE"
+          }
+
+      - name: Run Windows I/O mapping proof natively
+        if: always()
+        shell: pwsh
+        run: |
+          & zig test proofs/windows_io_mapping.zig 2>&1 | Tee-Object -FilePath (Join-Path $env:REVIEW_PACKET "windows-io-mapping-native.log")
+          if ($LASTEXITCODE -ne 0) {
+            throw "windows_io_mapping.zig failed with exit code $LASTEXITCODE"
+          }
+
+      - name: Run blocked-read cancellation proof natively
+        if: always()
+        shell: pwsh
+        run: |
+          & zig test proofs/threaded_blocked_read_cancel_windows.zig 2>&1 | Tee-Object -FilePath (Join-Path $env:REVIEW_PACKET "windows-blocked-read-cancel-native.log")
+          if ($LASTEXITCODE -ne 0) {
+            throw "threaded_blocked_read_cancel_windows.zig failed with exit code $LASTEXITCODE"
+          }
+
+      - name: Record checkout status
+        if: always()
+        shell: pwsh
+        run: |
+          & git status --porcelain --untracked-files=all 2>&1 | Tee-Object -FilePath (Join-Path $env:REVIEW_PACKET "repository-status.txt")
+          if ($LASTEXITCODE -ne 0) {
+            throw "git status failed with exit code $LASTEXITCODE"
+          }
+
+      - name: Upload Windows runtime evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: zig-wiki-windows-runtime-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/zig-wiki-windows-runtime
+          if-no-files-found: error
+          retention-days: 30

@@ -18,6 +18,8 @@ sources:
 proofs:
   - proofs/cancellation.zig
   - proofs/threaded_blocked_read_cancel_macos.zig
+  - proofs/threaded_blocked_read_cancel_linux.zig
+  - proofs/threaded_blocked_read_cancel_windows.zig
 platforms:
   - cross-platform
 ---
@@ -60,6 +62,22 @@ other cancellation point can cooperate through `io.checkCancel()`.
 `Group.cancel` requests cancellation immediately and also completes the group's
 resource lifecycle. A group task returning `error.Canceled` is a propagation
 boundary rather than an application failure.
+
+## `Io.Threaded` blocked-syscall interruption
+
+The portable contract is cancellation request and acknowledgement; the means
+of interrupting a blocking syscall belongs to the concrete implementation. On
+Linux and other supported POSIX targets, Zig 0.16 `Io.Threaded` installs a
+do-nothing `SIGIO` handler without restart semantics. A canceler marks the
+worker as blocked-and-canceling, sends `SIGIO` to that specific thread, and
+retries with exponential backoff if the signal races syscall entry. When the
+syscall returns `EINTR`, the wrapper checks and acknowledges cancellation.
+
+This has a process-wide integration seam: `Io.Threaded.init` replaces the
+existing `SIGIO` and `SIGPIPE` actions where those signals are available, saves
+them, and `deinit` restores them after joining its workers. Applications with
+their own signal policy must account for that implementation behavior rather
+than assuming cancellation is isolated inside a worker pool.
 
 ## Ownership rule
 
@@ -120,5 +138,13 @@ Zig 0.16.0 on 2026-09-04. It verifies `Future.cancel`, `Group.cancel`,
 `recancel`, protection, and owner-visible completion using `std.Io.Threaded`.
 The [blocked-read proof](../proofs/threaded_blocked_read_cancel_macos.zig)
 verifies that cancellation interrupts a worker blocked in a macOS pipe read; a
-watchdog turns failure to interrupt into a finite test failure. Linux signal
-interruption and the Windows NT path remain source-verified only.
+watchdog turns failure to interrupt into a finite test failure. The
+[Linux blocked-read proof](../proofs/threaded_blocked_read_cancel_linux.zig)
+ran on x86_64 Omarchy 4.0.2 with Linux `7.1.9-arch1-2` and Zig 0.16.0 on
+2026-09-04; it verifies that the `SIGIO` path interrupts and joins the blocked
+pipe read before the watchdog releases it. The
+[Windows blocked-read harness](../proofs/threaded_blocked_read_cancel_windows.zig)
+constructs a synchronous NT named pipe through the exact Threaded
+implementation and compiles for x86, x86_64, and aarch64 Windows. It has not
+run on Windows, so the NT interruption path remains source/compile-verified
+only.

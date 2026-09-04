@@ -22,6 +22,9 @@ Read this page first, then follow only the pages needed for the task.
 - [[zig-0.16-release-inventory]] — every named 0.16 release-note topic routed
   to current guidance, a numbered roadmap item, a watch, or an explicit
   out-of-scope decision.
+- [[zig-0.16-api-migration-traps]] — current replacements and ownership
+  consequences for stale language, allocation, filesystem, build, diagnostic,
+  path, reader/writer, and fuzzing examples.
 - [[process-init-and-capabilities]] — use `std.process.Init` at the executable
   root and thread narrower I/O, allocation, configuration, and authority into
   components.
@@ -60,6 +63,8 @@ Read this page first, then follow only the pages needed for the task.
   bounded diagnostic factories, and reporting boundaries.
 - [[evented-io-backends]] — production readiness and the Linux/macOS/Windows
   research boundary.
+- [[platform-io-backend-decision-table]] — select portable or platform-specific
+  file/network backends by guarantees, limits, ownership, and evidence level.
 - [[io-uring]] — Linux submission/completion ownership, finite rings, ordering,
   and cancellation races.
 - [[macos-kqueue-and-aio]] — `kqueue` readiness, Dispatch I/O/POSIX AIO
@@ -77,6 +82,14 @@ Read this page first, then follow only the pages needed for the task.
   missing guidance made explicit.
 - [[tigerstyle-seams-with-zig-and-os]] — strict-core versus exception labels
   for `usize`, allocators, concurrency runtimes, and finite OS resources.
+- [[design-revision-and-exception-policy]] — replaceable design sketches,
+  zero-safety-debt boundaries, dependency admission, and owned exceptions.
+- [[build-diagnostics-and-generated-code]] — exact Zig safety/diagnostic
+  controls, foreign-source warnings, and reproducible machine-code review.
+- [[error-path-catalogs-and-fault-injection]] — enumerate terminal failures,
+  ownership, side effects, limits, observations, and deterministic injections.
+- [[lower-dimensional-api-contracts]] — minimize caller state space without
+  erasing absence, failure, cancellation, partial completion, or ownership.
 - [[performance-sketches-and-batching]] — quantified network/disk/memory/CPU
   budgets, bounded control/data planes, batching, and a reproducible harness.
 - [[naming-comments-and-api-shape]] — explicit TigerStyle/Zig naming seams,
@@ -94,6 +107,12 @@ Read this page first, then follow only the pages needed for the task.
 - [[newtype-indexes]] — compact typed handles for bounded collections.
 - [[integer-widths-and-boundaries]] — domain widths, checked conversion and
   arithmetic, layout contracts, serialization, and stale-handle boundaries.
+- [[state-scope-and-in-place-initialization]] — one authoritative state,
+  short check/use gaps, const borrowing, final-address construction, and
+  suspension-aware revalidation.
+- [[buffer-hygiene-and-division-intent]] — complete observable-byte
+  initialization, reusable-buffer clearing, explicit encoding, and named
+  exact/floor/ceiling arithmetic.
 - [[deterministic-simulation-testing]] — seeded virtual time, fault injection,
   assertions, and replay.
 - [[tigerbeetle-engineering-corpus]] — curated TigerBeetle docs by reusable
@@ -103,8 +122,11 @@ Read this page first, then follow only the pages needed for the task.
 
 ## Project operation
 
-- [Agent contract](AGENTS.md) — schema plus query/ingest/lint/upgrade workflows.
+- [Agent contract](AGENTS.md) — schema plus query, ingest, lint, review, and
+  upgrade workflows with explicit mutation boundaries.
 - [Roadmap](ROADMAP.md) — persistent content, LLM, and backend work.
+- [Session handoff](HANDOFF.md) — exact completion state, platform evidence,
+  deliberate decisions, verification commands, and honest remaining gaps.
 - [Curation ledger](CURATION.md) — source pipeline, selected corpus, and what
   has or has not reached synthesis.
 - [[source-archaeology]] — revision-pinned code history and recovered design
@@ -114,3 +136,10 @@ Read this page first, then follow only the pages needed for the task.
 - [Semantic lint procedure](tools/semantic_lint.md) and
   [latest report](reports/2026-09-04-semantic-lint.md) — repeatable agent audit
   plus reviewable findings.
+- [Generated-code inspector](tools/inspect_generated_code.py) — exact-version,
+  source-hashed assembly evidence for focused exported symbols.
+- [Read-only source/release review](tools/wiki.py) and
+  [weekly workflow](.github/workflows/wiki-review.yml) — coarse change signals,
+  exact-baseline verification, and an out-of-tree review packet.
+- [Retrieval benchmark](reports/2026-09-04-retrieval-benchmark.md) — 25 reviewed
+  queries currently support keeping deterministic lexical retrieval.

@@ -44,6 +44,12 @@ def issue_from_failure(message: str) -> dict[str, object]:
     elif "verified page targets" in message:
         code = "STALE_VERIFIED_PAGE_VERSION"
         category = "version"
+    elif "page targets" in message and "baseline is" in message:
+        code = "STALE_PAGE_VERSION"
+        category = "version"
+    elif "broken source evidence" in message:
+        code = "BROKEN_EVIDENCE_SOURCE_LINK"
+        category = "evidence"
     elif "missing snapshot" in message:
         code = "BROKEN_EVIDENCE_SNAPSHOT_MISSING"
         category = "evidence"
@@ -149,6 +155,24 @@ def frontmatter(path: Path) -> tuple[dict[str, str], list[str]]:
         if match:
             values[match.group(1)] = (match.group(2) or "").strip().strip('"')
     return values, lines
+
+
+def frontmatter_items(lines: list[str], key: str) -> list[str]:
+    """Read a list from the deliberately small frontmatter schema."""
+    try:
+        end = lines.index("---", 1)
+    except ValueError:
+        return []
+    items: list[str] = []
+    in_key = False
+    for line in lines[1:end]:
+        key_match = KEY.match(line)
+        if key_match:
+            in_key = key_match.group(1) == key
+            continue
+        if in_key and line.startswith("  - "):
+            items.append(line[4:].strip().strip('"'))
+    return items
 
 
 def link_names() -> tuple[dict[str, list[Path]], set[str]]:
@@ -343,6 +367,7 @@ def main() -> int:
         failures.append(f"build.zig: registered proof does not exist: {proof}")
 
     ids: dict[str, Path] = {}
+    source_evidence_references: set[tuple[Path, str]] = set()
     allowed_status = {
         "stub",
         "draft",
@@ -380,16 +405,28 @@ def main() -> int:
             for required in ("zig", "updated", "sources", "proofs", "platforms"):
                 if required not in meta:
                     failures.append(f"{relative}: missing frontmatter key {required}")
-            if status in {"source-verified", "runtime-verified"}:
-                zig_version = meta.get("zig")
-                if zig_version not in {baseline, "n/a"}:
+            zig_version = meta.get("zig")
+            if zig_version not in {baseline, "n/a", None}:
+                if status in {"source-verified", "runtime-verified"}:
                     failures.append(
                         f"{relative}: verified page targets {zig_version!r}, baseline is {baseline}"
+                    )
+                else:
+                    failures.append(
+                        f"{relative}: page targets {zig_version!r}, baseline is {baseline}"
                     )
             if any(line.strip().startswith("```zig") for line in lines):
                 failures.append(
                     f"{relative}: fenced Zig is forbidden; link an executable proof instead"
                 )
+            for source_item in frontmatter_items(lines, "sources"):
+                match = WIKILINK.fullmatch(source_item)
+                if match:
+                    source_evidence_references.add((relative, match.group(1)))
+                else:
+                    failures.append(
+                        f"{relative}: broken source evidence item {source_item!r}"
+                    )
 
         if path in SOURCE_FILES:
             for required in ("captured", "revision"):
@@ -426,9 +463,25 @@ def main() -> int:
                 failures.append(f"{relative}: missing {match.group(1)}")
 
     stems, paths = link_names()
+    source_paths = {path.relative_to(ROOT) for path in SOURCE_FILES}
+    broken_source_evidence: set[tuple[Path, str]] = set()
+    for relative, raw_target in sorted(
+        source_evidence_references,
+        key=lambda item: (str(item[0]), item[1]),
+    ):
+        target = resolved_link(raw_target, stems, paths)
+        if target not in source_paths:
+            failures.append(
+                f"{relative}: broken source evidence wikilink [[{raw_target}]]"
+            )
+            broken_source_evidence.add((relative, raw_target))
+
     for path in ALL_MARKDOWN:
+        relative = path.relative_to(ROOT)
         text = path.read_text(encoding="utf-8")
         for raw_target in links_outside_fences(text):
+            if (relative, raw_target) in broken_source_evidence:
+                continue
             target = raw_target.split("|", 1)[0].split("#", 1)[0].strip()
             if not target:
                 continue
@@ -436,19 +489,19 @@ def main() -> int:
                 normalized = target.removesuffix(".md").lstrip("/")
                 if normalized not in paths:
                     failures.append(
-                        f"{path.relative_to(ROOT)}: broken wikilink [[{raw_target}]]"
+                        f"{relative}: broken wikilink [[{raw_target}]]"
                     )
                 continue
             target_name = target[:-3] if target.endswith(".md") else target
             matches = stems.get(target_name, [])
             if not matches:
                 failures.append(
-                    f"{path.relative_to(ROOT)}: broken wikilink [[{raw_target}]]"
+                    f"{relative}: broken wikilink [[{raw_target}]]"
                 )
             elif len(matches) > 1:
                 rendered = ", ".join(str(match) for match in matches)
                 failures.append(
-                    f"{path.relative_to(ROOT)}: ambiguous wikilink [[{raw_target}]] -> {rendered}"
+                    f"{relative}: ambiguous wikilink [[{raw_target}]] -> {rendered}"
                 )
 
     report = graph_report(stems, paths, baseline)

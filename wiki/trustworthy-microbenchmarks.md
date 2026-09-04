@@ -72,4 +72,5 @@ are deliberately not promoted to portable performance evidence.
 
 Related: [[tigerstyle]], [[code-reading-and-mechanical-checks]],
 [[static-allocation-and-constant-work]],
-[[performance-sketches-and-batching]].
+[[performance-sketches-and-batching]],
+[[build-diagnostics-and-generated-code]].

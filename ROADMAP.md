@@ -21,9 +21,9 @@ produce Zig 0.16.x code that:
 - **Foundation milestone:** M0 is complete. Portable local evidence, the full
   Zig 0.16 release-note scope inventory, deterministic graph scoring, and the
   first semantic lint report are all in place.
-- **Running now:** M1-005/M3-002 Linux (`/root/linux_runtime`), M3-004
-  (`/root/windows_mapping`), and LLM maintenance commands
-  (`/root/llm_operations`). These are actual concurrent agent assignments.
+- **Running now:** none. The content, platform, maintenance, and final semantic
+  audit assignments in this milestone have completed; queued work below is not
+  being described as active.
 - **Latest completed content:** M1-001, M1-003, and M1-006 now document and
   prove `std.process.Init`/capability threading, `Select`/`Batch` ownership, and
   the complete `std.Io` synchronization-primitives surface. The six requested
@@ -32,8 +32,12 @@ produce Zig 0.16.x code that:
   bounded error-diagnostics, full TigerStyle-coverage, and pinned TigerBeetle
   cross-platform I/O syntheses. `Future`/`Group` ownership, protection, and
   `recancel` have a macOS `Io.Threaded` proof.
-- **Queued, not running:** M1-005 Windows cancellation evidence, M2-011,
-  M2-012, and M3-005.
+- **Latest platform evidence:** Linux blocked-read cancellation and low-level
+  `io_uring` proofs ran on `omarx1`; the exact Windows Zig mapping compiles for
+  x86, x86_64, and aarch64 Windows; and M3-005 now exposes the cross-platform
+  backend choice and its missing Windows-runtime gate.
+- **Queued, not running:** M1-005 Windows cancellation runtime evidence and
+  M3-004 Windows runtime/load evidence.
 - **Backend:** intentionally deferred; the Obsidian-first ADR remains in force.
 
 Source status is tracked as `discovered → selected → captured → synthesized →
@@ -70,7 +74,7 @@ existing verification rules.
 | M1-002 | done | `Future` and `Group` ownership/lifetime page plus terminal-path proof. |
 | M1-003 | done | `Select` and `Batch` ownership, fixed capacity, result draining, cancellation traps, and runtime proof. |
 | M1-004 | done | `async` versus `concurrent`, including saturated runtime evidence. |
-| M1-005 | running | `/root/linux_runtime`: task semantics and a blocked pipe read are proved on macOS; Linux blocked-syscall evidence is running on `omarx1`, while Windows runtime evidence remains queued. |
+| M1-005 | queued | Task semantics and blocked pipe-read cancellation are runtime-proved on macOS and Linux; the exact Windows NT cancellation paths are source/compile-verified, but Windows blocked-call runtime evidence still needs a host. |
 | M1-006 | done | `Event`, `Queue`, `Mutex`, `RwLock`, `Condition`, `Semaphore`, and futex semantics plus six runtime tests. |
 | M1-007 | done | Clock domains, durations, timestamps, one-deadline budgets, timeout conversion, cancelable sleeping, strict-clock guard caveats, and five runtime tests. |
 | M1-008 | done | Files, directories, buffered readers/writers, exclusive read limits, flush versus truncation, atomic publication, and the directory-durability seam plus three runtime tests. |
@@ -82,7 +86,7 @@ existing verification rules.
 Exit condition: every public recommendation has a 0.16.x source citation; every
 behavioral trap has a runnable proof; Threaded-specific facts are labeled.
 
-## M2: TigerStyle in Zig (in progress)
+## M2: TigerStyle in Zig (done)
 
 | ID | Status | Deliverable / exit condition |
 | --- | --- | --- |
@@ -96,12 +100,17 @@ behavioral trap has a runnable proof; Threaded-specific facts are labeled.
 | M2-008 | done | Strict-core/exception labels and seams for `usize`, allocator-using standard-library APIs, concurrency runtimes, atomic persistence, and finite platform resources. |
 | M2-009 | done | Ingested the selected bounded-memory/layout cluster into reservation, working-set/output, explicit-layout, and stable-handle decisions. |
 | M2-010 | done | Ingested both retry-loop essays and the defer-pattern essay into bounded total-attempt/deadline, side-effect ambiguity, cancellation, and cleanup guidance with four runtime tests. |
-| M2-011 | queued | Close scope/state/lifetime gaps: duplicate aliases, large-value copying, in-place initialization, place-of-check/use, run-to-completion, buffer clearing/padding, paired cleanup, and division intent. |
-| M2-012 | queued | Close design/tooling gaps: disciplined revision and exception policy, strict build diagnostics, fault-injection catalog, generated-code inspection, dependency acceptance, and the Python/Zig tooling seam. |
+| M2-011 | done | One-authority state, smallest scope, const borrowing over 16 bytes, viral in-place initialization, check/use gaps across suspension, complete buffer initialization/reuse clearing, explicit encoding, and exact/floor/ceiling division have focused guidance and three Zig 0.16 tests. |
+| M2-012 | done | Disciplined design revision, zero-safety-debt/exception policy, strict Zig diagnostics, exhaustive fault catalogs, generated-code inspection, lower-dimensional APIs, dependency admission, and the deliberate Python/Zig seam close all remaining TigerStyle inventory rows. |
 
 Exit condition: the TigerStyle inventory has no unrepresented rule and an agent
 can derive a review checklist for a concrete Zig subsystem without rereading the
 source document.
+
+M2 exited on 2026-09-04 with all 71 principles in the pinned TigerStyle
+revision mapped to focused guidance and all local Zig claims registered for
+Zig 0.16 verification. This is guidance coverage, not automatic conformance by
+projects that consult it.
 
 ## M3: evented I/O across operating systems (in progress)
 
@@ -110,10 +119,10 @@ Keep interface design separate from backend implementation.
 | ID | Status | Deliverable / exit condition |
 | --- | --- | --- |
 | M3-001 | done | Pinned TigerBeetle `src/io` map distinguishing Linux `io_uring`, Darwin `kqueue` readiness plus synchronous file I/O, and Windows IOCP/overlapped I/O. |
-| M3-002 | running | `/root/linux_runtime` on `omarx1`: Linux `io_uring` kernel/version features, registered-resource ownership, cancellation, and runtime evidence. |
+| M3-002 | done | Linux kernel/feature floors, finite queues, registered-file/buffer ownership, target/cancel CQE reconciliation, exact Zig-layer readiness, and three Zig 0.16 runtime tests on `omarx1`. |
 | M3-003 | done | Apple-primary `kqueue`, Dispatch I/O, and POSIX AIO lifecycles; exact Zig 0.16 Dispatch/Kqueue mapping and defects; a Zig/C adapter; macOS runtime proof; and bounded comparative evidence. |
-| M3-004 | running | `/root/windows_mapping`: Microsoft-primary lifecycle is synthesized; exact Zig 0.16 source mapping and Windows cross-target proof are running, while Windows runtime evidence remains unavailable. |
-| M3-005 | queued | Cross-platform backend decision table with guarantees, limits, unsupported cases, and measured evidence. |
+| M3-004 | queued | Microsoft-primary IOCP lifecycle and exact Zig 0.16 Threaded/APC/NtDll mapping are synthesized; the proof compiles for three Windows architectures, while Windows runtime/load evidence still needs a host. |
+| M3-005 | done | Cross-platform decision table selects portable Threaded or platform-specific file/network backends with guarantees, limits, unsupported cases, ownership, resource models, and exact evidence gates. |
 
 | Platform | Research and proof targets |
 | --- | --- |
@@ -160,25 +169,27 @@ a second content store. A mutable service and database come only after that.
 
 ## LLM maintenance lane
 
-After M0:
+| ID | Status | Deliverable / exit condition |
+| --- | --- | --- |
+| L-006 | done | Deterministic read-only `query`/`lint` and plan-only `ingest`/`upgrade` commands expose versioned JSON and never silently mutate knowledge. |
+| L-007 | done | Machine lint classifies broken evidence, stale versions, schema, links, graph health, and style with stable codes. |
+| L-008 | done | Weekly/manual GitHub workflow installs the exact checksum-verified Zig baseline, verifies proofs, checks sources/releases and retrieval, proves the checkout stayed unchanged, and uploads a 30-day review packet. |
+| L-009 | queued | Connect a separately authorized coding agent that consumes the review packet and opens a reviewable PR; the read-only workflow intentionally lacks write/PR authority. |
+| L-010 | done | Read-only `review` reports coarse upstream-head differences and newer stable Zig releases while preserving source records and requiring an explicit upgrade workflow. |
+| L-011 | done | A versioned 25-query benchmark scores the deterministic index/lexical layer; MRR 1.0, hit@3 1.0, and recall@5 0.98 do not justify hybrid search yet. |
 
-1. Add deterministic `ingest`, `query`, `lint`, and `upgrade` command wrappers.
-2. Produce machine-readable lint output for broken evidence and stale versions.
-3. Add a scheduled agent job that opens reviewable changes; never silently
-   rewrites verified knowledge.
-4. Track source revisions and Zig releases, but require an explicit upgrade run
-   before changing the active version.
-5. Evaluate hybrid search only after index-plus-`rg` retrieval is benchmarked on
-   real queries and shown insufficient.
+The benchmark is a curated regression set, not production telemetry. Revisit
+hybrid search when thresholds fail or real agent queries demonstrate misses.
 
 ## Research queue
 
-- Advance the queued Zig 0.16 release-note topics using
-  [[zig-0.16-release-inventory]], especially all `std.Io` subtopics.
-- Add primary macOS and Windows documentation beside the source-verified
-  TigerBeetle I/O comparison; no runtime proof is implied by source inspection.
-- Work through the selected matklad clusters in `CURATION.md`; do not promote
-  older Zig syntax until it has a 0.16 proof.
-- Define a platform test matrix and access to Linux, macOS, and Windows runners.
+- Monitor a future Zig release through the explicit upgrade workflow; the 0.16
+  inventory has no stale queued rows.
+- Run the registered Windows cancellation and platform-I/O tests on a real
+  Windows host, then add IOCP lifecycle and load evidence.
+- Select new matklad or TigerBeetle sources only for a named system-design
+  question; never promote old Zig syntax without a 0.16 proof.
+- Extend the existing macOS/Linux matrix with Windows and workload-specific
+  filesystem/device/load runners.
 - Design snippet tangling so Markdown can eventually show verified excerpts
   without duplicating executable code.

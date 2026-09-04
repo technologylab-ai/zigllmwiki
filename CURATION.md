@@ -76,17 +76,18 @@ when a concrete systems-programming question needs them.
 
 | Source | Status | Wiki effect |
 | --- | --- | --- |
-| liburing `io_uring.7` and cancellation manuals | synthesized | Linux lifecycle, ordering, retained resources, and cancellation races in [[io-uring]] |
+| liburing `io_uring.7`, registration, and cancellation manuals | synthesized + runtime mechanics proved | Linux lifecycle, ordering, registered-resource ownership, finite queues, and cancellation races in [[io-uring]] |
 | Apple XNU `kqueue.2` and POSIX AIO manuals | synthesized | Readiness versus asynchronous file completion, ownership, cancellation, and cleanup in [[macos-kqueue-and-aio]] |
 | Apple libdispatch I/O headers | synthesized + adapter proved | Dispatch channel/data/callback lifecycles and the Zig/C macOS proof in [[macos-kqueue-and-aio]] |
 | Zig 0.16 Dispatch/Kqueue source | synthesized + selected macOS paths proved | Exact Evented alias, synchronous regular-file calls, unavailable networking, 60 MiB fibers, and broken deinit in [[macos-kqueue-and-aio]] |
 | Microsoft IOCP, overlapped I/O, and `CancelIoEx` documentation | synthesized | Completion ownership, immediate-success handling, ordering, capacity, and cancellation in [[windows-iocp-and-overlapped-io]] |
+| Zig 0.16 Windows `std.Io` source | synthesized + three-target compile proof | Exact synchronous-worker, APC/NtDll, AFD networking, batch, cancellation, error-mapping, and missing-IOCP boundaries in [[windows-iocp-and-overlapped-io]] |
 
 ## TigerBeetle — current slice
 
 | Source/path | Status | Wiki effect |
 | --- | --- | --- |
-| `docs/TIGER_STYLE.md` | captured + partially synthesized | [[tigerstyle]]; full rule inventory remains M2 work |
+| `docs/TIGER_STYLE.md` | synthesized + mechanics proved | [[tigerstyle-coverage]] maps all 71 principles to focused guidance and registered Zig 0.16 evidence where code is involved. |
 | `docs/ARCHITECTURE.md` | synthesized | [[tigerbeetle-engineering-corpus]], allocation and DST pages |
 | `docs/concepts/safety.md` | synthesized | fault-model and DST guidance |
 | `docs/concepts/performance.md` | synthesized | interface, batching, headroom, and capacity guidance |
@@ -106,13 +107,13 @@ agent is currently working on it.
 
 | Roadmap item | Execution | Current boundary / next artifact |
 | --- | --- | --- |
-| M1-005 cancellation | running (`/root/linux_runtime`) | `Future`, `Group`, `recancel`, protection, and a blocked pipe read are proved on macOS; Linux is running on `omarx1`, and Windows remains queued. |
+| M1-005 cancellation | queued | `Future`, `Group`, `recancel`, protection, and blocked pipe reads are proved on macOS and Linux; Windows runtime evidence still needs a host. |
 | M2-009 bounded-memory/layout curation | done | Reservation, finite working state, retained output, representation lifetime, and stable-handle consequences are synthesized. |
 | M2-010 retry/defer curation | done | Both retry-loop essays and the defer-pattern essay are synthesized into one-deadline retry and terminal cleanup guidance. |
 | M3-003 macOS evented I/O | done | Primary `kqueue`/AIO/Dispatch lifecycles, exact Zig mappings and defects, an actual Dispatch I/O adapter, macOS runtime evidence, and a bounded comparison are recorded. |
-| M3-002 Linux evented I/O | running (`/root/linux_runtime`) | Kernel/version features, registered resources, cancellation, and real `omarx1` evidence are assigned. |
-| M3-004 Windows evented I/O | running (`/root/windows_mapping`) | Exact Zig mapping and cross-target proof are assigned; no Windows runtime host is available. |
-| M3-005 backend decision table | queued | Final synthesis waits for the running Linux/Windows mapping results. |
+| M3-002 Linux evented I/O | done | Kernel/feature floors, registered resources, cancellation races, and real Zig 0.16 `omarx1` evidence are integrated. |
+| M3-004 Windows evented I/O | queued | Exact Zig mapping and three-architecture cross-target proof are integrated; no Windows runtime host is available. |
+| M3-005 backend decision table | done | File/network choices, guarantees, limits, unsupported paths, ownership, resource models, and evidence gates are synthesized across all three platforms. |
 
 M1-001 is complete: [[process-init-and-capabilities]] synthesizes the official
 Zig 0.16 initializer/startup source and the local migration guide, with a real
@@ -145,13 +146,9 @@ bounded-memory/layout essays have decision-level synthesis.
 
 ## Immediate curation order
 
-1. Complete cancellation with Linux and Windows blocked-syscall evidence; the
-   task-level and macOS blocked-read proofs are done.
-2. Finish dispatch I/O and Zig 0.16 source mapping beside the primary platform
-   lifecycles; then design the runtime matrix.
-3. Ingest the bounded-memory/layout source cluster and close the integer-width,
-   index/count/size, and arithmetic-intent gaps.
-4. Ingest time/retry/defer sources alongside the `std.Io` clocks and timeout
-   inventory.
-5. Continue selected TigerBeetle storage, recovery, and operational sources by
+1. Complete Windows blocked-syscall and IOCP runtime/load evidence when a
+   Windows host becomes available; macOS and Linux cancellation proofs are done.
+2. Keep the cross-platform backend table synchronized with runtime evidence and
+   explicitly tested OS/kernel/filesystem/device combinations.
+3. Continue selected TigerBeetle storage, recovery, and operational sources by
    a named system-design question rather than bulk summary.

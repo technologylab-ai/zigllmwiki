@@ -33,12 +33,27 @@ pub fn build(b: *std.Build) void {
     verify_step.dependOn(&lint_command.step);
     verify_step.dependOn(&fmt_command.step);
 
+    const generated_code_command = b.addSystemCommand(&.{
+        "python3",
+        "tools/inspect_generated_code.py",
+        "--source",
+        "proofs/error_path_catalog.zig",
+        "--symbol",
+        "bounded_sum_u32",
+        "--output-dir",
+        ".zig-cache/generated-code",
+        "--optimize",
+        "ReleaseSafe",
+    });
+    verify_step.dependOn(&generated_code_command.step);
+
     const proof_sources = [_][]const u8{
         "proofs/async_vs_concurrent.zig",
         "proofs/bounded_retries.zig",
         "proofs/cancellation.zig",
         "proofs/control_flow_shape.zig",
         "proofs/diagnostics_factory.zig",
+        "proofs/error_path_catalog.zig",
         "proofs/error_context.zig",
         "proofs/files_and_atomic_persistence.zig",
         "proofs/fmt_steering.zig",
@@ -46,6 +61,7 @@ pub fn build(b: *std.Build) void {
         "proofs/invariants.zig",
         "proofs/io_sync_primitives.zig",
         "proofs/io_time.zig",
+        "proofs/linux_io_uring.zig",
         "proofs/network_process_entropy.zig",
         "proofs/newtype_index.zig",
         "proofs/performance_sketch.zig",
@@ -53,8 +69,11 @@ pub fn build(b: *std.Build) void {
         "proofs/process_init_capabilities.zig",
         "proofs/select_and_batch.zig",
         "proofs/static_pool.zig",
+        "proofs/state_lifetime_and_arithmetic.zig",
         "proofs/testing_io_modes.zig",
+        "proofs/threaded_blocked_read_cancel_linux.zig",
         "proofs/threaded_blocked_read_cancel_macos.zig",
+        "proofs/threaded_blocked_read_cancel_windows.zig",
     };
     for (proof_sources) |proof_source| {
         const proof_module = b.createModule(.{
@@ -66,6 +85,39 @@ pub fn build(b: *std.Build) void {
         const run_proof_tests = b.addRunArtifact(proof_tests);
         test_step.dependOn(&run_proof_tests.step);
         verify_step.dependOn(&run_proof_tests.step);
+    }
+
+    const windows_architectures = [_]std.Target.Cpu.Arch{
+        .x86,
+        .x86_64,
+        .aarch64,
+    };
+    for (windows_architectures) |architecture| {
+        const windows_mapping_module = b.createModule(.{
+            .root_source_file = b.path("proofs/windows_io_mapping.zig"),
+            .target = b.resolveTargetQuery(.{
+                .cpu_arch = architecture,
+                .os_tag = .windows,
+            }),
+            .optimize = optimize,
+        });
+        const windows_mapping_tests = b.addTest(.{
+            .root_module = windows_mapping_module,
+        });
+        verify_step.dependOn(&windows_mapping_tests.step);
+
+        const windows_cancellation_module = b.createModule(.{
+            .root_source_file = b.path("proofs/threaded_blocked_read_cancel_windows.zig"),
+            .target = b.resolveTargetQuery(.{
+                .cpu_arch = architecture,
+                .os_tag = .windows,
+            }),
+            .optimize = optimize,
+        });
+        const windows_cancellation_tests = b.addTest(.{
+            .root_module = windows_cancellation_module,
+        });
+        verify_step.dependOn(&windows_cancellation_tests.step);
     }
 
     const single_threaded_testing_module = b.createModule(.{

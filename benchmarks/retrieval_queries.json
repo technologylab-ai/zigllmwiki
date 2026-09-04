@@ -1,0 +1,223 @@
+{
+  "schema_version": 1,
+  "dataset_version": "2026-09-04.1",
+  "zig_baseline": "0.16.0",
+  "query_limit": 10,
+  "description": "Representative agent questions spanning std.Io, platform I/O, TigerStyle, diagnostics, testing, and current Zig mechanics.",
+  "decision_policy": {
+    "minimum_mean_reciprocal_rank": 0.85,
+    "minimum_hit_rate_at_3": 0.95,
+    "minimum_mean_recall_at_5": 0.85
+  },
+  "queries": [
+    {
+      "id": "async-progress",
+      "category": "std.Io concurrency",
+      "query": "does io async create another thread or guarantee concurrent progress",
+      "relevant": [
+        "wiki/async-vs-concurrent.md",
+        "wiki/io-threaded.md"
+      ]
+    },
+    {
+      "id": "sleep-deadline",
+      "category": "std.Io time",
+      "query": "sleep inside an async function absolute timeout deadline clock",
+      "relevant": [
+        "wiki/io-time-clocks-and-deadlines.md",
+        "wiki/async-vs-concurrent.md"
+      ]
+    },
+    {
+      "id": "task-cancellation",
+      "category": "std.Io cancellation",
+      "query": "future group recancel cancellation protection acknowledgement cleanup",
+      "relevant": [
+        "wiki/cancellation.md",
+        "wiki/task-lifetimes-and-structured-concurrency.md"
+      ]
+    },
+    {
+      "id": "batch-races",
+      "category": "std.Io batching",
+      "query": "batch completion storage index cancel raced result drain",
+      "relevant": [
+        "wiki/select-and-batch.md"
+      ]
+    },
+    {
+      "id": "sync-predicate",
+      "category": "std.Io synchronization",
+      "query": "condition variable predicate loop semaphore queue capacity cancellation",
+      "relevant": [
+        "wiki/io-synchronization-primitives.md"
+      ]
+    },
+    {
+      "id": "file-publication",
+      "category": "filesystem",
+      "query": "flush truncate atomic replace directory fsync crash durability",
+      "relevant": [
+        "wiki/files-buffering-and-atomic-persistence.md"
+      ]
+    },
+    {
+      "id": "dns-racing",
+      "category": "networking",
+      "query": "DNS lookup queue race connection attempts bounded admission",
+      "relevant": [
+        "wiki/networking-and-dns-racing.md"
+      ]
+    },
+    {
+      "id": "child-output",
+      "category": "processes",
+      "query": "child process bounded output capture timeout kill wait cleanup",
+      "relevant": [
+        "wiki/child-process-lifecycles.md"
+      ]
+    },
+    {
+      "id": "linux-fixed-resources",
+      "category": "Linux I/O",
+      "query": "io_uring registered buffers fixed file after closing descriptor",
+      "relevant": [
+        "wiki/io-uring.md"
+      ]
+    },
+    {
+      "id": "linux-cancel-cqe",
+      "category": "Linux I/O",
+      "query": "io_uring cancel CQE target completion buffer ownership ENOENT EALREADY",
+      "relevant": [
+        "wiki/io-uring.md",
+        "wiki/cancellation.md"
+      ]
+    },
+    {
+      "id": "macos-files",
+      "category": "macOS I/O",
+      "query": "macOS kqueue regular file readiness Dispatch I/O completion",
+      "relevant": [
+        "wiki/macos-kqueue-and-aio.md"
+      ]
+    },
+    {
+      "id": "windows-overlapped",
+      "category": "Windows I/O",
+      "query": "CancelIoEx OVERLAPPED immediate success completion packet buffer lifetime",
+      "relevant": [
+        "wiki/windows-iocp-and-overlapped-io.md"
+      ]
+    },
+    {
+      "id": "backend-choice",
+      "category": "platform architecture",
+      "query": "choose file network backend for HTTP server Linux macOS Windows",
+      "relevant": [
+        "wiki/platform-io-backend-decision-table.md",
+        "wiki/evented-io-backends.md"
+      ]
+    },
+    {
+      "id": "explicit-capability",
+      "category": "Zig 0.16 migration",
+      "query": "why pass std Io explicit capability from process Init",
+      "relevant": [
+        "wiki/process-init-and-capabilities.md",
+        "wiki/std-io.md"
+      ]
+    },
+    {
+      "id": "error-context",
+      "category": "diagnostics",
+      "query": "structured error context diagnostics avoid logging handled cancellation",
+      "relevant": [
+        "wiki/error-context.md",
+        "wiki/error-handling-and-diagnostics.md"
+      ]
+    },
+    {
+      "id": "test-io",
+      "category": "testing",
+      "query": "std testing io failing adapter single threaded build deterministic tests",
+      "relevant": [
+        "wiki/testing-io-and-single-threaded-builds.md"
+      ]
+    },
+    {
+      "id": "assertion-pair",
+      "category": "TigerStyle invariants",
+      "query": "assert before write and after read persistence boundary corrupt state",
+      "relevant": [
+        "wiki/invariants-and-assertions.md"
+      ]
+    },
+    {
+      "id": "startup-allocation",
+      "category": "TigerStyle allocation",
+      "query": "no steady state allocation fixed capacity overload reserve at startup",
+      "relevant": [
+        "wiki/static-allocation-and-constant-work.md"
+      ]
+    },
+    {
+      "id": "typed-index",
+      "category": "TigerStyle types",
+      "query": "newtype index stale handle generation checked integer narrowing",
+      "relevant": [
+        "wiki/newtype-indexes.md",
+        "wiki/integer-widths-and-boundaries.md"
+      ]
+    },
+    {
+      "id": "function-shape",
+      "category": "TigerStyle control flow",
+      "query": "inverse hourglass function shape push ifs up fors down",
+      "relevant": [
+        "wiki/function-shape-and-control-flow.md"
+      ]
+    },
+    {
+      "id": "performance-sketch",
+      "category": "TigerStyle performance",
+      "query": "back of envelope bandwidth estimate batching control plane data plane",
+      "relevant": [
+        "wiki/performance-sketches-and-batching.md"
+      ]
+    },
+    {
+      "id": "bounded-retry",
+      "category": "failure handling",
+      "query": "retry transient error one deadline total attempts defer cleanup",
+      "relevant": [
+        "wiki/bounded-retries-and-cleanup.md"
+      ]
+    },
+    {
+      "id": "buffer-initialization",
+      "category": "data boundaries",
+      "query": "zero reusable buffer padding serialization exact floor ceiling division",
+      "relevant": [
+        "wiki/buffer-hygiene-and-division-intent.md",
+        "wiki/integer-widths-and-boundaries.md"
+      ]
+    },
+    {
+      "id": "simulation-replay",
+      "category": "testing",
+      "query": "deterministic simulation virtual time fault injection seed replay",
+      "relevant": [
+        "wiki/deterministic-simulation-testing.md"
+      ]
+    },
+    {
+      "id": "formatter-shape",
+      "category": "Zig style",
+      "query": "force zig fmt multiline trailing comma block formatting",
+      "relevant": [
+        "wiki/steering-zig-fmt.md"
+      ]
+    }
+  ]
+}

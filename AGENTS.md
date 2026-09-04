@@ -84,6 +84,36 @@ not promote them to facts through repetition.
 
 ## Operations
 
+### Command layer and mutation boundary
+
+`tools/wiki.py` exposes deterministic `query`, `ingest`, `lint`, `review`, and
+`upgrade` wrappers. Use `--format json` for agents and automation; its schema is
+versioned and every result declares `mutates_repository`.
+
+- `query` is read-only and ranks relevant wiki pages together with their listed
+  sources, proofs, Zig version, and platforms.
+- `lint` is read-only. By default it runs `zig build verify` and returns stable
+  issue codes, including broken evidence and stale-version findings.
+- `ingest` is plan-only. It screens obvious moving revision names, reports
+  whether the revision merely resembles a full content identifier, hashes
+  local input, finds related pages, and proposes a record. It does not contact
+  the origin or prove immutability; the agent must confirm the revision before
+  performing the full ingest workflow below as reviewable edits.
+- `upgrade` is plan-only. It inventories invalidation and verification work but
+  never changes `.zig-version`; the explicit upgrade workflow remains the only
+  authority to do that.
+- `review` is read-only and networked. It reports coarse upstream-head
+  differences and newer Zig release candidates; neither is permission to
+  rewrite an immutable source record or change `.zig-version`.
+
+Run `python3 tools/retrieval_benchmark.py --enforce-policy` after changing the
+index or query ranking. Its reviewed cases are a regression set, not production
+telemetry or proof that lexical retrieval will remain sufficient.
+
+Do not turn plan output into unattended content mutation. A wrapper can check
+structure and state, but cannot establish that a synthesis follows its primary
+evidence or that a platform behavior was runtime-verified.
+
 ### Query
 
 Read `index.md`, search the vault, then open the smallest relevant page set and

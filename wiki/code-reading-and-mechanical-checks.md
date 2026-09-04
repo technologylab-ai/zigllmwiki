@@ -92,4 +92,5 @@ checking the meaning and evidence of a recommendation.
   and triage state without requiring an elaborate service.
 
 Related: [[source-archaeology]], [[invariants-and-assertions]],
-[[trustworthy-microbenchmarks]], [[tigerstyle]].
+[[trustworthy-microbenchmarks]], [[build-diagnostics-and-generated-code]],
+[[design-revision-and-exception-policy]], [[tigerstyle]].

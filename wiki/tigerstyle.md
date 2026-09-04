@@ -90,6 +90,19 @@ For every system component, ask:
 - Which control-plane choices keep the data plane regular and batchable?
 - Which OS behavior is measured rather than assumed portable?
 
+Start new subsystems with the replaceable sketch and revision passes in
+[[design-revision-and-exception-policy]]. That page also defines the hard line
+between release-blocking safety debt, bounded non-strict exceptions, honest
+feature gaps, dependency admission, and this repository's Python/Zig tooling
+seam.
+
+Make every non-fatal branch reviewable with
+[[error-path-catalogs-and-fault-injection]], and reduce caller state spaces
+without hiding ownership or cancellation using
+[[lower-dimensional-api-contracts]]. Apply Zig 0.16 diagnostics and emitted-code
+inspection according to [[build-diagnostics-and-generated-code]]; there is no
+fictional general “strict warnings” switch for Zig source.
+
 TigerBeetle's wider documentation is curated by engineering question in
 [[tigerbeetle-engineering-corpus]]; it is not treated as a bag of slogans.
 For review, reconstruct both control flow and every mutation of decisive state;
@@ -101,4 +114,8 @@ Related: [[std-io]], [[cancellation]], [[error-context]], [[newtype-indexes]],
 [[trustworthy-microbenchmarks]], [[performance-sketches-and-batching]],
 [[function-shape-and-control-flow]], [[naming-comments-and-api-shape]],
 [[tigerstyle-seams-with-zig-and-os]], [[tigerstyle-coverage]],
+[[design-revision-and-exception-policy]],
+[[build-diagnostics-and-generated-code]],
+[[error-path-catalogs-and-fault-injection]],
+[[lower-dimensional-api-contracts]],
 [[zig-0.16-baseline]].
