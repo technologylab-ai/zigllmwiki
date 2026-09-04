@@ -26,6 +26,20 @@ The active compiler is exactly the value in `.zig-version`: `0.16.0`. Do not
 silently follow Zig master, 0.15 examples, or a future 0.16 patch. The installed
 release source is API truth.
 
+## Host selection
+
+The user authors on both Linux `omarx1` and the M3 Max Mac `maxross`. Prefer
+the Mac for resource-heavy portable work; reach it from Linux with
+`ssh maxross`. Use `ssh omarx1` from the Mac for Linux runtime gates. If the
+Mac is unavailable during travel, continue feasible work on `omarx1` with
+appropriate parallelism and record macOS-native gates as pending. Preserve
+remote edits and verify the exact input tree/compiler before offloading; see
+the host-selection procedure in [the platform runbook](docs/platform-testing.md).
+
+Windows native tests use the manual GitHub-hosted Windows VM workflow. No
+local Windows VM is part of the setup. Windows cross-compilation on macOS or
+Linux remains compile-only evidence.
+
 ## First five minutes of a new session
 
 1. Read `AGENTS.md` completely, then `.agents/skills/zig-wiki/SKILL.md`.
@@ -92,9 +106,12 @@ at `959a93ac690abbde9f9ea55cf5f06437fedcec30`: **82/82 Zig steps, 70 passing
 tests, 7 skips**, then all four native Windows proofs passed separately. That
 workflow's overall result was failure in the newly added Python gate: a drive
 letter was parsed as a URL scheme. The command layer now distinguishes Windows
-drive paths and has a regression test. The final publication reruns all gates;
-use the [Windows workflow history](https://github.com/technologylab-ai/zigllmwiki/actions/workflows/windows-runtime-verify.yml)
-and match `headSha` to the checkout, not just to a similarly named run.
+drive paths and has a regression test. The corrected publication commit
+`e6eb0b58a0779f50f43a1fea5d07019a44618231` passed the complete workflow in
+[run 33916448015](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33916448015),
+including the command/retrieval gates and clean-checkout check. For later
+changes, use the [Windows workflow history](https://github.com/technologylab-ai/zigllmwiki/actions/workflows/windows-runtime-verify.yml)
+and match `headSha` to the intended pushed commit.
 
 The expanded workflow retains CPU/RAM/filesystem metadata, all four native
 logs, command/retrieval checks, and an explicit clean-status packet. macOS
@@ -148,13 +165,14 @@ watchdogs, checksums and race distributions are in
 [[windows-iocp-and-overlapped-io]]. Do not use these VM fixtures as a backend
 performance ranking.
 
-Rerun the complete current tree on Linux with:
+From another host, rerun the complete current tree on Linux with:
 
 `tools/verify_linux_ssh.sh omarx1`
 
 The script copies the checkout to a validated temporary directory, runs the
 full verifier with the remote `zig`, reports kernel/`io_uring` state, and cleans
-up that directory. It does not alter the remote user's checkout.
+up that directory. It does not alter the remote user's checkout. When already
+on `omarx1`, run the common gate locally as described in the runbook.
 
 For exact commands, hosted Windows dispatch/artifacts, evidence-promotion
 rules, and known CRLF, shell, timer, token-scope, and platform-interpretation

@@ -513,3 +513,23 @@ now accounts for Windows drives, with a cross-platform regression test while
 retaining remote HTTPS validation. All 16 Python command/retrieval tests pass
 locally. This historical workflow remains a failure overall; final publication
 gates rerun the corrected command layer and unchanged native proofs.
+
+## [2026-09-04] maintenance | two-host execution preference and Windows runner boundary
+
+Recorded the user's host policy in `AGENTS.md`, the platform runbook, retrieval
+map, and handoff: both `omarx1` and the M3 Max Mac `maxross` are authoring hosts;
+prefer `ssh maxross` from Linux for expensive portable work when available,
+and continue feasible work on Linux when travel/connectivity makes the Mac
+unavailable. The procedure bounds the availability probe, preserves remote
+checkout edits, identifies the input tree and exact compiler, and leaves
+unavailable macOS-native evidence pending. The Linux SSH wrapper remains
+Linux-specific. This policy update does not assert that reverse SSH was tested.
+
+Clarified that Windows runtime tests use GitHub-hosted Windows VMs; no local
+Windows VM or self-hosted Windows runner is configured for this project.
+Windows cross-compilation on macOS/Linux is distinct from runtime evidence.
+Confirmed the previously completed publication workflow
+[run 33916448015](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33916448015)
+is successful at `e6eb0b58a0779f50f43a1fea5d07019a44618231` and preserved that
+result in the handoff. This documentation change does not extend proof scope
+or change the queued M3-006/L-009 roadmap work.

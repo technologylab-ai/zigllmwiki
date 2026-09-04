@@ -114,6 +114,13 @@ Read `docs/platform-testing.md` before adding or promoting macOS, Linux, or
 Windows evidence. It owns the remote-run commands, host metadata requirements,
 hosted artifact boundaries, and known cross-platform test traps.
 
+Both `omarx1` (Linux) and `maxross` (the user's M3 Max Mac) are authoring hosts.
+Prefer the Mac for resource-heavy portable work; from Linux, reach it with
+`ssh maxross`. If the Mac is unavailable during travel, continue feasible work
+on `omarx1` with parallelism suited to its resources. Follow the runbook's host
+selection and checkout rules. Native platform gates still require their OS;
+record unavailable gates as pending rather than substituting cross-compilation.
+
 Do not turn plan output into unattended content mutation. A wrapper can check
 structure and state, but cannot establish that a synthesis follows its primary
 evidence or that a platform behavior was runtime-verified.

@@ -24,6 +24,43 @@ Actions artifacts expire. Preserve the important environment and conclusion in
 the affected wiki page and append `log.md`; use the artifact/run URL as
 supporting detail, not the only durable record.
 
+## Execution hosts and availability
+
+The user works from either host. These are the user's execution preferences,
+recorded on 2026-09-04, rather than a guarantee of SSH availability:
+
+| Host | Access from the other host | Role |
+| --- | --- | --- |
+| `maxross`, the user's M3 Max Mac | `ssh maxross` from `omarx1` | Preferred for resource-heavy portable builds, cross-compilation, analysis, and macOS runtime gates. |
+| `omarx1`, Linux | `ssh omarx1` from the Mac | Linux runtime gates and continued authoring/builds when the Mac is unavailable. |
+| GitHub-hosted Windows runner | Manual GitHub Actions dispatch below | Windows x86_64 runtime gates. |
+
+When working on `omarx1`, prefer offloading expensive portable work to
+`maxross` when reachable. A bounded availability probe is:
+
+```text
+ssh -o BatchMode=yes -o ConnectTimeout=5 -o ConnectionAttempts=1 maxross 'uname -sm'
+```
+
+The Mac may be offline during travel or loss of signal. If it is unreachable,
+continue all feasible work on `omarx1`, size build/agent parallelism to its
+available CPU and memory, and leave only macOS-native evidence pending. Do not
+stall portable or Linux work on repeated Mac connection attempts. Lightweight
+editing and checks can stay on the current host.
+
+Before offloading, identify the actual host, exact compiler, working directory,
+and checkout state. Do not assume the Mac's `/Users/rs/...` checkout path exists
+on Linux or that a remote clone contains the current tree. Use an isolated
+checkout at the intended pushed commit for publication gates, or a validated
+temporary copy of the current tree for development checks; preserve any active
+remote checkout and its edits. Record the source commit and whether the input
+tree was dirty. A successful SSH probe alone does not validate that setup.
+
+Execution placement never changes evidence scope: Linux runtime tests run on
+Linux, macOS tests on macOS, and Windows tests on Windows. Cross-compiling on
+the faster Mac does not satisfy another OS's runtime gate. Report any required
+unavailable native gate and its exact blocker explicitly.
+
 ## Release gates
 
 From a clean checkout on every runtime host:
@@ -52,7 +89,8 @@ reviewed edits. Generated assembly and caches belong under ignored
 
 ## macOS
 
-The local macOS checkout is the ordinary authoring host. Run the common gate.
+On `maxross`, run the common gate in the intended checkout, whether working
+locally or over SSH from `omarx1`.
 The verifier additionally compiles the C Blocks shim and runs the Dispatch I/O
 and experimental Zig Dispatch mapping proofs only when the host target is
 macOS.
@@ -63,7 +101,9 @@ not evidence about cold storage, durability, cancellation, or production load.
 
 ## Linux on `omarx1`
 
-Run the complete current tree with:
+When already working on `omarx1`, run the common gate locally and record the
+architecture, `/etc/os-release`, kernel, and `io_uring_disabled` state. From
+the Mac or another authoring host, run the complete current tree with:
 
 ```text
 tools/verify_linux_ssh.sh omarx1
@@ -85,6 +125,9 @@ It does not modify the remote user's checkout. Do not replace its validated
 temporary path with `$HOME`, `~`, a workspace root, a glob, or another broad
 deletion target.
 
+This wrapper is Linux-specific; do not point it at `maxross` as a reverse
+macOS runner. Use the macOS common gate in an isolated checkout there.
+
 The archive contains the current working tree. The printed commit identifies
 that tree only when the local checkout is clean. Require a clean checkout and
 matching pushed commit for a publication gate; label earlier dirty-tree runs
@@ -101,6 +144,14 @@ feature/probe result. Do not turn a skip on one host into a portable support
 claim.
 
 ## Windows through GitHub Actions
+
+Windows runtime evidence currently comes from GitHub-hosted Windows VMs via
+`runs-on: windows-latest`. No local Windows VM on `maxross` or `omarx1`, or
+self-hosted Windows runner, is part of this repository's testing setup.
+The common verifier also cross-compiles Windows proofs on macOS and Linux;
+those builds provide compile-only evidence. The most recently recorded hosted
+image is Windows Server 2025 x86_64; `windows-latest` can change, so record the
+actual image and build for every new runtime claim.
 
 The private repository exposes the manual workflow `Windows runtime
 verification` in `.github/workflows/windows-runtime-verify.yml`. Dispatch it
