@@ -2,9 +2,9 @@
 id: io-synchronization-primitives
 title: std.Io synchronization primitives
 kind: concept
-status: runtime-verified
+status: source-verified
 zig: "0.16.0"
-summary: Choose Event, Queue, Mutex, RwLock, Condition, Semaphore, or futex operations by state and ownership shape, preserving cancellation, predicate loops, capacity, and terminal wakeups.
+summary: Choose synchronization by state and ownership; Queue minimums do not remove mutex contention, partial-transfer accounting, or the need to join blocked participants.
 updated: 2026-09-04
 sources:
   - "[[zig-0.16.0-release-notes]]"
@@ -65,21 +65,57 @@ caller-provided ring buffer. An empty consumer and full producer can wait; those
 blocked task stacks/records are resources outside `queue.capacity()` and need
 their own admission limits.
 
-The slice APIs accept `min`. With `min == 0`, they move as much as possible
-without blocking. With a positive minimum, cancellation or closure after a
-partial transfer returns the partial count first; the following call reports
-`Canceled` or `Closed`. Therefore callers must process the returned count
-before responding to cancellation.
+### Minimums and partial transfers
+
+The slice APIs accept `min`, bounded by the supplied slice length. With
+`min == 0`, they transfer what is available without waiting for more elements
+or space. The public comments call this nonblocking, but the installed 0.16.0
+`TypeErasedQueue.put/get` first acquire an internal `Mutex` for nonempty
+slices. Contention can therefore still wait or return `error.Canceled`.
+The uncancelable variants acquire that mutex uncancelably. A zero minimum is
+not a lock-free probe or a bound on call latency.
+
+With a positive minimum, cancellation or closure after a partial transfer can
+return a count below `min`. A returned error means no elements were transferred
+by that call. Always account for exactly the returned prefix before propagating
+cancellation or retrying the remainder; `min` is not an all-or-nothing boundary.
+
+The public `Queue.put/get` comments promise subsequent `Canceled` or `Closed`
+after such a short result. There is an implementation caveat for cancellation:
+`TypeErasedQueue.putLocked/getLocked` re-arm it with `io.recancel()` when a
+condition wait returns `Canceled` after some transfer, but a later call can
+acquire an uncontended mutex and transfer available data without consulting
+`Io`. Do not depend on the immediately following queue call observing the
+request. In a loop that can keep making immediate progress, account for owned
+elements and use `io.checkCancel()` at a bounded batch boundary when prompt
+cancellation matters; its contract remains subject to cancellation protection.
+
+These distinctions follow from `Queue`, `TypeErasedQueue`, `Mutex.lock`,
+`recancel`, and `checkCancel` in [[zig-0.16.0-stdlib]].
 
 `putAll` is convenient, but on cancellation or closure its error path does not
 report how many elements were transferred. Do not use it where the operation
 must be transactional or retryable without duplication; add item identity or a
 higher-level acknowledgement protocol.
 
-`close(io)` is idempotent. Puts fail immediately after close even if capacity
-remains. Gets drain already buffered elements, then return `error.Closed` when
-empty. A shutdown owner normally stops producers, closes the queue, drains or
-accounts for remaining elements, then joins consumers.
+### Close, drain, and join
+
+`close(io)` is idempotent. New nonempty puts fail after acquiring the mutex
+and observing closure, even if capacity remains. Gets drain existing elements
+before reporting `error.Closed`; an empty slice returns zero without checking
+closure. A successful `close` signals waiting producers and consumers, but
+does not join them. It also acquires the internal mutex uncancelably.
+
+The implementation links blocked callers' stack-local pending records and
+their transfer slices into the queue. Keep the queue, ring storage, and caller
+buffers alive until all calls have returned. A shutdown owner stops new
+admission, closes the queue, drains or accounts for transferred elements, and
+joins both producers and consumers before reclaiming storage. Trying to join a
+producer blocked on a full queue before arranging consumption or closure can
+prevent shutdown from progressing.
+
+[[select-and-batch]] applies this queue ownership model to typed task results;
+its `awaitMany` also inherits partial counts and the zero-minimum mutex caveat.
 
 ## `Mutex` and `Condition`
 
@@ -163,13 +199,23 @@ x86_64 Linux 7.1.9 and x86_64 Windows Server 2025 build 26100.33296 on
 2026-09-04; the Windows evidence is retained in
 [Actions run 33911991858](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33911991858).
 
+The queue test uses an uncontended two-element ring and checks zero-minimum
+capacity plus close/drain behavior. It does not exercise mutex contention,
+partial-transfer cancellation, or closure with blocked participants. Those
+boundaries above are release-source evidence. This page is `source-verified`
+so the existing six runtime tests are not mistaken for runtime coverage of
+these additional cases; their recorded platform results remain valid.
+
 ## Review checklist
 
 - Which state/predicate is guarded, and who owns every transition?
 - Is a wait cancelable, and does cleanup still run after successful acquire?
 - Can a spurious wake or partial queue transfer be handled without data loss?
+- Does a zero-minimum call still contend on the queue mutex, and where does a
+  continuously progressing loop explicitly check cancellation?
 - Which count bounds buffered data, blocked tasks, permits, and downstream work?
-- What closes/wakes the primitive during shutdown, and who joins the waiters?
+- What closes/wakes the primitive during shutdown, and who joins every blocked
+  producer and consumer before releasing storage?
 - Is an uncancelable wait both necessary and guaranteed to terminate?
 
 Related: [[std-io]], [[cancellation]], [[async-vs-concurrent]],
