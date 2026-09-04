@@ -1,0 +1,10 @@
+[Unit]
+Description=Weekly Zig wiki semantic curation after the read-only review
+
+[Timer]
+OnCalendar=Mon *-*-* 05:17:00 UTC
+Persistent=true
+Unit=zig-wiki-curation.service
+
+[Install]
+WantedBy=timers.target

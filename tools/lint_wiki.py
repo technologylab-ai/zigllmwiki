@@ -92,6 +92,9 @@ def issue_from_failure(message: str) -> dict[str, object]:
     elif "unsupported status" in message:
         code = "UNSUPPORTED_CONTENT_STATUS"
         category = "schema"
+    elif "unsupported wiki kind" in message:
+        code = "UNSUPPORTED_WIKI_KIND"
+        category = "schema"
 
     location: dict[str, object] = {}
     location_match = re.match(r"^([^:]+)(?::(\d+))?:\s", message)
@@ -402,6 +405,8 @@ def main() -> int:
             failures.append(f"{relative}: unsupported status {status}")
 
         if path in WIKI_FILES:
+            if meta.get("kind") not in {"concept", "pattern", "principle", "platform", "map"}:
+                failures.append(f"{relative}: unsupported wiki kind {meta.get('kind')}")
             for required in ("zig", "updated", "sources", "proofs", "platforms"):
                 if required not in meta:
                     failures.append(f"{relative}: missing frontmatter key {required}")

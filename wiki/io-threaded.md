@@ -81,8 +81,12 @@ The [dispatch proof](../proofs/async_vs_concurrent.zig) covers the eager/failure
 distinction. The [cancellation proof](../proofs/cancellation.zig) covers task
 cancellation points and ownership on aarch64 macOS. The
 [blocked-read proof](../proofs/threaded_blocked_read_cancel_macos.zig) verifies
-actual syscall interruption for a macOS pipe. Linux and Windows cancellation
-behavior is source-verified; their runtime matrix remains M1/M3 work.
+actual syscall interruption for a macOS pipe. The corresponding
+[Linux](../proofs/threaded_blocked_read_cancel_linux.zig) and
+[Windows](../proofs/threaded_blocked_read_cancel_windows.zig) pipe proofs also
+ran with Zig 0.16.0; exact environments are retained in
+[[cancellation]] and [the platform runbook](../docs/platform-testing.md).
+Those fixtures do not establish cancellation for arbitrary devices or calls.
 
 Related: [[async-vs-concurrent]], [[cancellation]],
 [[task-lifetimes-and-structured-concurrency]],

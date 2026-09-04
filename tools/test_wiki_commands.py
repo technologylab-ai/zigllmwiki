@@ -290,6 +290,7 @@ class WikiCommandTests(unittest.TestCase):
                 "proofs/missing.zig: not registered in build.zig",
                 "sources/local.md: missing snapshot sources/snapshots/local.txt",
                 "wiki/io.md: broken source evidence wikilink [[missing-source]]",
+                "wiki/io.md: unsupported wiki kind workflow",
             ],
             "0.16.0",
             "0.15.2",
@@ -304,6 +305,7 @@ class WikiCommandTests(unittest.TestCase):
                 "BROKEN_EVIDENCE_PROOF_UNREGISTERED",
                 "BROKEN_EVIDENCE_SNAPSHOT_MISSING",
                 "BROKEN_EVIDENCE_SOURCE_LINK",
+                "UNSUPPORTED_WIKI_KIND",
             ],
         )
         self.assertEqual(report["summary"]["issues_by_category"]["evidence"], 3)

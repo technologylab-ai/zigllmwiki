@@ -1,7 +1,7 @@
 ---
 id: trustworthy-microbenchmarks
 title: Trustworthy microbenchmarks
-kind: workflow
+kind: pattern
 status: source-verified
 zig: "0.16.0"
 summary: A benchmark needs runtime-variable inputs, an externally consumed correctness witness, explicit build mode, and one maintained test/build entry point before its timing means anything.

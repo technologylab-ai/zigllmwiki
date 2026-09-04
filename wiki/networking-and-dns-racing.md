@@ -138,3 +138,8 @@ stream test does not prove either. The Windows run is retained in
 Related: [[std-io]], [[async-vs-concurrent]], [[select-and-batch]],
 [[io-time-clocks-and-deadlines]], [[task-lifetimes-and-structured-concurrency]],
 [[evented-io-backends]], [[tigerstyle]].
+
+For a custom Windows completion backend, [[windows-iocp-and-overlapped-io]]
+tracks the separate public Winsock TCP-to-file fixture, partial-transfer
+ownership, per-entry errors, and native-evidence status. That custom loop does
+not implement the entire `std.Io` interface.

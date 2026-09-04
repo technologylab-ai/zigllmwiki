@@ -80,7 +80,9 @@ Once cancellation begins, do not call `await` or `awaitMany` again. Both
 
 `Batch.init` takes a preallocated slice of `Operation.Storage`. That slice is
 the exact maximum number of active operations; Zig 0.16's initializer requires
-at least one slot. After initialization it is safe to install an unconditional
+at least one slot and fewer than `maxInt(u32)` slots: initialization temporarily
+converts `index + 1` to an index whose maximum value is reserved for `.none`.
+Choose a much smaller application limit and assert it before allocation. After initialization it is safe to install an unconditional
 `defer batch.cancel(io)` terminal guard.
 
 `add` consumes the first unused slot and returns its index. `addAt` consumes a

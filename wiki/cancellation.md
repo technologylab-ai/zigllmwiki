@@ -62,7 +62,8 @@ finish a partial result or cleanup and then re-arm propagation. Use
 cancellation; restore the prior state with `defer`. Long CPU-bound work with no
 other cancellation point can cooperate through `io.checkCancel()`.
 
-`Group.await` propagates a request to members and waits for the group to finish.
+`Group.await` waits for the group to finish. If its caller receives cancellation
+while waiting, it propagates that request to the members and still joins them.
 `Group.cancel` requests cancellation immediately and also completes the group's
 resource lifecycle. A group task returning `error.Canceled` is a propagation
 boundary rather than an application failure.

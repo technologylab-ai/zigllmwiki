@@ -1,7 +1,7 @@
 ---
 id: code-reading-and-mechanical-checks
 title: Code reading and mechanical checks
-kind: workflow
+kind: pattern
 status: source-verified
 zig: "0.16.0"
 summary: Review whole subsystems by tracing control flow and every state mutation, then turn stable discoveries into small automated repository invariants.

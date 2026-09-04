@@ -21,8 +21,10 @@ produce Zig 0.16.x code that:
 - **Foundation milestone:** M0 is complete. Portable local evidence, the full
   Zig 0.16 release-note scope inventory, deterministic graph scoring, and the
   first semantic lint report are all in place.
-- **Running now:** none at handoff. M3-004's proof and source-review assignments
-  are complete. Queued qualification work below has no assigned agent.
+- **Running now:** M3-006 Windows qualification, L-009 maintenance-agent
+  connection and a fresh semantic audit. Selected storage/recovery curation
+  is complete as source synthesis.
+  These are active agent assignments; remote gates start only after integration.
 - **Latest completed content:** M1-001, M1-003, and M1-006 now document and
   prove `std.process.Init`/capability threading, `Select`/`Batch` ownership, and
   the complete `std.Io` synchronization-primitives surface. The six requested
@@ -38,8 +40,8 @@ produce Zig 0.16.x code that:
   The initial-wait batch defect and no-follow open metadata mismatch are
   preserved, not hidden by successful fixtures. Linux `omarx1` also passed
   82/82 steps, 70 tests and 7 skips.
-- **Queued, not running:** M3-006 deployment qualification and L-009
-  review-packet-to-PR automation.
+- **Session scope:** finish actionable wiki work; M4 is reserved by the user
+  for a separate in-depth session. External evidence gaps remain explicit.
 - **Backend:** intentionally deferred; the Obsidian-first ADR remains in force.
 
 Source status is tracked as `discovered → selected → captured → synthesized →
@@ -129,7 +131,7 @@ Keep interface design separate from backend implementation.
 | M3-003 | done | Apple-primary `kqueue`, Dispatch I/O, and POSIX AIO lifecycles; exact Zig 0.16 Dispatch/Kqueue mapping and defects; a Zig/C adapter; macOS runtime proof; and bounded comparative evidence. |
 | M3-004 | done | Pinned Microsoft/0.16 source, raw immediate/pending APC, fixed batch races and NPFS device-control cancellation, custom IOCP immediate/pending/cancel/shutdown ownership, finite limits/watchdogs, and bounded pipe/hot-file read metrics ran on Windows Server 2025. Initial-wait and wrapper-mode defects are explicit; broader qualification is M3-006. |
 | M3-005 | done | Cross-platform decision table selects portable Threaded or platform-specific file/network backends with guarantees, limits, unsupported cases, ownership, resource models, and exact evidence gates. |
-| M3-006 | queued | Qualify a named Windows deployment workload: Winsock and batched dequeue, overlapped file writes, regular-file immediate-success/cancellation, cold storage/durability, required driver/error paths, and a supported solution to unassisted batch shutdown. Record load/tail-latency criteria and native architecture/device matrix before extending runtime claims. |
+| M3-006 | running | Qualify a named Windows deployment workload: Winsock and batched dequeue, overlapped file writes, regular-file immediate-success/cancellation, cold storage/durability, required driver/error paths, and a supported solution to unassisted batch shutdown. Record load/tail-latency criteria and native architecture/device matrix before extending runtime claims. |
 
 | Platform | Research and proof targets |
 | --- | --- |
@@ -144,7 +146,10 @@ the named OS. Never generalize a networking result to regular files.
 Exit condition: a decision table can select a backend for file and network I/O
 with explicit guarantees, limits, unsupported cases, and measured evidence.
 
-## M4: synthesis project — TigerStyle evented HTTP server
+## M4: synthesis project — TigerStyle evented HTTP server (reserved)
+
+Reserved by the user on 2026-09-04 for its own in-depth session; outside the
+current wiki-completion session.
 
 Use the wiki to design, implement, and critique a bounded HTTP server:
 
@@ -181,7 +186,7 @@ a second content store. A mutable service and database come only after that.
 | L-006 | done | Deterministic read-only `query`/`lint` and plan-only `ingest`/`upgrade` commands expose versioned JSON and never silently mutate knowledge. |
 | L-007 | done | Machine lint classifies broken evidence, stale versions, schema, links, graph health, and style with stable codes. |
 | L-008 | done | Weekly/manual GitHub workflow installs the exact checksum-verified Zig baseline, verifies proofs, checks sources/releases and retrieval, proves the checkout stayed unchanged, and uploads a 30-day review packet. |
-| L-009 | queued | Connect a separately authorized coding agent that consumes the review packet and opens a reviewable PR; the read-only workflow intentionally lacks write/PR authority. |
+| L-009 | running | Connect a separately authorized coding agent that consumes the review packet and opens a reviewable PR; the read-only workflow intentionally lacks write/PR authority. |
 | L-010 | done | Read-only `review` reports coarse upstream-head differences and newer stable Zig releases while preserving source records and requiring an explicit upgrade workflow. |
 | L-011 | done | A versioned 25-query benchmark scores the deterministic index/lexical layer; MRR 1.0, hit@3 1.0, and recall@5 0.98 do not justify hybrid search yet. |
 
@@ -194,9 +199,13 @@ hybrid search when thresholds fail or real agent queries demonstrate misses.
   inventory has no stale queued rows.
 - Extend the completed Windows NPFS/IOCP fixtures only against M3-006's named
   workload, device, error-path, and shutdown requirements.
-- Select new matklad or TigerBeetle sources only for a named system-design
-  question; never promote old Zig syntax without a 0.16 proof.
+- Completed the selected TigerBeetle storage/recovery/operations slice on
+  2026-09-04 in [[durable-storage-and-recovery]], including focused implementation
+  evidence. Future source selection remains question-driven; old Zig syntax
+  must not enter guidance without an exact 0.16 proof.
 - Extend the three-platform matrix with workload-specific filesystem/device,
   cold-storage, durability, and native architecture runners.
-- Design snippet tangling so Markdown can eventually show verified excerpts
-  without duplicating executable code.
+- Verified-excerpt design is complete in
+  [ADR 0002](docs/decisions/0002-verified-proof-excerpts.md): proof files remain
+  canonical, future exports require provenance/drift gates, and wiki Zig fences
+  remain forbidden. No renderer or tangler is enabled by that design.

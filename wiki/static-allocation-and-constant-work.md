@@ -13,6 +13,8 @@ sources:
   - "[[matklad-static-allocation-constant-work]]"
   - "[[matklad-reserve-first]]"
   - "[[matklad-static-allocation-compilers]]"
+  - "[[tigerbeetle-storage-source]]"
+  - "[[zig-0.16.0-stdlib]]"
 proofs:
   - proofs/static_pool.zig
 platforms:
@@ -31,6 +33,12 @@ dynamic allocation or deallocation afterward.
 When capacity is full, reject or defer excess work while preserving service for
 the admitted work. Trying one hopeful allocation beyond a declared limit can
 turn overload into process-wide failure.
+
+This is a design recommendation, not a claim that every TigerBeetle capacity
+boundary rejects gracefully: the pinned `Grid.reserve` and manifest
+`NodePool.acquire` terminate on exhaustion. Their limits and operational
+consequences are examined in [[durable-storage-and-recovery]].
+[[tigerbeetle-storage-source]]
 
 ## Capacity is part of the design
 
@@ -90,11 +98,21 @@ Choose it after a performance sketch and measurement at the configured maximum.
 
 ## The `std.Io.Threaded` seam
 
-[[io-threaded|`std.Io.Threaded`]] allocates task records and may grow its thread
-pool when `async` or `concurrent` schedules work. An application that preallocates
-its own request pool is therefore not strictly allocation-free in steady state
-unless it avoids those dispatch paths, proves they are prewarmed and bounded, or
-uses another implementation with explicit reservation semantics.
+In the ordinary multithreaded Zig 0.16 implementation,
+[[io-threaded|`std.Io.Threaded`]] calls `Future.create` for `async`/`concurrent`
+and `Group.Task.create` for group dispatch; terminal cleanup destroys those
+records. Prewarming worker threads may avoid thread growth, but does not remove
+these per-dispatch allocator calls. Even an `async` call that ultimately runs
+inline because its concurrency limit is reached first attempts to allocate
+the future. [[zig-0.16.0-stdlib]]
+
+A preallocated allocator can bound the backing storage while still performing
+allocation/free operations. An application requiring strictly no steady-state
+allocation must avoid these dispatch paths or choose an implementation whose
+ownership model satisfies that requirement. This is a `Threaded` seam, not an
+allocation guarantee imposed by the `std.Io` interface. The explicit
+single-threaded build follows different paths described in
+[[testing-io-and-single-threaded-builds]].
 
 An evented design has the same obligation. Every in-flight kernel operation
 needs a stable operation record, buffer lifetime, completion slot, and
@@ -116,4 +134,4 @@ mechanics with Zig 0.16.0. It does not claim to benchmark the approach.
 Related: [[tigerstyle]], [[newtype-indexes]],
 [[integer-widths-and-boundaries]], [[cancellation]],
 [[select-and-batch]], [[io-synchronization-primitives]],
-[[evented-io-backends]].
+[[evented-io-backends]], [[durable-storage-and-recovery]].

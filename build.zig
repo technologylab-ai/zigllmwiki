@@ -77,6 +77,7 @@ pub fn build(b: *std.Build) void {
         "proofs/windows_io_mapping.zig",
         "proofs/windows_apc_batch.zig",
         "proofs/windows_iocp_lifecycle.zig",
+        "proofs/windows_iocp_tcp_file.zig",
     };
     for (proof_sources) |proof_source| {
         const proof_module = b.createModule(.{
@@ -100,6 +101,7 @@ pub fn build(b: *std.Build) void {
         "proofs/threaded_blocked_read_cancel_windows.zig",
         "proofs/windows_apc_batch.zig",
         "proofs/windows_iocp_lifecycle.zig",
+        "proofs/windows_iocp_tcp_file.zig",
     };
     for (windows_architectures) |architecture| {
         for (windows_proof_sources) |proof_source| {

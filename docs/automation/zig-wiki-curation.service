@@ -1,0 +1,15 @@
+[Unit]
+Description=Curate the latest verified Zig wiki review packet
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/.local/state/zigllmwiki-curator/runner
+Environment=PATH=%h/.local/share/mise/shims:%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStartPre=/usr/bin/git fetch origin main --quiet
+ExecStartPre=/usr/bin/git merge --ff-only origin/main
+ExecStart=%h/.local/share/mise/shims/python3 tools/curate_scheduled.py
+TimeoutStartSec=100min
+KillMode=control-group

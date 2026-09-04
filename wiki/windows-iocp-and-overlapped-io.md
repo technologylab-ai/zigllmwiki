@@ -9,6 +9,7 @@ updated: 2026-09-04
 sources:
   - "[[microsoft-windows-iocp]]"
   - "[[microsoft-windows-iocp-api]]"
+  - "[[microsoft-windows-winsock-batched-file-io]]"
   - "[[microsoft-windows-nt-fs-control]]"
   - "[[zig-0.16-windows-io-source]]"
   - "[[tigerbeetle-io-source]]"
@@ -17,6 +18,7 @@ proofs:
   - proofs/threaded_blocked_read_cancel_windows.zig
   - proofs/windows_apc_batch.zig
   - proofs/windows_iocp_lifecycle.zig
+  - proofs/windows_iocp_tcp_file.zig
 platforms:
   - windows
 ---
@@ -220,9 +222,28 @@ successful packet with a null pointer can instead be an application control
 message, provided its identity and handling are explicit.
 [[microsoft-windows-iocp-api]] supplies the exact API contracts.
 
+`GetQueuedCompletionStatusEx` returns up to the capacity of the caller's entry
+array. A successful call can include both successful and failed operations;
+the call's Boolean result and `GetLastError` do not classify every entry.
+`OVERLAPPED_ENTRY.Internal` is reserved in the public API. The TCP/file proof
+uses the dequeued operation pointer to call nonwaiting
+`WSAGetOverlappedResult` for sockets or `GetOverlappedResult` for files,
+retaining each record until its own result is reconciled. It does not interpret
+the reserved field as a public Win32 error code.
+[[microsoft-windows-winsock-batched-file-io]] pins these contracts.
+
+For TCP, one successful receive can contain fewer bytes than requested, and
+a zero-byte success signals graceful receive EOF. A send completion only
+establishes local transport consumption of the send buffer; peer application
+receipt requires a separate witness. Continue a bounded frame's remaining
+bytes using the actual completion counts, and keep the payload at its final
+address through every pending request. A failed initiation other than
+`WSA_IO_PENDING` has no completion indication to drain. These public Winsock
+rules do not turn the stdlib's private AFD implementation into an IOCP adapter.
+
 ## Bounded proof design
 
-The two new harnesses implement deliberately narrow fixtures, not a complete
+The harnesses implement deliberately narrow fixtures, not a complete
 `std.Io` backend. Their records remain at final addresses while the kernel can
 borrow them; cleanup drains terminal outcomes before closing handles. The
 named-pipe buffer reservation is a requested kernel quota, not an application
@@ -232,10 +253,12 @@ memory cap or a guarantee about every driver's buffering.
 | --- | --- | --- |
 | [APC/batch/device](../proofs/windows_apc_batch.zig) | NPFS pipes; one or two fixed operation slots; a 4096-byte requested pipe quota; 1-byte and 8192-byte transfers; one permitted Threaded concurrent task plus bounded helper threads. Raw NT calls record actual immediate/pending statuses. | Direct task cancellation joins; batch cleanup explicitly alerts the issuing thread to release the 0.16.0 initial-wait defect, then drains retained successes. The device fixture is message-pipe `FSCTL_PIPE_TRANSCEIVE` through `NtFsControlFile`. |
 | [Custom IOCP](../proofs/windows_iocp_lifecycle.zig) | Four stable slots and 64-byte buffers, port concurrency one, four pipe pairs or four handles to one 256-byte regular file. Admission counts submitted operations until terminal dispatch, including queued completions. Both default and skip-on-success modes have separate runs. | Stop admission, post one uniquely identified control packet, cancel outstanding operations, keep draining after the control packet, reconcile every data result, then close handles and port. Capacity exhaustion and closed admission fail explicitly. |
+| [TCP to file / batched dequeue](../proofs/windows_iocp_tcp_file.zig) | One IPv4 loopback TCP pair; four fixed 1024-byte slots, four-entry dequeue array, port concurrency one; one read/write and one read-only handle to the same owned temporary file. The listener is setup-only. Default packet ownership includes immediate success. TCP receive requests are capped at 127 bytes and positive partial send/receive/file results advance the remaining range. | Stop admission, post a distinct control packet, request cancellation immediately, drain every data/control entry, then release socket/file/port ownership. Two pending socket receives test shutdown independently of `Threaded.batchCancel` and APC alerts. Five-second per-drain and sixty-second process watchdogs retain the outer workflow timeout. |
 
-The IOCP proof uses one-packet `GetQueuedCompletionStatus` dequeue and bounded
-submission batches. It does not exercise `GetQueuedCompletionStatusEx` or
-Winsock. Aborted results do not imply byte rollback: race fixtures close their
+The original IOCP proof uses one-packet `GetQueuedCompletionStatus` dequeue and
+bounded submission batches; the TCP/file proof adds Winsock and batched
+`GetQueuedCompletionStatusEx`. Aborted results do not imply byte rollback:
+pipe race fixtures close their
 pipe only after the writer and target are terminal, then create a fresh pair.
 The regular-file fixture uses an explicit NT asynchronous open rooted at its
 owned temporary directory, rather than depending on symlink policy or the
@@ -363,15 +386,60 @@ therefore exercised by the prefilled pipes, **not** by these regular-file
 reads. These small VM measurements are correctness/load fixtures, not a
 backend ranking or deployment capacity forecast.
 
+### M3-006 TCP-to-file qualification fixture
+
+The named qualification question is deliberately bounded: can one loopback
+producer transfer a 1024-byte frame through public overlapped TCP, write it at
+an explicit regular-file offset, call `FlushFileBuffers`, and verify every
+read-back byte while preserving bounded completion ownership and shutdown?
+This is a local ingestion fixture for Windows Server 2025 x86_64 on the hosted
+runner's NTFS volume, not a declaration of a production deployment's needs.
+
+The proof performs 32 such cycles (32 KiB logical working set), then 32 read
+and 32 write cancellation races. Read-race successes validate the original
+payload; write races use a separate scratch offset because cancellation does
+not promise rollback. It also checks read-only write rejection without a
+completion packet, file EOF, successful zero-byte TCP EOF, pending receive
+cancellation, occupied-slot/closed-admission rejection, and terminal accounting
+during shutdown. An error byte-count output is never treated as confirmed
+transferred or rolled-back data. Fixed application storage does not bound the
+Winsock provider, kernel, or filesystem's own allocations and buffering.
+
+Acceptance is zero corrupt/missing/duplicate results, all accepted requests
+reconciled, each full transfer/flush/readback cycle under five seconds, each
+drain under its five-second diagnostic deadline, and no sixty-second process
+watchdog expiry. The proof reports actual immediate/pending counts by operation,
+batch size, cancel outcomes, total rate, and nearest-rank cycle p50/p99/max.
+For only 32 observations, p99 is the maximum; this is not a production tail
+latency estimate. There is no deployment throughput SLO to invent from this
+fixture. Blocking Winsock connection setup and file creation are outside the
+measured cycle and protected only by the process/job watchdogs.
+
+On 2026-09-04, the new proof linked Windows PE test binaries for x86,
+x86_64, and aarch64 using exact Zig 0.16.0 on macOS. **Native execution is
+pending**; these binaries alone do not establish socket completion, batched
+error classification, file write/flush, or cancellation behavior. The original
+M3-004 native observations above remain separate evidence.
+
+The supported public-API shutdown strategy being tested belongs to this custom
+IOCP fixture: cancel before waiting and reconcile through the port. It does
+not repair the shipped `Threaded.batchCancel` initial wait, supply a general
+`std.Io` replacement, or qualify arbitrary drivers. No private AFD protocol or
+manual APC alert is part of this new strategy.
+
 This page remains `source-verified` because its broad OS and implementation
-claims exceed these narrow runtime fixtures. Remaining M3-006 work includes
-Winsock and `GetQueuedCompletionStatusEx`, overlapped file writes, regular-file
-immediate-success/cancellation, cold storage and durability, arbitrary drivers
-and error translations, unassisted batch shutdown remediation, and deployment
-load. Windows x86 and aarch64 remain compile-only; macOS/Linux runs skip the
-Windows behavior tests. The shipped Threaded backend remains the default, and
-this custom adapter is not a complete `std.Io` implementation.
+claims exceed the narrow runtime fixtures. M3-006 cannot be fully discharged
+by a hosted VM: physical power-loss persistence, controlled cold storage,
+deployment driver/error coverage, native x86/aarch64 execution, and a specified
+production workload/SLO require additional environments or requirements. A
+successful `FlushFileBuffers` and immediate readback are API observations,
+not power-loss recovery evidence about unidentified virtual-disk backing.
+Regular-file immediate success or cancellation wins remain unobserved unless
+the runtime counters actually report them. macOS/Linux runs skip Windows
+behavior; the shipped Threaded backend remains the portable default.
 
 Related: [[std-io]], [[io-threaded]], [[select-and-batch]],
 [[tigerbeetle-io]], [[evented-io-backends]], [[cancellation]],
-[[invariants-and-assertions]], [[static-allocation-and-constant-work]].
+[[invariants-and-assertions]], [[static-allocation-and-constant-work]],
+[[files-buffering-and-atomic-persistence]], [[networking-and-dns-racing]],
+[[error-path-catalogs-and-fault-injection]].

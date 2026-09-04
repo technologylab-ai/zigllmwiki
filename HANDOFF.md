@@ -40,6 +40,23 @@ Windows native tests use the manual GitHub-hosted Windows VM workflow. No
 local Windows VM is part of the setup. Windows cross-compilation on macOS or
 Linux remains compile-only evidence.
 
+## Current completion session
+
+The user requested completion of actionable wiki work on 2026-09-04, reserving
+M4 for its own in-depth session. The selected TigerBeetle storage/recovery and
+operations sources are now synthesized in [[durable-storage-and-recovery]];
+no engine execution or physical durability proof is claimed. A fresh semantic
+audit reviewed the expanded vault and seven fixes; see
+[the follow-up report](reports/2026-09-04-semantic-lint-followup.md).
+
+A new Windows TCP-to-file proof and pinned source slice compile for three
+architectures. Native gates are pending; M3-006 must retain the unavailable
+physical power-loss/cold-storage/deployment-driver/native-architecture limits.
+The local maintenance consumer and publication-boundary tests are implemented;
+end-to-end agent/PR validation and scheduler installation are still pending.
+See [agent curation](docs/agent-curation.md). No remote test runner or periodic
+curator is implied active by these implementation notes.
+
 ## First five minutes of a new session
 
 1. Read `AGENTS.md` completely, then `.agents/skills/zig-wiki/SKILL.md`.

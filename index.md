@@ -70,7 +70,7 @@ Read this page first, then follow only the pages needed for the task.
 - [[macos-kqueue-and-aio]] — `kqueue` readiness, Dispatch I/O/POSIX AIO
   completion, exact Zig 0.16 backend gaps, and measured macOS evidence.
 - [[windows-iocp-and-overlapped-io]] — APC/batch/device cancellation, the
-  Windows batch progress defect, and bounded IOCP ownership and shutdown.
+  Windows batch progress defect, bounded IOCP ownership and TCP-to-file qualification.
 - [[tigerbeetle-io]] — source-verified comparison of TigerBeetle's Linux
   `io_uring`, Darwin `kqueue`, and Windows IOCP backend choices.
 
@@ -115,6 +115,8 @@ Read this page first, then follow only the pages needed for the task.
   exact/floor/ceiling arithmetic.
 - [[deterministic-simulation-testing]] — seeded virtual time, fault injection,
   assertions, and replay.
+- [[durable-storage-and-recovery]] — bounded compaction, checkpoint/WAL
+  authority, delayed block reuse, sync cancellation, and recovery promises.
 - [[tigerbeetle-engineering-corpus]] — curated TigerBeetle docs by reusable
   systems question and ingestion state.
 - [[steering-zig-fmt]] — formatter controls that keep Zig code readable and
@@ -136,12 +138,16 @@ Read this page first, then follow only the pages needed for the task.
 - [Maintenance log](log.md) — append-only history.
 - [Obsidian-first decision](docs/decisions/0001-obsidian-first.md).
 - [Semantic lint procedure](tools/semantic_lint.md) and
-  [latest report](reports/2026-09-04-semantic-lint.md) — repeatable agent audit
+  [latest report](reports/2026-09-04-semantic-lint-followup.md) — repeatable agent audit
   plus reviewable findings.
 - [Generated-code inspector](tools/inspect_generated_code.py) — exact-version,
   source-hashed assembly evidence for focused exported symbols.
 - [Read-only source/release review](tools/wiki.py) and
   [weekly workflow](.github/workflows/wiki-review.yml) — coarse change signals,
   exact-baseline verification, and an out-of-tree review packet.
+- [Agent curation](docs/agent-curation.md) — local semantic review of a trusted
+  GitHub packet, bounded edits, verification and draft-PR publication.
+- [Verified-excerpt design](docs/decisions/0002-verified-proof-excerpts.md) —
+  future proof-derived displays with provenance, without duplicated Zig.
 - [Retrieval benchmark](reports/2026-09-04-retrieval-benchmark.md) — 25 reviewed
   queries currently support keeping deterministic lexical retrieval.

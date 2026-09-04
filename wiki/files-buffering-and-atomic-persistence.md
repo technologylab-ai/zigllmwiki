@@ -156,5 +156,11 @@ file, and checks the exclusive `readFileAlloc` limit boundary. It ran through
 The proof establishes API behavior on that runtime; it is not a simulated
 power-loss test and makes no claim about other filesystems' durability.
 
+For a database's additional root-selection, WAL, replication, block-reuse,
+and crash-repair decisions, see [[durable-storage-and-recovery]]. Its
+TigerBeetle synthesis is source evidence; it does not strengthen this proof's
+runtime or power-loss scope.
+
 Related: [[std-io]], [[io-threaded]], [[static-allocation-and-constant-work]],
-[[invariants-and-assertions]], [[tigerstyle]], [[evented-io-backends]].
+[[invariants-and-assertions]], [[tigerstyle]], [[evented-io-backends]],
+[[durable-storage-and-recovery]].

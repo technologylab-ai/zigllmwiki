@@ -107,8 +107,9 @@ cancelable and uncancelable acquisition variants plus nonblocking `tryLock` and
 implementation may touch its internal mutex.
 
 Match `unlock` only with exclusive acquisition and `unlockShared` with every
-successful shared acquisition. The 0.16 implementation tracks queued writers
-to avoid admitting them as readers, but the public contract does not promise a
+successful shared acquisition. In the 0.16 implementation, queued writers
+disable the reader fast path; shared acquisition falls back to the internal
+mutex. The public contract does not promise a
 general fairness or starvation bound. If a latency guarantee depends on
 fairness, build and test that policy explicitly.
 

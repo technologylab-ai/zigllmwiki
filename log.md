@@ -533,3 +533,38 @@ Confirmed the previously completed publication workflow
 is successful at `e6eb0b58a0779f50f43a1fea5d07019a44618231` and preserved that
 result in the handoff. This documentation change does not extend proof scope
 or change the queued M3-006/L-009 roadmap work.
+
+## [2026-09-04] ingest and audit | complete selected storage synthesis and expand Windows qualification
+
+Continued from clean main `000989dcbaaf548a68fefc943c88c4e19a6a6153`, matching
+origin after the user's Obsidian-settings change. Exact Zig 0.16.0 baseline
+passed 82/82 steps, 69/77 tests with 8 macOS skips. User reserved M4 for a
+separate in-depth session.
+
+Pinned five TigerBeetle storage/recovery/operations source slices at
+`47aeb2212a255273dda508288412e537d11e4b7c` and synthesized the selected documents
+plus named implementation symbols into one linked durable-storage page. It
+preserves per-beat versus documented half-bar reservation, fatal capacity
+exhaustion, delayed block reuse, recovery authority, and submitted-I/O drain
+boundaries. No TigerBeetle engine was built or run.
+
+Pinned the focused Microsoft Winsock/batched-result/flush contracts before
+adding a registered four-slot TCP-to-file proof. Exact 0.16.0 cross-compilation
+now includes x86/x86_64/aarch64. It covers public socket I/O, partial transfers,
+file write/flush/readback, cancellation races, per-operation batched results,
+and independent shutdown; native Windows execution is still pending here.
+The physical storage and deployment qualification gap is not closed by a VM.
+
+A fresh semantic audit reviewed 50 navigable pages, 59 records, 31 Zig proofs
+and the C shim, with seven corrected findings and no remaining high/critical
+finding. Fixed Threaded prewarming/allocation wording, Group.await propagation,
+RwLock fast-path wording, Dispatch STOP error qualification, stale platform/DST
+claims, and invalid page kinds. Kind validation now enforces the agent contract.
+The follow-up report preserves the historical audit and exact review scope.
+The proof-excerpt design is documented without enabling wiki Zig fences.
+
+Implemented a local review-packet consumer with isolated agent edits and
+separate gh publication, bounded Markdown changes, immutable-source and
+append-only-log checks, exact-revision gates, and retained failure artifacts.
+Publication-boundary review and end-to-end runtime validation are in progress;
+no timer or autonomous PR is claimed at this entry.

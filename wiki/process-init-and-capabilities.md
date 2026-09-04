@@ -110,8 +110,10 @@ module and an executable. `zig build verify` compiles and runs its real
 `main(init: std.process.Init)`, checks the full field surface at compile time,
 uses the cross-platform allocating argument iterator, and drives a leaf through
 the caller-provided `std.Io`. It ran on aarch64 macOS with Zig 0.16.0 on
-2026-09-04; other platforms retain source-level coverage until their runners
-execute it.
+2026-09-04. Subsequent full gates also executed this proof on Linux and Windows;
+the exact environments and publication references are retained in
+[the handoff](../HANDOFF.md) and [platform runbook](../docs/platform-testing.md).
+Those executions cover this fixture, not every process-startup configuration.
 
 Related: [[std-io]], [[io-threaded]], [[async-vs-concurrent]],
 [[task-lifetimes-and-structured-concurrency]],

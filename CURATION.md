@@ -85,6 +85,11 @@ when a concrete systems-programming question needs them.
 | Microsoft `NtFsControlFile` at `7515063cea4c9e98db6a92986c5b4ddb0463fd16` | synthesized + NPFS mechanics proved | APC/port-context ownership and message-pipe transaction direct/batch cancellation; arbitrary devices are unproved and the nonexistent `Asynchronous` parameter is excluded. |
 | Zig 0.16 Windows `std.Io` source | synthesized + selected Windows runtime and three-target compile proofs | Exact mapping, APC/batch/NPFS evidence, initial-wait progress defect, and no-follow open metadata mismatch in [[windows-iocp-and-overlapped-io]]; AFD and arbitrary-driver behavior remain source-only. |
 
+The Microsoft SDK slice at `5f2625b6782d3e9c0df08756583c527a0a2872ca` also
+now covers public Winsock, batched dequeue and flush/result APIs in
+[[microsoft-windows-winsock-batched-file-io]]. The bounded TCP-to-file proof is
+registered; native results remain pending until a named Windows gate passes.
+
 ## TigerBeetle — current slice
 
 | Source/path | Status | Wiki effect |
@@ -94,13 +99,13 @@ when a concrete systems-programming question needs them.
 | `docs/concepts/safety.md` | synthesized | fault-model and DST guidance |
 | `docs/concepts/performance.md` | synthesized | interface, batching, headroom, and capacity guidance |
 | `docs/internals/vopr.md` | synthesized | [[deterministic-simulation-testing]] |
-| `docs/internals/data_file.md` | captured | selected for storage correctness; synthesis waits for implementation and OS evidence |
-| `docs/internals/lsm.md` | selected | bounded compaction and manifest invariants |
-| `docs/internals/sync.md` | selected | recovery and cancellation boundaries |
-| `docs/internals/vsr.md` | selected | protocol state machines, quorums, and repair |
-| `docs/operating/{hardware,monitoring,recovering}.md` | selected | operational assumptions and failure handling |
+| `docs/internals/data_file.md` | synthesized | [[durable-storage-and-recovery]] separates layout, checkpoint authority and OS durability assumptions. |
+| `docs/internals/lsm.md` | synthesized | Bounded compaction and manifest ownership; exact per-beat reservation differs from the document's half-bar description. |
+| `docs/internals/sync.md` | synthesized | Authoritative checkpoint selection, I/O drain, lazy-repair markers and sync ratchets. |
+| `docs/internals/vsr.md` | synthesized | Distinct replication/view-change quorums and recovery promises. |
+| `docs/operating/{hardware,monitoring,recovering}.md` | synthesized | Fault domains, capacity/latency signals and lost-replica recovery assumptions. |
 | `src/io{,.zig}/**` | synthesized | [[tigerbeetle-io]] maps caller-owned completions, dispatch, queue pressure, Linux `io_uring`, Darwin `kqueue`, and Windows IOCP while recording the missing cancellation surface. |
-| `src/{vsr,lsm}/**` | selected | implementation evidence for ownership, limits, storage, state machines, and recovery |
+| `src/{vsr,lsm}/**` | synthesized, focused symbols | [[tigerbeetle-storage-source]] names inspected reservations, pools, root selection, delayed reuse and sync-cancellation symbols; not a full implementation audit. |
 
 ## Current curation execution
 
@@ -116,7 +121,7 @@ agent is currently working on it.
 | M3-002 Linux evented I/O | done | Kernel/feature floors, registered resources, cancellation races, and real Zig 0.16 `omarx1` evidence are integrated. |
 | M3-004 Windows evented I/O | done | APC/batch/NPFS plus custom IOCP pipe/file lifecycle and bounded load ran on Windows Server 2025; exact observations, defects, watchdogs and limits are preserved. All subagents finished. |
 | M3-005 backend decision table | done | File/network choices, guarantees, limits, unsupported paths, ownership, resource models, and evidence gates are synthesized across all three platforms. |
-| M3-006 Windows deployment qualification | queued | No assigned agent. Select workload/driver requirements before Winsock, file-write/cold-storage/durability, native architecture, and unassisted-shutdown evidence. |
+| M3-006 Windows deployment qualification | running | Windows proof agent is implementing a bounded TCP-to-file fixture; broader qualification still requires Winsock, file-write/cold-storage/durability, native architecture, and unassisted-shutdown evidence. |
 
 M1-001 is complete: [[process-init-and-capabilities]] synthesizes the official
 Zig 0.16 initializer/startup source and the local migration guide, with a real
@@ -153,5 +158,6 @@ bounded-memory/layout essays have decision-level synthesis.
    through M3-006; the initial APC/batch/NPFS and IOCP lifecycle/load slice is done.
 2. Keep the cross-platform backend table synchronized with runtime evidence and
    explicitly tested OS/kernel/filesystem/device combinations.
-3. Continue selected TigerBeetle storage, recovery, and operational sources by
-   a named system-design question rather than bulk summary.
+3. The selected TigerBeetle storage/recovery/operations slice is synthesized
+   in [[durable-storage-and-recovery]]. New sources require a new named design
+   question; source synthesis does not prove an engine or storage deployment.

@@ -74,7 +74,7 @@ On the exact publication revision, also run the target-independent command and
 retrieval regression tests on at least one host:
 
 ```text
-PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tools.test_wiki_commands tools.test_retrieval_benchmark -v
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tools.test_wiki_commands tools.test_retrieval_benchmark tools.test_curate_review tools.test_curate_scheduled -v
 PYTHONDONTWRITEBYTECODE=1 python3 tools/retrieval_benchmark.py --format text --enforce-policy
 ```
 
@@ -168,8 +168,8 @@ archive named by `.zig-version` from Zig's official release index, verifies the
 published SHA-256, records the runner image, exact Windows build/UBR, CPU, RAM,
 logical filesystems and reported disk models, runs the common Zig verifier,
 then explicitly runs `windows_io_mapping.zig`,
-`threaded_blocked_read_cancel_windows.zig`, `windows_apc_batch.zig`, and
-`windows_iocp_lifecycle.zig` natively. It also runs the command/retrieval gates
+`threaded_blocked_read_cancel_windows.zig`, `windows_apc_batch.zig`,
+`windows_iocp_lifecycle.zig`, and `windows_iocp_tcp_file.zig` natively. It also runs the command/retrieval gates
 and fails if verification changes the checkout. Logs and host metadata are
 uploaded for 30 days even when an earlier step fails.
 
@@ -243,9 +243,11 @@ with read-only `git ls-remote`; do not reintroduce the scoped API call. A remote
 HEAD difference is a coarse inspection prompt, not proof that a pinned record
 or synthesized claim is stale.
 
-Neither hosted workflow writes content or opens pull requests. L-009 in
-`ROADMAP.md` deliberately reserves review-packet consumption for a separately
-authorized coding agent.
+Neither hosted workflow writes content or opens pull requests. The separate
+local consumer in [agent curation](agent-curation.md) uses Codex for semantic
+review and `gh` for packet retrieval and draft-PR publication. Its operational
+validation and scheduler status are tracked in the handoff; read-only hosted
+review remains independent of write authority.
 
 ## Recording a new platform result
 

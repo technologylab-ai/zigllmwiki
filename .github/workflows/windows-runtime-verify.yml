@@ -176,10 +176,19 @@ jobs:
             throw "windows_iocp_lifecycle.zig failed with exit code $LASTEXITCODE"
           }
 
+      - name: Run TCP-to-file IOCP qualification natively
+        if: always()
+        shell: pwsh
+        run: |
+          & zig test proofs/windows_iocp_tcp_file.zig 2>&1 | Tee-Object -FilePath (Join-Path $env:REVIEW_PACKET "windows-iocp-tcp-file-native.log")
+          if ($LASTEXITCODE -ne 0) {
+            throw "windows_iocp_tcp_file.zig failed with exit code $LASTEXITCODE"
+          }
+
       - name: Run command and retrieval gates
         shell: pwsh
         run: |
-          & python3 -m unittest tools.test_wiki_commands tools.test_retrieval_benchmark -v 2>&1 | Tee-Object -FilePath (Join-Path $env:REVIEW_PACKET "command-tests.log")
+          & python3 -m unittest tools.test_wiki_commands tools.test_retrieval_benchmark tools.test_curate_review tools.test_curate_scheduled -v 2>&1 | Tee-Object -FilePath (Join-Path $env:REVIEW_PACKET "command-tests.log")
           if ($LASTEXITCODE -ne 0) {
             throw "command tests failed with exit code $LASTEXITCODE"
           }

@@ -89,7 +89,8 @@ dispatch-data object until the operation completes, but whether the underlying
 bytes were copied or borrowed was decided when that object was created.
 
 Closing with `DISPATCH_IO_STOP` requests best-effort interruption. Partial
-results may still arrive, and the terminal handler reports `ECANCELED`. Thus,
+results may still arrive. An interrupted operation reports `ECANCELED` in its
+terminal handler; a stop request does not promise every operation is interrupted. Thus,
 as with [[cancellation]], close/stop is a request and the terminal callback is
 the buffer-ownership acknowledgement.
 

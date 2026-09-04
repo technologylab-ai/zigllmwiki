@@ -11,6 +11,8 @@ sources:
   - "[[tigerbeetle-architecture]]"
   - "[[tigerbeetle-safety]]"
   - "[[source-tigerstyle]]"
+  - "[[tigerbeetle-sync]]"
+  - "[[tigerbeetle-storage-source]]"
 proofs: []
 platforms:
   - cross-platform
@@ -53,6 +55,22 @@ also aligns tested invariants with deployed invariants.
 - seed, revision, configuration, and event trace in every failure artifact;
 - exact replay plus targeted regression tests for minimized failures.
 
+## Derive storage faults from ownership boundaries
+
+[[durable-storage-and-recovery]] supplies concrete targets from TigerBeetle's
+pinned sync and storage implementation: delay completion past a sync request,
+crash between root publication and lazy repair completion, return a valid
+block with an unexpected identity, and exhaust compaction or manifest
+capacity. The sync design also describes a crash that needs a block already
+used and released during repair, which is why its unfinished-sync marker
+survives until a later checkpoint. [[tigerbeetle-sync]],
+[[tigerbeetle-storage-source]]
+
+For a new service, make these proposed fault cases deterministic before
+claiming recovery coverage. Check both the durable state selected after
+restart and the lifetime of operations still accessing the old state. These
+are harness design recommendations; no such storage campaign ran in this wiki.
+
 ## Limits
 
 Simulation validates the implementation paths and assumptions represented by
@@ -61,9 +79,12 @@ the simulator itself correct. Pair DST with focused real-platform tests,
 property/fuzz testing, static analysis, and formal models where each provides
 different evidence.
 
-No Zig DST harness is proved in this repository yet. M1 must first inventory
-`std.testing.io` and the failing/test `Io` implementations; a custom evented
-backend and its deterministic model belong to M3/M4.
+No custom Zig DST harness is proved in this repository yet. The completed
+[[testing-io-and-single-threaded-builds]] inventory distinguishes host-backed
+`std.testing.io` from the fixed hostile `Io.failing` profile; neither is a
+deterministic disk/network scheduler. An application-specific harness belongs
+with the separate M4 synthesis project.
 
 Related: [[tigerbeetle-engineering-corpus]], [[tigerstyle]], [[std-io]],
-[[cancellation]].
+[[cancellation]], [[durable-storage-and-recovery]],
+[[testing-io-and-single-threaded-builds]].
