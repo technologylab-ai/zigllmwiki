@@ -15,11 +15,15 @@ sources:
   - "[[liburing-interface-and-cancellation]]"
   - "[[apple-xnu-kqueue-aio]]"
   - "[[microsoft-windows-iocp]]"
+  - "[[microsoft-windows-iocp-api]]"
+  - "[[zig-0.16-windows-io-source]]"
 proofs:
   - proofs/cancellation.zig
   - proofs/threaded_blocked_read_cancel_macos.zig
   - proofs/threaded_blocked_read_cancel_linux.zig
   - proofs/threaded_blocked_read_cancel_windows.zig
+  - proofs/windows_apc_batch.zig
+  - proofs/windows_iocp_lifecycle.zig
 platforms:
   - cross-platform
 ---
@@ -150,3 +154,13 @@ Zig 0.16.0 on x86_64 Windows Server 2025 Datacenter 24H2, build 26100.33296, on
 2026-09-04 and proved that `NtCancelSynchronousIoFile` interrupts and joins the
 blocked pipe read before the watchdog releases it. The exact environment and
 logs are retained by [Actions run 33911991858](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33911991858).
+
+The later Windows [APC/batch proof](../proofs/windows_apc_batch.zig) and
+[custom IOCP proof](../proofs/windows_iocp_lifecycle.zig) passed on that Windows
+build in [run 33915530939](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33915530939).
+They add NPFS task/batch/device-control cancellation, result-race draining,
+both IOCP notification policies, and shutdown from four pending reads. The
+batch proof requires an explicit NT alert to release Zig 0.16.0's initial
+pre-cancellation wait; it does not prove unassisted progress. See
+[[windows-iocp-and-overlapped-io]] for exact limits, host metadata, and the
+distinction between observed task entry and kernel submission.

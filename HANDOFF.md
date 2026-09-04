@@ -10,12 +10,17 @@ The repository is a usable Obsidian-first, agent-first Zig 0.16.0 systems
 knowledge base. M0 (trustworthy foundation), M2 (TigerStyle in Zig), and the
 cross-platform M3 decision synthesis are complete. M1 covers the public
 `std.Io` field-guide surface targeted by the roadmap, including blocked-call
-cancellation on macOS, Linux, and Windows. M3-004 is being extended with
-registered APC/batch/NPFS-device and custom IOCP lifecycle/load harnesses.
-The earlier mapping and synchronous cancellation harness ran on Windows;
-the new harnesses still require the hosted runtime gate before evidence
-promotion. Their implementation found a 0.16.0 Windows `batchCancel` progress
-defect: an unbounded alertable wait occurs before cancellation requests.
+cancellation on macOS, Linux, and Windows. M3-004's bounded Windows evidence
+slice is complete: APC/batch/NPFS-device cancellation and custom IOCP
+immediate/pending/cancel/shutdown paths, plus pipe/hot-file read measurements,
+ran on Windows. M3-006 owns broader deployment qualification.
+
+Two exact 0.16.0 seams must survive continuation: Windows `batchCancel` waits
+indefinitely for an APC/alert before sending cancellation requests, and the
+no-follow file-open path requests asynchronous NT mode but returns false
+`nonblocking` metadata. The proofs expose the first through an explicit wake
+and avoid the second with an explicit NT open. Neither is silently repaired in
+the installed compiler, and neither is an interface-level guarantee.
 
 The active compiler is exactly the value in `.zig-version`: `0.16.0`. Do not
 silently follow Zig master, 0.15 examples, or a future 0.16 patch. The installed
@@ -81,6 +86,22 @@ and [Windows run 33911991858](https://github.com/technologylab-ai/zigllmwiki/act
 The latter completed the full verifier with 70/70 build steps, 67 passing tests,
 and 7 intentional platform skips before rerunning both Windows-specific proofs.
 
+M3-004's complete native evidence is
+[run 33915530939](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33915530939)
+at `959a93ac690abbde9f9ea55cf5f06437fedcec30`: **82/82 Zig steps, 70 passing
+tests, 7 skips**, then all four native Windows proofs passed separately. That
+workflow's overall result was failure in the newly added Python gate: a drive
+letter was parsed as a URL scheme. The command layer now distinguishes Windows
+drive paths and has a regression test. The final publication reruns all gates;
+use the [Windows workflow history](https://github.com/technologylab-ai/zigllmwiki/actions/workflows/windows-runtime-verify.yml)
+and match `headSha` to the checkout, not just to a similarly named run.
+
+The expanded workflow retains CPU/RAM/filesystem metadata, all four native
+logs, command/retrieval checks, and an explicit clean-status packet. macOS
+verification is 82/82 steps, 69 passing tests and 8 skips; the clean Linux
+implementation gate on `omarx1` is 82/82 steps, 70 passing tests and 7 skips.
+The command suite has 16 tests; the reviewed retrieval metrics remain unchanged.
+
 That workflow intentionally cannot edit content or open a pull request. L-009
 in `ROADMAP.md` reserves that job for a separately authorized coding-agent
 consumer. A source-head difference is only a review prompt, not evidence that
@@ -116,7 +137,16 @@ with an assumption that one “evented” label has portable semantics.
 | --- | --- | --- |
 | macOS arm64 | Full local verification; Threaded task/cancellation proofs; blocked pipe-read interruption; Dispatch I/O adapter and experimental Dispatch mapping; all portable proofs. | Product kqueue reactor/load tests, cold-storage matrix, Dispatch cancellation/write/durability matrix. |
 | Linux x86_64 (`ssh omarx1`) | Zig 0.16.0 blocked pipe-read cancellation; low-level `io_uring` finite SQ/probing, registered file+buffer lifetime, and target/cancel CQE reconciliation. | Older kernels, other filesystems/devices, resource tags, multishot behavior, high-level `std.Io.Uring` readiness, and decision-grade load measurements. |
-| Windows Server 2025 Datacenter 24H2, x86_64, build 26100.33296 | Full verification plus native mapping and synchronous blocked-read cancellation ran with Zig 0.16.0; both Windows harnesses also compile for x86, x86_64, and aarch64. | APC races, batch/device cancellation breadth, custom IOCP immediate-success/cancel/shutdown paths, and load evidence. |
+| Windows Server 2025 Datacenter 24H2, x86_64, build 26100.33296 | Exact Zig 0.16.0 full verification; mapping/synchronous cancellation; raw APC immediate/pending paths; 32 batch races; NPFS transaction cancellation; both IOCP notification modes, four-slot shutdown, 256 four-read cycles on pipes and a hot NTFS file. Four proofs compile for x86/x86_64/aarch64. | Native x86/aarch64, arbitrary drivers/AFD, unassisted batch progress, Winsock IOCP/batched dequeue, overlapped file writes, regular-file immediate-success/cancel, cold storage/durability and deployment load. |
+
+The recorded M3-004 measurement host reported AMD EPYC 7763, one core/two
+logical processors, 8,584,425,472 bytes RAM, Microsoft Virtual Disk devices,
+and NTFS on D:. Each workload was Debug, four 64-byte slots, 256 cycles; the
+regular-file working set was 256 bytes. All file load submissions were
+pending; only prefilled pipes exercised immediate success. Exact metrics,
+watchdogs, checksums and race distributions are in
+[[windows-iocp-and-overlapped-io]]. Do not use these VM fixtures as a backend
+performance ranking.
 
 Rerun the complete current tree on Linux with:
 
@@ -148,10 +178,10 @@ traps, read `docs/platform-testing.md` before changing any platform claim.
 
 ## Honest remaining work
 
-1. Finish M3-004's new hosted Windows runtime gate, preserve observed statuses
-   and bounded workload metrics, and distinguish the explicit batch wake from
-   unassisted cancellation. NPFS evidence does not cover arbitrary drivers,
-   Winsock IOCP, cold storage, or deployment load.
+1. M3-006 is queued with no assigned agent: choose a concrete Windows workload
+   and qualify its socket/file-write/device/error/durability paths and supported
+   shutdown strategy. The initial-wait defect still needs a supported remedy;
+   explicit test alerts are not a general production adapter.
 2. Extend the platform performance matrix only for a concrete workload,
    hardware, filesystem/device, queue depth, and correctness witness.
 3. Continue selected TigerBeetle storage/recovery/operations ingestion by a

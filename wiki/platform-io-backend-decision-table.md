@@ -16,6 +16,8 @@ sources:
   - "[[apple-libdispatch-io]]"
   - "[[zig-0.16-dispatch-kqueue-source]]"
   - "[[microsoft-windows-iocp]]"
+  - "[[microsoft-windows-iocp-api]]"
+  - "[[microsoft-windows-nt-fs-control]]"
   - "[[zig-0.16-windows-io-source]]"
   - "[[tigerbeetle-io-source]]"
 proofs:
@@ -25,6 +27,8 @@ proofs:
   - proofs/threaded_blocked_read_cancel_macos.zig
   - proofs/threaded_blocked_read_cancel_windows.zig
   - proofs/windows_io_mapping.zig
+  - proofs/windows_apc_batch.zig
+  - proofs/windows_iocp_lifecycle.zig
 platforms:
   - linux
   - macos
@@ -55,8 +59,9 @@ capacity, shutdown, and test obligations.
   other kernels, filesystems, devices, queue depths, or workloads.
 
 This page is `source-verified`, not cross-platform `runtime-verified`, because
-the narrow Windows mapping/cancellation proof is not a custom IOCP lifecycle or
-production server load result.
+its broad backend comparisons exceed the named lifecycle fixtures. The Windows
+IOCP proof now includes bounded pipe/file load; it does not establish production
+server capacity or every file/socket/device path.
 
 ## Backend matrix
 
@@ -69,8 +74,8 @@ production server load result.
 | macOS nonblocking `kqueue` reactor | Regular files are not turned into asynchronous data operations. `EVFILT_VNODE` is metadata notification; TigerBeetle performs regular-file `pread`/`pwrite` synchronously. | Strong candidate for socket readiness: attempt nonblocking operation, register one-shot readiness after `WouldBlock`, then retry. | Readiness is not byte transfer. Events may coalesce; one-shot watches require re-arm; a slow callback can stall a serialized dispatcher. Zig 0.16 `std.Io.Kqueue` is an unfinished proof of concept and is not selected as Apple `Io.Evented`. | Preallocate watch/operation records and retain identity through re-arm. Closing a descriptor removes its watches but does not acknowledge a separate AIO request. Cancellation/shutdown is application policy. | **Contract/source:** Apple XNU and pinned TigerBeetle; exact Zig 0.16 Kqueue source. No product reactor runtime/load proof in this vault. See [[macos-kqueue-and-aio]]. |
 | Apple Dispatch I/O for macOS files | Random-access channels accept explicit offsets and may run operations concurrently; stream operations have channel-position ordering. Handlers may deliver partial data before terminal `done`. | This page does not recommend Dispatch I/O as the socket reactor; use nonblocking readiness/Dispatch sources or Threaded until proved. | The Zig 0.16 stdlib does not expose `dispatch_io_*`; the proof uses a C Blocks shim. One hot-cache result is not a storage-backend ranking. | Dispatch retains channels and write data; read data must be retained or copied before handler return. `DISPATCH_IO_STOP` is best effort; retain buffers until terminal callback. Bound channels, operations, queued bytes, and callbacks. | **Runtime:** one random-access read via a Zig/C shim on arm64 macOS 26.6.2 plus a narrow hot-cache comparison. No cancellation, write, cold-I/O, durability, queue-depth, or load proof. See [[macos-kqueue-and-aio]]. |
 | Zig 0.16 `std.Io.Dispatch` on macOS | Positional file operations and `fsync` call synchronous syscalls inside fibers; streaming descriptors use Dispatch readiness after `WouldBlock`. | Network vtable operations are unavailable. | Experimental, not feature parity with Threaded. Each allocated fiber reserves at least 60 MiB, and `deinit` does not compile under Zig 0.16.0. Not a production server backend as shipped. | Allocated stackful fibers and Dispatch queues are implementation resources; synchronous file work can still occupy execution. Current teardown limitation prevents a clean lifecycle claim. | **Source/runtime:** exact Zig source; type mapping, initialization, async fiber, and positional read ran on arm64 macOS 26.6.2. No networking path exists. See [[macos-kqueue-and-aio]]. |
-| Zig 0.16 Windows `std.Io.Threaded` APC/NtDll paths | Default files use synchronous NT handles; selected asynchronous handles use `NtReadFile`/`NtWriteFile` APC completion. | Opens asynchronous AFD endpoints and issues `NtDeviceIoControlFile` requests; shutdown has a synchronous exception. | This is not IOCP. Windows `Io.Evented` is `void`; low-level AFD details are stdlib internals. Concurrent `Batch.net_receive` is explicitly unavailable. | Direct APC paths keep stack `IO_STATUS_BLOCK` and buffers alive; batch paths keep them in fixed slots. Cancellation uses `NtCancelSynchronousIoFile` or `NtCancelIoFileEx` and waits for terminal reconciliation. | **Source/compile/runtime:** exact Zig 0.16 mapping compiles for x86, x86_64, and arm64 PE; the mapping and synchronous blocked-read cancellation ran on x86_64 Windows Server 2025 build 26100.33296. APC/batch/device breadth remains unproved. See [[windows-iocp-and-overlapped-io]]. |
-| Custom Windows IOCP/overlapped adapter | Overlapped `ReadFile`/`WriteFile` with per-operation offsets on associated handles. | Overlapped Winsock operations such as `AcceptEx`, `ConnectEx`, `WSARecv`, and `WSASend`. | Windows only. IOCP concurrency does not bound handles, in-flight requests, completion backlog, or memory. Immediate success normally still queues a packet unless skip-on-success is deliberately enabled. Zig 0.16 stdlib supplies no IOCP/`OVERLAPPED` binding. | One stable `OVERLAPPED`, buffer, handle association, slot generation, and terminal owner per operation. `CancelIoEx` is only a request; normal, canceled, or failed terminal completion still owns reclamation. | **Contract/source:** pinned Microsoft docs and TigerBeetle implementation. No custom Zig 0.16 adapter runtime proof or Windows load result. See [[windows-iocp-and-overlapped-io]] and [[tigerbeetle-io]]. |
+| Zig 0.16 Windows `std.Io.Threaded` APC/NtDll paths | Default files use synchronous NT handles; selected asynchronous handles use APC completion. The no-follow open path has inconsistent `nonblocking` metadata. | Asynchronous AFD endpoints use `NtDeviceIoControlFile`; shutdown has a synchronous exception. | Not IOCP. `Io.Evented` is `void`; AFD details are private. Concurrent `Batch.net_receive` is unavailable. Pending `batchCancel` waits for an APC/alert before issuing cancellation, so unassisted shutdown can stall. | Direct paths retain stack status blocks/buffers; batches retain fixed slots. Cancellation must reconcile terminal state; the proof uses an explicit NT alert for the initial-wait defect. | **Runtime:** x86_64 Windows Server 2025 build 26100.33296, Zig 0.16.0: synchronous cancellation, raw APC immediate/pending paths, 32 batch races, and NPFS `NtFsControlFile` transaction cancellation. No arbitrary-driver/AFD cancellation proof. x86/arm64 compile only. See [[windows-iocp-and-overlapped-io]]. |
+| Custom Windows IOCP/overlapped adapter | Overlapped `ReadFile`/`WriteFile` with per-operation offsets. The proof exercises reads; file writes/durability remain outside its runtime scope. | Overlapped Winsock is supported by the OS/source design but untested by this custom fixture. | Port concurrency does not bound handles, requests, backlog, or memory. Immediate success normally queues a packet unless skip-on-success is enabled. Zig 0.16 stdlib supplies no IOCP bindings. | Stable `OVERLAPPED`/buffer ownership until terminal dispatch; four-slot admission includes undrained completions. Stop admission, cancel, drain data and distinct control packets, then close. Cancellation does not promise byte rollback. | **Runtime:** same Windows build, both pipe notification policies, cancel races and shutdown from four pending reads, plus 256 four-read cycles on pipes and a hot 256-byte NTFS file. File load was pending-only. No production ranking, cold storage, Winsock, or arbitrary-device result. See [[windows-iocp-and-overlapped-io]] and [[tigerbeetle-io]]. |
 
 ## Recommendation by project stage
 

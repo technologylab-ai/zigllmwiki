@@ -12,6 +12,7 @@ sources:
   - "[[zig-0.16-windows-io-source]]"
 proofs:
   - proofs/select_and_batch.zig
+  - proofs/windows_apc_batch.zig
 platforms:
   - macos
   - windows
@@ -133,6 +134,14 @@ released. The batch test supplies exactly two fixed operation slots, reads two
 separate files, accepts arbitrary completion order, dispatches results by tag,
 and verifies slot indexes/data. It ran with `std.testing.io` on aarch64 macOS on
 2026-09-04.
+
+The Windows-specific [APC/batch proof](../proofs/windows_apc_batch.zig) ran with
+Zig 0.16.0 on x86_64 Windows Server 2025 build 26100.33296 on 2026-09-04.
+It preserves completed results, reconciles 32 cancellation/write races, and
+observes the initial-wait defect before an explicit NT alert releases it.
+The exact environment and scope are in [[windows-iocp-and-overlapped-io]].
+This page is now `source-verified`: the added Windows progress analysis must
+not inherit the earlier macOS-only runtime label as a portable guarantee.
 
 ## Review checklist
 

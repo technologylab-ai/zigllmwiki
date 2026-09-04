@@ -11,7 +11,7 @@ import re
 import subprocess
 import sys
 from dataclasses import dataclass
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 from typing import Callable, Sequence
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlparse
@@ -265,7 +265,9 @@ def ingest_report(
     source_kind: str
     source_identity: str
     actual_sha256: str | None = None
-    if parsed.scheme:
+    # URL parsing treats a Windows drive letter as a one-letter URI scheme.
+    # Preserve native drive paths (including drive-relative paths) as local.
+    if parsed.scheme and not PureWindowsPath(source).drive:
         if parsed.scheme != "https" or not parsed.netloc:
             raise CommandError("remote sources must use an absolute https URL")
         source_kind = "remote"

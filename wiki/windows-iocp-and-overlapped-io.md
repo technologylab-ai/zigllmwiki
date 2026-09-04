@@ -265,7 +265,7 @@ actions still execute synchronously. It validates a bounded ownership shape;
 it is not a Zig 0.16 `std.Io` backend or evidence that every wrapper operation
 is nonblocking.
 
-## Evidence and missing runtime work
+## Runtime evidence and remaining limits
 
 The [mapping proof](../proofs/windows_io_mapping.zig) checks the exact Zig
 0.16 Windows type surface, confirms that `Io.Evented` is unavailable, confirms
@@ -285,21 +285,92 @@ Server 2025 host and still compiles for all three Windows architectures. The
 exact host metadata and both native logs are retained by
 [Actions run 33911991858](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33911991858).
 
-Windows-specific work still needs to exercise, with watchdogs and exact OS
-version recorded:
+The new harnesses ran on 2026-09-04 at commit
+`959a93ac690abbde9f9ea55cf5f06437fedcec30` in
+[run 33915530939](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33915530939).
+The full Zig verifier passed **82/82 steps, 70/77 tests, 7 platform skips**;
+all four Windows proofs then passed standalone. The workflow's subsequent
+Python test step exposed a Windows drive-path parsing bug in the command
+layer, so this run's overall conclusion was failure despite the native passes.
+That bug was corrected separately; see the append-only log and publication
+gates in [[index]].
 
-- immediate and pending APC completion paths, including buffer lifetime;
-- `Batch.cancel` racing success and cancellation on asynchronous handles;
-- each expected NTSTATUS-to-Zig error path that matters to the application;
-- custom IOCP immediate-success policy both with and without skip-on-success;
-- `CancelIoEx` races, shutdown draining, completion backlog bounds, and handle
-  closure only after every terminal packet is reconciled.
+Exact host: x86_64 Windows Server 2025 Datacenter 24H2, build 26100.33296;
+Zig 0.16.0, Debug; runner image `win25-vs2026` version `20260824.214.3`;
+PowerShell 7.6.5; reported AMD EPYC 7763, one core/two logical processors,
+8,584,425,472 bytes RAM. The file fixture lived under the checkout's
+`D:\a\zigllmwiki\zigllmwiki\.zig-cache` on NTFS; D: reported
+80,528,535,552 bytes capacity and the host reported Microsoft Virtual Disk
+devices. Physical backing storage was not identified.
 
-This page remains `source-verified`, not broadly `runtime-verified`: one host
-proves the narrow mapping and synchronous cancellation harness, not the APC,
-device, custom-IOCP, or load matrix. The shipped Threaded backend is the
-production default; the custom IOCP design is a platform-backend research
-target.
+### APC, batch, and NPFS observations
+
+- Raw NT empty reads and 8192-byte quota writes returned `PENDING`; preloaded
+  reads and one-byte writes returned `SUCCESS`. All four APC callbacks ran
+  before their records were released, and successful payloads matched.
+- Direct Threaded read/write task cancellation joined successfully. These
+  cases use a task-entry event and a 20ms scheduling allowance; they do not
+  independently observe kernel submission. The raw NT pending status and the
+  device request received by its peer provide stronger submission witnesses.
+- Idle `Batch.cancel` had not finished in the 100ms observation window; after
+  explicit `NtAlertThread` it finished with no canceled result to drain. This
+  is consistent with the source-derived initial-wait defect, not evidence of
+  unassisted cancellation progress.
+- Fixed-capacity batch cleanup retained completed read/write results and
+  removed a canceled pending read. The standalone 32-round writer/cancel race
+  observed 3 successes and 29 cancellations; each operation was reconciled
+  once. A different scheduling distribution is legal.
+- NPFS message `TRANSCEIVE` passed direct cancellation, batch cancellation,
+  and retained successful reply checks. The device-control operation reached
+  `NtFsControlFile`; it did **not** exercise arbitrary `NtDeviceIoControlFile`
+  drivers or the private AFD networking path.
+
+### Custom IOCP observations
+
+Both pipe modes reached the four-slot admission bound and rejected excess
+admission. Default mode observed five immediate successes whose packets still
+owned completion; skip-on-success mode observed four direct completions.
+Pending requests still produced packets in both modes. Default mode also
+observed `CancelIoEx` returning `ERROR_NOT_FOUND` after a known immediate
+success, then retained its successful packet. Each mode's 16 competing
+writer/cancel races observed cancellation winning all 16; the harness accepts
+either outcome and does not claim that this run sampled both.
+
+Shutdown began with four pending reads, rejected new admission, consumed one
+distinct control packet, and reconciled all data completions before closing
+handles. Final accounting was 1054 submissions/1054 packets in default mode
+and 1053 submissions/1049 packets/4 direct completions in skip mode. Each had
+21 canceled outcomes, including four from shutdown. No watchdog expired.
+The bound of four undrained data completions follows from application
+admission accounting; it is not a measurement of the kernel queue depth.
+
+Each load row below is one standalone Debug sample: 256 cycles of four
+64-byte reads, 65,536 bytes total. Cycle latency includes all four submissions,
+producer writes for pipes, and complete draining; it is not per-I/O latency.
+The regular-file working set is a hot 256-byte file with offsets 0/64/128/192.
+
+| Fixture / policy | Elapsed ms | Bytes/s | Cycle p50 / p99 / max, microseconds |
+| --- | --- | --- | --- |
+| NPFS / default | 4.2986 | 15,245,894 | 16.1 / 50.9 / 60.4 |
+| NPFS / skip-success | 4.9033 | 13,365,692 | 16.7 / 57.0 / 544.1 |
+| Hot NTFS file / default | 6.3600 | 10,304,402 | 23.3 / 58.5 / 289.6 |
+| Hot NTFS file / skip-success | 6.0686 | 10,799,195 | 20.9 / 57.9 / 465.3 |
+
+Each row observed 1024 pending submissions and 1024 packets, with zero
+immediate/direct load completions. Payload checksums were 8,036,480 for each
+pipe row and 2,195,456 for each file row. Immediate-success behavior was
+therefore exercised by the prefilled pipes, **not** by these regular-file
+reads. These small VM measurements are correctness/load fixtures, not a
+backend ranking or deployment capacity forecast.
+
+This page remains `source-verified` because its broad OS and implementation
+claims exceed these narrow runtime fixtures. Remaining M3-006 work includes
+Winsock and `GetQueuedCompletionStatusEx`, overlapped file writes, regular-file
+immediate-success/cancellation, cold storage and durability, arbitrary drivers
+and error translations, unassisted batch shutdown remediation, and deployment
+load. Windows x86 and aarch64 remain compile-only; macOS/Linux runs skip the
+Windows behavior tests. The shipped Threaded backend remains the default, and
+this custom adapter is not a complete `std.Io` implementation.
 
 Related: [[std-io]], [[io-threaded]], [[select-and-batch]],
 [[tigerbeetle-io]], [[evented-io-backends]], [[cancellation]],

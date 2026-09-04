@@ -21,10 +21,8 @@ produce Zig 0.16.x code that:
 - **Foundation milestone:** M0 is complete. Portable local evidence, the full
   Zig 0.16 release-note scope inventory, deterministic graph scoring, and the
   first semantic lint report are all in place.
-- **Running now:** M3-004. The first Windows run passed APC/NPFS and IOCP pipe
-  paths. The regular-file fixture and empty-status packet fixes are complete;
-  all subagents have finished. The continuation agent owns the new hosted
-  runtime gate and evidence publication.
+- **Running now:** none at handoff. M3-004's proof and source-review assignments
+  are complete. Queued qualification work below has no assigned agent.
 - **Latest completed content:** M1-001, M1-003, and M1-006 now document and
   prove `std.process.Init`/capability threading, `Select`/`Batch` ownership, and
   the complete `std.Io` synchronization-primitives surface. The six requested
@@ -33,12 +31,15 @@ produce Zig 0.16.x code that:
   bounded error-diagnostics, full TigerStyle-coverage, and pinned TigerBeetle
   cross-platform I/O syntheses. `Future`/`Group` ownership, protection, and
   `recancel` have a macOS `Io.Threaded` proof.
-- **Latest platform evidence:** Linux blocked-read cancellation and low-level
-  `io_uring` proofs ran on `omarx1`; the exact Windows Zig mapping and blocked
-  synchronous pipe cancellation ran on Windows Server 2025 while continuing to
-  compile for x86, x86_64, and aarch64; and M3-005 exposes the remaining custom
-  IOCP/load evidence gate.
-- **Queued, not running:** L-009 review-packet-to-PR automation.
+- **Latest platform evidence:** M3-004 adds Windows APC/batch/NPFS cancellation,
+  both custom IOCP notification policies, cancellation/shutdown ownership, and
+  bounded pipe/hot-NTFS read measurements. Zig 0.16.0 native Windows verification
+  passed 82/82 steps, 70/77 tests, 7 skips; x86/aarch64 remain compile-only.
+  The initial-wait batch defect and no-follow open metadata mismatch are
+  preserved, not hidden by successful fixtures. Linux `omarx1` also passed
+  82/82 steps, 70 tests and 7 skips.
+- **Queued, not running:** M3-006 deployment qualification and L-009
+  review-packet-to-PR automation.
 - **Backend:** intentionally deferred; the Obsidian-first ADR remains in force.
 
 Source status is tracked as `discovered → selected → captured → synthesized →
@@ -126,8 +127,9 @@ Keep interface design separate from backend implementation.
 | M3-001 | done | Pinned TigerBeetle `src/io` map distinguishing Linux `io_uring`, Darwin `kqueue` readiness plus synchronous file I/O, and Windows IOCP/overlapped I/O. |
 | M3-002 | done | Linux kernel/feature floors, finite queues, registered-file/buffer ownership, target/cancel CQE reconciliation, exact Zig-layer readiness, and three Zig 0.16 runtime tests on `omarx1`. |
 | M3-003 | done | Apple-primary `kqueue`, Dispatch I/O, and POSIX AIO lifecycles; exact Zig 0.16 Dispatch/Kqueue mapping and defects; a Zig/C adapter; macOS runtime proof; and bounded comparative evidence. |
-| M3-004 | running | APC/batch/NPFS and custom IOCP pipe paths ran; correct the regular-file fixture and empty checkout-status packet, then rerun complete Windows and final publication gates. |
+| M3-004 | done | Pinned Microsoft/0.16 source, raw immediate/pending APC, fixed batch races and NPFS device-control cancellation, custom IOCP immediate/pending/cancel/shutdown ownership, finite limits/watchdogs, and bounded pipe/hot-file read metrics ran on Windows Server 2025. Initial-wait and wrapper-mode defects are explicit; broader qualification is M3-006. |
 | M3-005 | done | Cross-platform decision table selects portable Threaded or platform-specific file/network backends with guarantees, limits, unsupported cases, ownership, resource models, and exact evidence gates. |
+| M3-006 | queued | Qualify a named Windows deployment workload: Winsock and batched dequeue, overlapped file writes, regular-file immediate-success/cancellation, cold storage/durability, required driver/error paths, and a supported solution to unassisted batch shutdown. Record load/tail-latency criteria and native architecture/device matrix before extending runtime claims. |
 
 | Platform | Research and proof targets |
 | --- | --- |
@@ -190,11 +192,11 @@ hybrid search when thresholds fail or real agent queries demonstrate misses.
 
 - Monitor a future Zig release through the explicit upgrade workflow; the 0.16
   inventory has no stale queued rows.
-- Run the registered Windows cancellation and platform-I/O tests on a real
-  Windows host, then add IOCP lifecycle and load evidence.
+- Extend the completed Windows NPFS/IOCP fixtures only against M3-006's named
+  workload, device, error-path, and shutdown requirements.
 - Select new matklad or TigerBeetle sources only for a named system-design
   question; never promote old Zig syntax without a 0.16 proof.
-- Extend the existing macOS/Linux matrix with Windows and workload-specific
-  filesystem/device/load runners.
+- Extend the three-platform matrix with workload-specific filesystem/device,
+  cold-storage, durability, and native architecture runners.
 - Design snippet tangling so Markdown can eventually show verified excerpts
   without duplicating executable code.

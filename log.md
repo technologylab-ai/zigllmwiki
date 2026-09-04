@@ -486,3 +486,30 @@ The complete Windows gate was 80/82 steps, 69/77 tests, 7 skips, 1 failure.
 The checkout-status step also failed because empty `git status` output never
 created its `Tee-Object` file; explicit packet creation fixes this separate
 workflow error. No full Windows success is claimed for this run.
+
+## [2026-09-04] runtime | M3-004 native evidence complete; Windows command fix
+
+At `959a93ac690abbde9f9ea55cf5f06437fedcec30`,
+[run 33915530939](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33915530939)
+passed 82/82 Zig steps, 70/77 tests with 7 skips and all four standalone Windows
+proofs. The host was x86_64 Windows Server 2025 Datacenter 24H2 build
+26100.33296, Zig 0.16.0 Debug, image `win25-vs2026`/`20260824.214.3`,
+PowerShell 7.6.5, reported AMD EPYC 7763 with two logical processors and
+8,584,425,472 bytes RAM, NTFS and Microsoft Virtual Disk devices.
+
+Both IOCP notification policies reconciled their bounded pipe lifecycles,
+including four pending reads at shutdown. Each pipe/file load sample completed
+256 cycles of four 64-byte reads with validated checksums. File reads were all
+pending; immediate success was observed on prefilled pipes. The exact timings,
+status counts, APC/NPFS results, and watchdog limits are preserved in the
+Windows page. M3-004 is complete at this bounded scope; M3-006 separately queues
+Winsock/file-write/cold-storage/driver/durability and unassisted-shutdown
+qualification. Related pages, the decision table, curation, retrieval map, and
+handoff reflect those boundaries without broad runtime-status promotion.
+
+The same workflow then exposed a command-layer portability bug: `urlparse`
+treated a local Windows drive letter as a remote scheme. Local path detection
+now accounts for Windows drives, with a cross-platform regression test while
+retaining remote HTTPS validation. All 16 Python command/retrieval tests pass
+locally. This historical workflow remains a failure overall; final publication
+gates rerun the corrected command layer and unchanged native proofs.

@@ -132,6 +132,15 @@ intentional platform skips, then passed the native mapping and synchronous
 named-pipe cancellation proofs explicitly. x86 and aarch64 remain compile-only
 until native runners execute them.
 
+The M3-004 expansion's native gate at commit
+`959a93ac690abbde9f9ea55cf5f06437fedcec30` in
+[run 33915530939](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33915530939)
+passed 82/82 Zig steps, 70 tests and 7 skips, plus all four explicit native
+proofs. Its later Python gate failed because a Windows drive letter was parsed
+as a URL scheme; that command bug is fixed with a regression test. Keep the
+native result distinct from that run's overall failure. Full environment,
+fixtures, observed paths and metrics are in [[windows-iocp-and-overlapped-io]].
+
 Before interpreting a run, check `headSha` with `gh run view RUN_ID --json
 headSha,status,conclusion,url` and match it to the intended pushed commit.
 A queued workflow has not executed any proof. An in-progress workflow has not
@@ -165,6 +174,9 @@ Windows lessons that must not regress:
 - PowerShell `Tee-Object` does not create a file when a clean `git status`
   emits nothing. Capture status as an array and explicitly write the packet
   file before checking it; a missing file is not a dirty checkout.
+- `urlparse` treats a Windows drive letter as a URI scheme. Local source
+  ingestion must identify drive paths before enforcing the remote HTTPS rule;
+  the native Windows command gate protects this distinction.
 
 ## Scheduled source/retrieval review
 

@@ -81,9 +81,9 @@ when a concrete systems-programming question needs them.
 | Apple libdispatch I/O headers | synthesized + adapter proved | Dispatch channel/data/callback lifecycles and the Zig/C macOS proof in [[macos-kqueue-and-aio]] |
 | Zig 0.16 Dispatch/Kqueue source | synthesized + selected macOS paths proved | Exact Evented alias, synchronous regular-file calls, unavailable networking, 60 MiB fibers, and broken deinit in [[macos-kqueue-and-aio]] |
 | Microsoft IOCP, overlapped I/O, and `CancelIoEx` documentation | synthesized | Completion ownership, immediate-success handling, ordering, capacity, and cancellation in [[windows-iocp-and-overlapped-io]] |
-| Microsoft SDK API contracts at `5f2625b6782d3e9c0df08756583c527a0a2872ca` | synthesized; runtime gates pending | Failed terminal packets versus wait failures, skip-on-success, named-pipe fixtures, advisory quotas, and process-watchdog limits in [[windows-iocp-and-overlapped-io]] |
-| Microsoft `NtFsControlFile` at `7515063cea4c9e98db6a92986c5b4ddb0463fd16` | synthesized; runtime gates pending | APC versus port-context ownership and the bounded NPFS device-control fixture; the source's nonexistent `Asynchronous` parameter is explicitly excluded. |
-| Zig 0.16 Windows `std.Io` source | synthesized + three-target compile proof | Exact synchronous-worker, APC/NtDll, AFD networking, batch, cancellation, error-mapping, and missing-IOCP boundaries in [[windows-iocp-and-overlapped-io]] |
+| Microsoft SDK API contracts at `5f2625b6782d3e9c0df08756583c527a0a2872ca` | synthesized + bounded runtime mechanics proved | Both IOCP notification policies, terminal ownership, fixed admission, cancel/shutdown, and pipe/hot-file read metrics; quotas/watchdogs remain explicitly limited. |
+| Microsoft `NtFsControlFile` at `7515063cea4c9e98db6a92986c5b4ddb0463fd16` | synthesized + NPFS mechanics proved | APC/port-context ownership and message-pipe transaction direct/batch cancellation; arbitrary devices are unproved and the nonexistent `Asynchronous` parameter is excluded. |
+| Zig 0.16 Windows `std.Io` source | synthesized + selected Windows runtime and three-target compile proofs | Exact mapping, APC/batch/NPFS evidence, initial-wait progress defect, and no-follow open metadata mismatch in [[windows-iocp-and-overlapped-io]]; AFD and arbitrary-driver behavior remain source-only. |
 
 ## TigerBeetle — current slice
 
@@ -114,8 +114,9 @@ agent is currently working on it.
 | M2-010 retry/defer curation | done | Both retry-loop essays and the defer-pattern essay are synthesized into one-deadline retry and terminal cleanup guidance. |
 | M3-003 macOS evented I/O | done | Primary `kqueue`/AIO/Dispatch lifecycles, exact Zig mappings and defects, an actual Dispatch I/O adapter, macOS runtime evidence, and a bounded comparison are recorded. |
 | M3-002 Linux evented I/O | done | Kernel/feature floors, registered resources, cancellation races, and real Zig 0.16 `omarx1` evidence are integrated. |
-| M3-004 Windows evented I/O | running | First Windows gate passed APC/NPFS and custom IOCP pipe paths. Fixture and packet fixes are complete; all subagents finished. The continuation agent owns the new runtime gate and publication. |
+| M3-004 Windows evented I/O | done | APC/batch/NPFS plus custom IOCP pipe/file lifecycle and bounded load ran on Windows Server 2025; exact observations, defects, watchdogs and limits are preserved. All subagents finished. |
 | M3-005 backend decision table | done | File/network choices, guarantees, limits, unsupported paths, ownership, resource models, and evidence gates are synthesized across all three platforms. |
+| M3-006 Windows deployment qualification | queued | No assigned agent. Select workload/driver requirements before Winsock, file-write/cold-storage/durability, native architecture, and unassisted-shutdown evidence. |
 
 M1-001 is complete: [[process-init-and-capabilities]] synthesizes the official
 Zig 0.16 initializer/startup source and the local migration guide, with a real
@@ -148,8 +149,8 @@ bounded-memory/layout essays have decision-level synthesis.
 
 ## Immediate curation order
 
-1. Complete Windows blocked-syscall and IOCP runtime/load evidence when a
-   Windows host becomes available; macOS and Linux cancellation proofs are done.
+1. Qualify the Windows runtime fixtures against a concrete deployment question
+   through M3-006; the initial APC/batch/NPFS and IOCP lifecycle/load slice is done.
 2. Keep the cross-platform backend table synchronized with runtime evidence and
    explicitly tested OS/kernel/filesystem/device combinations.
 3. Continue selected TigerBeetle storage, recovery, and operational sources by

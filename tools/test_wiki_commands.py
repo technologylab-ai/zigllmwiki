@@ -123,6 +123,16 @@ class WikiCommandTests(unittest.TestCase):
                         title="Moving source",
                     )
 
+    def test_ingest_distinguishes_drive_paths_from_remote_schemes(self) -> None:
+        for source in (r"C:\zig-wiki-missing-fixture\source.txt", "C:/zig-wiki-missing-fixture/source.txt"):
+            with self.subTest(source=source):
+                with self.assertRaisesRegex(wiki.CommandError, "local source does not exist"):
+                    wiki.ingest_report(self.root, source, "fixture-1")
+        for source in ("http://example.invalid/source", "ftp://example.invalid/source"):
+            with self.subTest(source=source):
+                with self.assertRaisesRegex(wiki.CommandError, "absolute https URL"):
+                    wiki.ingest_report(self.root, source, "fixture-1")
+
     def test_ingest_does_not_overclaim_remote_revision_immutability(self) -> None:
         weak = wiki.ingest_report(
             self.root,
