@@ -14,6 +14,8 @@ proofs:
   - proofs/network_process_entropy.zig
 platforms:
   - macos
+  - linux
+  - windows
 ---
 
 # Networking, DNS, and connection racing
@@ -127,9 +129,11 @@ The [network/process/entropy proof](../proofs/network_process_entropy.zig)
 validates hostnames and IP literals and runs an actual IPv4 loopback exchange:
 one required-concurrent task accepts a stream, both sides use buffered
 reader/writer adapters, both flush and close their resources, and the owner
-awaits the server task. It ran with Zig 0.16.0 on aarch64 macOS on 2026-09-04.
-DNS, packet batching, Linux, and Windows retain source-level coverage until
-their dedicated runtime matrix executes them.
+awaits the server task. It ran with Zig 0.16.0 on aarch64 macOS 26.6.2,
+x86_64 Linux 7.1.9, and x86_64 Windows Server 2025 build 26100.33296 on
+2026-09-04. DNS and packet batching retain source-level coverage; this loopback
+stream test does not prove either. The Windows run is retained in
+[Actions run 33911991858](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33911991858).
 
 Related: [[std-io]], [[async-vs-concurrent]], [[select-and-batch]],
 [[io-time-clocks-and-deadlines]], [[task-lifetimes-and-structured-concurrency]],

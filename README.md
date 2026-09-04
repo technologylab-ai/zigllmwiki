@@ -26,6 +26,8 @@ proofs.
 - Read [HANDOFF.md](HANDOFF.md) when continuing the project in a fresh agent
   session; it records exact platform evidence, deliberate decisions, and honest
   remaining gaps.
+- Read the [platform testing runbook](docs/platform-testing.md) before changing
+  macOS, Linux, Windows, cancellation, timing, or hosted-verification claims.
 
 The required compiler version is recorded in [.zig-version](.zig-version).
 The initial baseline is Zig 0.16.0, the current stable 0.16.x release as of
@@ -47,6 +49,7 @@ AGENTS.md            schema and maintenance contract
 ROADMAP.md           work across content, LLM, and backend lanes
 CURATION.md          transparent source-selection and ingestion ledger
 HANDOFF.md           durable continuation state and platform evidence matrix
+docs/platform-testing.md  macOS/Linux/Windows verification and evidence runbook
 ```
 
 ## Why there is no backend yet

@@ -110,6 +110,10 @@ Run `python3 tools/retrieval_benchmark.py --enforce-policy` after changing the
 index or query ranking. Its reviewed cases are a regression set, not production
 telemetry or proof that lexical retrieval will remain sufficient.
 
+Read `docs/platform-testing.md` before adding or promoting macOS, Linux, or
+Windows evidence. It owns the remote-run commands, host metadata requirements,
+hosted artifact boundaries, and known cross-platform test traps.
+
 Do not turn plan output into unattended content mutation. A wrapper can check
 structure and state, but cannot establish that a synthesis follows its primary
 evidence or that a platform behavior was runtime-verified.

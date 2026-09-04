@@ -211,7 +211,7 @@ pipes, starts a read on an owned concurrent task, and expects cancellation to
 interrupt it before a watchdog write. It ran successfully on that same Windows
 Server 2025 host and still compiles for all three Windows architectures. The
 exact host metadata and both native logs are retained by
-[Actions run 33910260004](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33910260004).
+[Actions run 33911991858](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33911991858).
 
 Windows-specific work still needs to exercise, with watchdogs and exact OS
 version recorded:

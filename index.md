@@ -127,6 +127,8 @@ Read this page first, then follow only the pages needed for the task.
 - [Roadmap](ROADMAP.md) — persistent content, LLM, and backend work.
 - [Session handoff](HANDOFF.md) — exact completion state, platform evidence,
   deliberate decisions, verification commands, and honest remaining gaps.
+- [Platform testing runbook](docs/platform-testing.md) — exact macOS/Linux/
+  Windows gates, evidence rules, hosted artifacts, and known portability traps.
 - [Curation ledger](CURATION.md) — source pipeline, selected corpus, and what
   has or has not reached synthesis.
 - [[source-archaeology]] — revision-pinned code history and recovered design

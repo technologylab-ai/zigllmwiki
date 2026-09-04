@@ -13,6 +13,8 @@ proofs:
   - proofs/io_sync_primitives.zig
 platforms:
   - macos
+  - linux
+  - windows
 ---
 
 # `std.Io` synchronization primitives
@@ -155,8 +157,10 @@ with Zig 0.16 `std.testing.io`: event cancellation/reset after join; canceled
 mutex acquisition and reuse; condition predicate handoff; queue capacity,
 close, and drain; shared/exclusive lock and semaphore balance; and an atomic
 futex predicate loop. It ran on aarch64 macOS on 2026-09-04. Interface claims
-are source-verified cross-platform; Linux and Windows runtime execution remains
-part of the runner matrix.
+are source-verified cross-platform. The same six tests ran with Zig 0.16.0 on
+x86_64 Linux 7.1.9 and x86_64 Windows Server 2025 build 26100.33296 on
+2026-09-04; the Windows evidence is retained in
+[Actions run 33911991858](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33911991858).
 
 ## Review checklist
 

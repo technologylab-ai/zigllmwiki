@@ -16,6 +16,8 @@ proofs:
   - proofs/io_time.zig
 platforms:
   - macos
+  - linux
+  - windows
 ---
 
 # `std.Io` clocks, durations, deadlines, timeouts, and sleeping
@@ -128,6 +130,14 @@ only when independent progress is required, handle
 `error.ConcurrencyUnavailable`, and prefer an operation's native deadline when
 it expresses the same ownership correctly.
 
+One Windows Server 2025 run observed a 2 ms `.awake` deadline wait return just
+before the following timestamp sample compared at or beyond the deadline. The
+proof therefore rechecks remaining time and, when needed, waits again on the
+same absolute deadline with a bounded attempt count. This is an observed Zig
+0.16 `Io.Threaded`/Windows timer seam, not a relaxation of the interface's
+“until the timestamp” contract. Never replace the recheck with a fresh relative
+duration, which would extend the original budget.
+
 ## Strictly monotonic application time
 
 When equal samples are ambiguous for application assertions, the pinned
@@ -146,8 +156,11 @@ guard to timestamp external facts or replace wall-clock chronology.
 
 The [time proof](../proofs/io_time.zig) verifies Zig 0.16 duration conversion
 and `{f}` formatting, clock-tagged deadline arithmetic, timeout conversion,
-one-deadline sleeping, cancellation of a `std.Io.Threaded` sleep, and the pure
-strict-guard transition. It ran on aarch64 macOS with Zig 0.16.0 on 2026-09-04.
+bounded rechecking of one absolute deadline, cancellation of a
+`std.Io.Threaded` sleep, and the pure strict-guard transition. It ran with Zig
+0.16.0 on aarch64 macOS 26.6.2, x86_64 Linux 7.1.9, and x86_64 Windows Server
+2025 build 26100.33296 on 2026-09-04. The Windows run is retained in
+[Actions run 33911991858](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33911991858).
 
 - Is this calendar time, awake elapsed time, suspend-inclusive elapsed time, or CPU time?
 - Was one absolute deadline captured for the entire operation?

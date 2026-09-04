@@ -72,6 +72,12 @@ verifier and Python tests, performs the network review and retrieval benchmark,
 asserts that maintenance did not mutate the checkout, and retains an
 out-of-tree review packet for 30 days.
 
+The first green hosted gates are
+[read-only review run 33911520101](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33911520101)
+and [Windows run 33911991858](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33911991858).
+The latter completed the full verifier with 70/70 build steps, 67 passing tests,
+and 7 intentional platform skips before rerunning both Windows-specific proofs.
+
 That workflow intentionally cannot edit content or open a pull request. L-009
 in `ROADMAP.md` reserves that job for a separately authorized coding-agent
 consumer. A source-head difference is only a review prompt, not evidence that
@@ -107,7 +113,7 @@ with an assumption that one “evented” label has portable semantics.
 | --- | --- | --- |
 | macOS arm64 | Full local verification; Threaded task/cancellation proofs; blocked pipe-read interruption; Dispatch I/O adapter and experimental Dispatch mapping; all portable proofs. | Product kqueue reactor/load tests, cold-storage matrix, Dispatch cancellation/write/durability matrix. |
 | Linux x86_64 (`ssh omarx1`) | Zig 0.16.0 blocked pipe-read cancellation; low-level `io_uring` finite SQ/probing, registered file+buffer lifetime, and target/cancel CQE reconciliation. | Older kernels, other filesystems/devices, resource tags, multishot behavior, high-level `std.Io.Uring` readiness, and decision-grade load measurements. |
-| Windows Server 2025 Datacenter 24H2, x86_64, build 26100.33296 | Mapping and synchronous blocked-read cancellation ran with Zig 0.16.0; both harnesses also compile for x86, x86_64, and aarch64 Windows. | APC races, batch/device cancellation breadth, custom IOCP immediate-success/cancel/shutdown paths, and load evidence. |
+| Windows Server 2025 Datacenter 24H2, x86_64, build 26100.33296 | Full verification plus native mapping and synchronous blocked-read cancellation ran with Zig 0.16.0; both Windows harnesses also compile for x86, x86_64, and aarch64. | APC races, batch/device cancellation breadth, custom IOCP immediate-success/cancel/shutdown paths, and load evidence. |
 
 Rerun the complete current tree on Linux with:
 
@@ -116,6 +122,10 @@ Rerun the complete current tree on Linux with:
 The script copies the checkout to a validated temporary directory, runs the
 full verifier with the remote `zig`, reports kernel/`io_uring` state, and cleans
 up that directory. It does not alter the remote user's checkout.
+
+For exact commands, hosted Windows dispatch/artifacts, evidence-promotion
+rules, and known CRLF, shell, timer, token-scope, and platform-interpretation
+traps, read `docs/platform-testing.md` before changing any platform claim.
 
 ## Deliberate decisions
 
@@ -155,7 +165,7 @@ boundaries.
 
 ## Git and publication
 
-The canonical target is the private GitHub repository
+The canonical repository is the private GitHub repository
 `technologylab-ai/zigllmwiki`, on branch `main`. Confirm `git remote -v` after
 cloning and inspect the most recent `Zig wiki read-only review` run before
 trusting hosted automation. No credentials or platform secrets belong in this

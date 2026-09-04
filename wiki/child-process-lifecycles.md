@@ -14,6 +14,8 @@ proofs:
   - proofs/network_process_entropy.zig
 platforms:
   - macos
+  - linux
+  - windows
 ---
 
 # Child processes, output limits, and terminal ownership
@@ -92,12 +94,14 @@ in the process owner rather than scattering it across worker tasks.
 ## Evidence
 
 The [network/process/entropy proof](../proofs/network_process_entropy.zig)
-runs `/bin/sh` with an absolute five-second deadline, independently bounded
-stdout/stderr, owned-result cleanup, and a nonzero exit status. A second test
-proves that three output bytes exceed a two-byte process-output limit while
-three bytes at a three-byte limit succeed. It ran with Zig 0.16.0 on aarch64
-macOS on 2026-09-04; shell paths and child semantics need separate Linux and
-Windows runtime coverage.
+runs `/bin/sh` on POSIX and `cmd.exe` on Windows with an absolute five-second
+deadline, independently bounded stdout/stderr, owned-result cleanup, and a
+nonzero exit status. A second test proves that output at the exact inclusive
+platform byte limit succeeds while a limit one byte smaller returns
+`error.StreamTooLong`; the Windows expectation includes CRLF. It ran with Zig
+0.16.0 on aarch64 macOS 26.6.2, x86_64 Linux 7.1.9, and x86_64 Windows Server
+2025 build 26100.33296 on 2026-09-04. The Windows evidence is retained in
+[Actions run 33911991858](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33911991858).
 
 Related: [[process-init-and-capabilities]], [[std-io]],
 [[io-time-clocks-and-deadlines]], [[task-lifetimes-and-structured-concurrency]],

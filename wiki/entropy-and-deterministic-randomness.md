@@ -13,6 +13,8 @@ proofs:
   - proofs/network_process_entropy.zig
 platforms:
   - macos
+  - linux
+  - windows
 ---
 
 # Entropy and deterministic randomness
@@ -59,10 +61,13 @@ implementation and test deterministic algorithms with an explicit fixed seed.
 ## Evidence
 
 The [network/process/entropy proof](../proofs/network_process_entropy.zig)
-executes both operations through `std.testing.io` on aarch64 macOS with Zig
-0.16.0 on 2026-09-04. It proves the current signatures and successful platform
-path without making a probabilistic quality assertion. Failure injection and
-the no-capability `Io` behavior are covered by
+executes both operations through `std.testing.io` with Zig 0.16.0 on aarch64
+macOS 26.6.2, x86_64 Linux 7.1.9, and x86_64 Windows Server 2025 build
+26100.33296 on 2026-09-04. It proves the current signatures and successful
+platform paths without making a probabilistic quality assertion. The Windows
+run is retained in
+[Actions run 33911991858](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33911991858).
+Failure injection and the no-capability `Io` behavior are covered by
 [[testing-io-and-single-threaded-builds]].
 
 Related: [[std-io]], [[cancellation]],

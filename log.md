@@ -426,3 +426,16 @@ formatting, and the process proof hard-coded `/bin/sh`. The follow-up enforces
 LF through `.gitattributes`, selects `cmd.exe` on Windows, and makes the public
 Gist revision check independent of repository-token API scope. Custom IOCP,
 APC/batch/device race breadth, and load evidence remain M3-004 work.
+
+## [2026-09-04] verification | hosted Linux and Windows gates green
+
+The repaired read-only Linux workflow passed every proof, command test, source
+review, retrieval threshold, and checkout-mutation guard in Actions run
+33911520101. The Windows workflow then passed 70/70 build steps, 67/74 tests
+with 7 intentional platform skips, the native implementation-mapping proof,
+and the blocked synchronous pipe-cancellation proof in run 33911991858.
+
+The successful Windows run used x86_64 Windows Server 2025 Datacenter 24H2,
+build 26100.33296, and exact Zig 0.16.0. It validates the portable suite and
+narrow Threaded evidence on that host; it does not close the custom IOCP,
+APC/batch/device breadth, native x86/aarch64, or production-load gates.
