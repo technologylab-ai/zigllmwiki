@@ -708,3 +708,18 @@ blocked by unavailable physical power-loss/controlled cold-storage and named
 deployment driver/error/SLO evidence. M4 remains reserved. This documentation
 publication is followed by the required exact-final-commit local/Linux/Windows
 gates; it does not predict their outcome or rewrite earlier failure records.
+
+## [2026-09-05] roadmap scope | postpone M3-006 by user decision
+
+The user postponed Windows deployment qualification because dedicated Windows
+deployment hardware is unavailable and further qualification is not a current
+priority. Updated ROADMAP.md, HANDOFF.md, CURATION.md and the index to keep it
+out of active curation until explicitly resumed with a concrete deployment need
+and suitable test access. Existing GitHub-hosted Windows runtime results and
+all physical durability, driver/workload and unobserved-path limits remain
+intact. This is a scope decision, not completion or a new platform claim.
+M4 remains reserved for its own session.
+
+Local exact Zig 0.16.0 verification passed 87/87 steps, 73/82 tests with
+9 platform skips. The 25-query retrieval policy passed (MRR 1.0, hit@3 1.0,
+recall@5 0.98). This documentation-only scope update adds no runtime evidence.

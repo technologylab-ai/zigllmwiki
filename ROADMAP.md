@@ -1,9 +1,10 @@
 # Roadmap
 
 This is the persistent plan for the Zig LLM Wiki. Status values are `done`,
-`running`, `queued`, `deferred`, and `blocked`. `running` means an agent is
+`running`, `queued`, `postponed`, `deferred`, and `blocked`. `running` means an agent is
 executing that item now; it never means merely “important” or “partially
-complete.” Update this file when ownership, completion, or scope changes.
+complete.” `postponed` means deliberately set aside by the user until explicitly
+resumed. Update this file when ownership, completion, or scope changes.
 
 ## North star
 
@@ -32,8 +33,9 @@ produce Zig 0.16.0 code that:
   tests and Batch index assertions passed across the four runtime environments.
   28 Python tests and the 25-query retrieval policy passed. See
   [the publication receipt](reports/2026-09-04-publication-verification.md).
-- **Remaining blocker:** M3-006's physical storage/deployment qualification
-  requires unavailable external evidence; no implementation agent is active.
+- **Postponed:** the user set aside M3-006 on 2026-09-05. No dedicated Windows
+  deployment hardware is available and further qualification is not a current
+  priority; existing GitHub-hosted runtime evidence remains valid within its limits.
   The curator service is inactive, with its weekly timer enabled and waiting.
 - **Session scope:** finish actionable wiki work; M4 is reserved by the user
   for a separate in-depth session. External evidence gaps remain explicit.
@@ -115,7 +117,7 @@ revision mapped to focused guidance and all local Zig claims registered for
 Zig 0.16 verification. This is guidance coverage, not automatic conformance by
 projects that consult it.
 
-## M3: evented I/O across operating systems (deployment evidence blocked)
+## M3: evented I/O across operating systems (deployment qualification postponed)
 
 Keep interface design separate from backend implementation.
 
@@ -126,7 +128,7 @@ Keep interface design separate from backend implementation.
 | M3-003 | done | Apple-primary `kqueue`, Dispatch I/O, and POSIX AIO lifecycles; exact Zig 0.16 Dispatch/Kqueue mapping and defects; a Zig/C adapter; macOS runtime proof; and bounded comparative evidence. |
 | M3-004 | done | Pinned Microsoft/0.16 source, raw immediate/pending APC, fixed batch races and NPFS device-control cancellation, custom IOCP immediate/pending/cancel/shutdown ownership, finite limits/watchdogs, and bounded pipe/hot-file read metrics ran on Windows Server 2025. Initial-wait and wrapper-mode defects are explicit; broader qualification is M3-006. |
 | M3-005 | done | Cross-platform decision table selects portable Threaded or platform-specific file/network backends with guarantees, limits, unsupported cases, ownership, resource models, and exact evidence gates. |
-| M3-006 | blocked | Available work complete: Winsock/batched TCP-to-file IOCP, file writes/flush/readback, cancel races, public stop/cancel/drain and x64/WOW64/ARM64 runtime gates. Remaining exit requires unavailable physical power-loss/controlled cold-storage evidence and a named deployment filesystem/device/driver/error/SLO matrix; immediate file-read and canceled file terminal results remain unobserved. Native ARM compiler failure is separate from the passing explicit ARM64 runtime path. |
+| M3-006 | postponed | Postponed by the user on 2026-09-05; resume only on explicit request with a concrete Windows deployment need and suitable test access. Available work complete: Winsock/batched TCP-to-file IOCP, file writes/flush/readback, cancel races, public stop/cancel/drain and x64/WOW64/ARM64 runtime gates. Remaining exit requires unavailable physical power-loss/controlled cold-storage evidence and a named deployment filesystem/device/driver/error/SLO matrix; immediate file-read and canceled file terminal results remain unobserved. Native ARM compiler failure is separate from the passing explicit ARM64 runtime path. |
 
 | Platform | Research and proof targets |
 | --- | --- |
@@ -198,14 +200,16 @@ hybrid search when thresholds fail or real agent queries demonstrate misses.
   Windows x64 and ARM64 gates; historical reports retain their earlier gaps.
 - Monitor a future Zig release through the explicit upgrade workflow; the 0.16
   inventory has no stale queued rows.
-- Extend the completed Windows NPFS/IOCP fixtures only against M3-006's named
-  workload, device, error-path, and shutdown requirements.
+- M3-006 is postponed by user decision. If explicitly resumed, extend the
+  completed Windows NPFS/IOCP fixtures against its named workload, device,
+  error-path, and shutdown requirements.
 - Completed the selected TigerBeetle storage/recovery/operations slice on
   2026-09-04 in [[durable-storage-and-recovery]], including focused implementation
   evidence. Future source selection remains question-driven; old Zig syntax
   must not enter guidance without an exact 0.16 proof.
-- Extend the three-platform matrix with workload-specific filesystem/device,
-  cold-storage and durability evidence; ARM64/WOW64 fixtures now have named
+- Future deployment qualification can extend the three-platform matrix with
+  workload-specific filesystem/device, cold-storage and durability evidence;
+  Windows deployment work remains postponed. ARM64/WOW64 fixtures have named
   runtime results with distinct compiler and process architectures.
 - Verified-excerpt design is complete in
   [ADR 0002](docs/decisions/0002-verified-proof-excerpts.md): proof files remain

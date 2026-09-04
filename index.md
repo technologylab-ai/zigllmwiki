@@ -5,7 +5,7 @@ kind: map
 status: draft
 zig: "0.16.0"
 summary: Retrieval map for current Zig systems programming, std.Io, TigerStyle, and platform I/O.
-updated: 2026-09-04
+updated: 2026-09-05
 sources: []
 proofs: []
 platforms:
@@ -158,4 +158,5 @@ Read this page first, then follow only the pages needed for the task.
 
 [Publication verification](reports/2026-09-04-publication-verification.md)
 records the completed four-environment gate, proof identities and remaining
-external deployment limits; [ROADMAP.md](ROADMAP.md) keeps M4 reserved.
+external deployment limits; [ROADMAP.md](ROADMAP.md) marks M3-006 postponed
+by user decision and keeps M4 reserved.

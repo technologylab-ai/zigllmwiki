@@ -19,9 +19,11 @@ The verified-proof-excerpt design is accepted in
 M3-006 now has a four-slot TCP-to-file IOCP fixture with partial transfers,
 batched per-operation results, file write/flush/readback, cancellation races
 and public-API stop/cancel/drain. All five Windows proofs ran on x64, as x86
-processes under WOW64, and as ARM64 processes. The broad deployment item still
-requires physical power-loss/controlled-cold-storage evidence and a named
-production driver/error/workload/SLO matrix. A hosted virtual disk cannot
+processes under WOW64, and as ARM64 processes. The user postponed M3-006 on
+2026-09-05: no dedicated Windows deployment hardware is available and further qualification is not a current priority.
+Resume only on explicit request with a concrete deployment need and suitable
+test access. Its remaining requirements are physical power-loss/controlled
+cold-storage evidence and a named production driver/error/workload/SLO matrix. A hosted virtual disk cannot
 establish those missing requirements; do not declare all of M3 complete.
 
 L-009 is complete. The installed omarx1 service selected maxross, consumed the
@@ -42,7 +44,7 @@ Historical curator reports preserve their sandbox failures and earlier gaps.
 
 All subagents and the curator finished. The service is inactive; its enabled
 weekly timer is waiting. No queued item is described as running. M3-006 is
-blocked only on the explicitly unavailable external deployment evidence above;
+postponed by user decision, with the external evidence gaps above preserved;
 M4 remains reserved. All other selected actionable work is complete.
 
 ## Exact baseline and editing contract
@@ -171,8 +173,9 @@ validated hosts. Installed Mac Zig is under
   registered resources and target/cancel CQE tests, not older kernels or a
   production load matrix. macOS evidence covers Dispatch/Threaded proofs, not
   a product kqueue reactor or physical durability.
-- M3-006 needs deployment hardware/storage/driver/error and durability evidence
-  with workload-specific tail-latency criteria. M4 remains reserved. Future
+- M3-006 is postponed by user decision. If explicitly resumed, it needs
+  deployment hardware/storage/driver/error and durability evidence with
+  workload-specific tail-latency criteria. M4 remains reserved. Future
   source selection is question-driven. Backend work stays deferred until an
   Obsidian-first ADR trigger is real.
 

@@ -90,7 +90,8 @@ now covers public Winsock, batched dequeue and flush/result APIs in
 [[microsoft-windows-winsock-batched-file-io]]. The bounded TCP-to-file proof is
 registered and ran on x64 Windows in run 33919878353. WOW64 and ARM64
 fixtures and full target gates subsequently passed in run 33922946389; physical
-deployment qualification remains blocked on unavailable external evidence.
+deployment qualification was postponed by the user on 2026-09-05; its external
+evidence gaps remain recorded.
 
 ## TigerBeetle — current slice
 
@@ -123,7 +124,7 @@ agent is currently working on it.
 | M3-002 Linux evented I/O | done | Kernel/feature floors, registered resources, cancellation races, and real Zig 0.16 `omarx1` evidence are integrated. |
 | M3-004 Windows evented I/O | done | APC/batch/NPFS plus custom IOCP pipe/file lifecycle and bounded load ran on Windows Server 2025; exact observations, defects, watchdogs and limits are preserved. All subagents finished. |
 | M3-005 backend decision table | done | File/network choices, guarantees, limits, unsupported paths, ownership, resource models, and evidence gates are synthesized across all three platforms. |
-| M3-006 Windows deployment qualification | blocked | All available x64/TCP-file, WOW64 and ARM64 runtime fixtures and publication gates passed. Physical power-loss/controlled cold storage and named deployment driver/error/SLO evidence are unavailable. Native ARM compiler failure is separate from passing ARM64 runtime evidence. No assigned agent remains active. |
+| M3-006 Windows deployment qualification | postponed | User decision on 2026-09-05; resume only on explicit request with a concrete deployment need and suitable test access. All available x64/TCP-file, WOW64 and ARM64 runtime fixtures and publication gates passed. Physical power-loss/controlled cold storage and named deployment driver/error/SLO evidence are unavailable. Native ARM compiler failure is separate from passing ARM64 runtime evidence. No assigned agent remains active. |
 
 M1-001 is complete: [[process-init-and-capabilities]] synthesizes the official
 Zig 0.16 initializer/startup source and the local migration guide, with a real
@@ -158,8 +159,9 @@ bounded-memory/layout essays have decision-level synthesis.
 
 ## Immediate curation order
 
-1. Qualify the Windows runtime fixtures against a concrete deployment question
-   through M3-006; the initial APC/batch/NPFS and IOCP lifecycle/load slice is done.
+1. M3-006 is postponed by user decision; do not select further Windows
+   deployment qualification unless explicitly resumed. The initial
+   APC/batch/NPFS and IOCP lifecycle/load slice is done.
 2. Keep the cross-platform backend table synchronized with runtime evidence and
    explicitly tested OS/kernel/filesystem/device combinations.
 3. The selected TigerBeetle storage/recovery/operations slice is synthesized
