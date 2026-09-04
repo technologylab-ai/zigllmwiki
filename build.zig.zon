@@ -1,0 +1,23 @@
+.{
+    .name = .zigllmwiki,
+    .version = "0.1.0",
+    .fingerprint = 0x7904ba2cd463a593,
+    .minimum_zig_version = "0.16.0",
+    .dependencies = .{},
+    .paths = .{
+        ".zig-version",
+        ".agents",
+        "AGENTS.md",
+        "ROADMAP.md",
+        "README.md",
+        "build.zig",
+        "build.zig.zon",
+        "docs",
+        "index.md",
+        "log.md",
+        "proofs",
+        "sources",
+        "tools",
+        "wiki",
+    },
+}
