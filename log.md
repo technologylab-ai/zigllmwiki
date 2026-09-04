@@ -595,3 +595,30 @@ and successful PR publication remain to be tested. Added the Mac's actual
 `/Users/rs/bin` Zig path to the bounded host probe. Expanded the Windows workflow
 to native ARM64 and x64 plus x86 process execution under WOW64, with compiler
 and test PE architecture checks; these new runtime gates are pending.
+
+## [2026-09-04] maintenance | bounded queue and Select review 33921176578
+
+Inspected the caller-authenticated packet for run `33921176578`, attempt `1`,
+at matching clean base `0e82e97e6eb9314c4dd70cecdedd3449556bdd81`.
+The packet reports 87/87 Linux steps, 70/78 tests with 8 skips, 28 Python tests,
+and passing retrieval policy. Its nine upstream-head differences did not
+establish stale guidance or justify changing any source revision.
+
+Reviewed two wiki pages, three source records, and two portable proofs.
+Installed Zig 0.16.0 source qualifies queue zero-minimum calls as still subject
+to mutex contention, permits short `Select.awaitMany` delivery on cancellation,
+and requires joining both producers and consumers after queue closure before
+reclaiming storage. Documented the re-armed-cancellation/fast-path caveat and
+added a reciprocal Select-to-synchronization link. The synchronization page is
+now source-verified while preserving its six historical runtime tests; new
+contention/partial-transfer/shutdown proofs require separate authority and are
+queued in the roadmap. No proof, source record, tool, workflow or version changed.
+
+[The bounded report](reports/curation-review-33921176578-1.md) records exact
+source hashes, findings, inspected scope, and limitations. Local macOS arm64
+26.6.2 build 25G83, Zig 0.16.0 verification passed structural checks but failed
+the loopback bind with errno 1: 85/87 steps, 68/78 tests passed, 9 skips,
+1 failure. This also occurred on the clean base and is consistent with the
+sandbox network restriction. Graph and retrieval policy passed; the caller's
+independent gates and publication remain pending. No new Linux/Windows runtime
+evidence, full-vault semantic pass, or successful curator publication is claimed.

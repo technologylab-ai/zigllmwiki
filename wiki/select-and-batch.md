@@ -53,10 +53,17 @@ The scheduling distinction is the same as elsewhere in [[std-io]]:
 - `select.concurrent` guarantees an independent concurrency unit or returns
   `error.ConcurrencyUnavailable`.
 
-`await` returns one completion. `awaitMany` copies at least the requested
-minimum into a caller buffer and asserts that the buffer is large enough. It is
-legal to schedule more tasks after either await operation, which makes a select
-useful as a bounded rolling task set rather than only a one-shot race.
+`await` returns one completion. `awaitMany` delegates to `Queue.get`: it normally
+copies at least the requested minimum, but cancellation after partial delivery
+can return a smaller count. Only that returned prefix contains results for the
+caller to handle. Account for every owned result in it before propagating
+cancellation. The buffer must be large enough for the requested minimum.
+
+With a zero minimum, `awaitMany` does not wait for more results, but its queue
+mutex can still contend. The partial-result and cancellation-check caveats are
+documented once in [[io-synchronization-primitives]]. It is legal to schedule
+more tasks after either await operation, which makes a select useful as a
+bounded rolling task set rather than only a one-shot race.
 
 ### The cancellation-buffer trap
 
@@ -161,6 +168,10 @@ counts completions, and verifies byte counts and data. It arms indexes 0 and 1
 but does not assert the returned `completion.index` values; that mapping is
 supported here by the `Batch.addAt`/`next` source contract. It ran with
 `std.testing.io` on aarch64 macOS on 2026-09-04.
+
+The select test uses `await`, not `awaitMany`; the latter's partial-delivery
+and mutex-contention boundaries are supported by the exact `Select.awaitMany`
+and `Queue.get` source, not exercised by this proof.
 
 The Windows-specific [APC/batch proof](../proofs/windows_apc_batch.zig) ran with
 Zig 0.16.0 on x86_64 Windows Server 2025 build 26100.33296 on 2026-09-04.

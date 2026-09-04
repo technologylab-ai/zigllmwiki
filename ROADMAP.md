@@ -196,6 +196,12 @@ hybrid search when thresholds fail or real agent queries demonstrate misses.
 
 ## Research queue
 
+- Add focused `Queue`/`Select.awaitMany` proofs for zero-minimum mutex
+  contention, partial-transfer cancellation, and close with blocked callers.
+  These are queued follow-ups from
+  [bounded review 33921176578](reports/curation-review-33921176578-1.md), which
+  permits guidance edits only; the existing six synchronization tests do not
+  establish those additional runtime claims.
 - Monitor a future Zig release through the explicit upgrade workflow; the 0.16
   inventory has no stale queued rows.
 - Extend the completed Windows NPFS/IOCP fixtures only against M3-006's named

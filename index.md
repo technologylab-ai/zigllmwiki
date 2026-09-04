@@ -40,7 +40,8 @@ Read this page first, then follow only the pages needed for the task.
 - [[select-and-batch]] — typed task races, fixed low-level operation slots,
   completion identity, result draining, and cancellation-buffer traps.
 - [[io-synchronization-primitives]] — `Event`, `Queue`, `Mutex`, `RwLock`,
-  `Condition`, `Semaphore`, and futex cancellation/capacity rules.
+  `Condition`, `Semaphore`, and futex rules; queue mutex contention, partial
+  transfers, and close/drain/join ownership.
 - [[io-time-clocks-and-deadlines]] — clock domains, absolute deadlines,
   timeout conversion, cancelable sleep, and strict-clock application guards.
 - [[bounded-retries-and-cleanup]] — transient classification, total-attempt

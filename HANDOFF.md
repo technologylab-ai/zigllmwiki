@@ -28,6 +28,16 @@ correctly retained an unpushed proposal when the caller verifier exposed an
 absolute-path cache-filter bug in the linter. The fix and regression are now
 implemented; a new packet and successful draft-PR trial remain required.
 
+[Bounded review 33921176578, attempt 1](reports/curation-review-33921176578-1.md)
+inspected the fresh packet at `0e82e97e6eb9314c4dd70cecdedd3449556bdd81`
+and qualified `Queue`/`Select.awaitMany` contention, partial delivery, and
+shutdown ownership against installed Zig 0.16.0. Synchronization guidance is
+now `source-verified`; its earlier six-test platform results are preserved,
+while additional adversarial proofs are queued in ROADMAP.md. Local structural
+verification passed, but the sandboxed full gate failed the loopback bind with
+errno 1. Independent caller gates and publication are still required; this
+bounded content review does not complete L-009 or revalidate the full vault.
+
 ## Exact baseline and editing contract
 
 Read AGENTS.md, the zig-wiki skill, .zig-version, ROADMAP.md, CURATION.md,
