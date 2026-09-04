@@ -439,3 +439,26 @@ The successful Windows run used x86_64 Windows Server 2025 Datacenter 24H2,
 build 26100.33296, and exact Zig 0.16.0. It validates the portable suite and
 narrow Threaded evidence on that host; it does not close the custom IOCP,
 APC/batch/device breadth, native x86/aarch64, or production-load gates.
+
+## [2026-09-04] ingest | bounded Windows cancellation and IOCP fixtures
+
+Continued from clean `main` at `ddb680360aaa6c274fc36f23030e200ba832410f`,
+matching freshly fetched `origin/main`. Exact Zig 0.16.0 baseline verification
+passed 70/70 steps and 69/74 tests with 5 macOS platform skips after rerunning
+outside sandbox restrictions on library access and loopback networking.
+
+Pinned additional Microsoft SDK and NT filesystem-control contracts before
+synthesis. Registered separate APC/batch/NPFS-device and custom IOCP harnesses
+with fixed operation storage, explicit cancellation/result ownership,
+watchdogs, and bounded workload fixtures. Extended the manual Windows packet
+with hardware/filesystem metadata, native proof logs, command/retrieval gates,
+and checkout-mutation enforcement. Aligned the Linux SSH wrapper with the
+runbook's exact-version, host-metadata, and full-summary requirements.
+
+Source analysis exposed `Threaded.batchCancel`'s unbounded initial alertable
+wait before `NtCancelIoFileEx`. The Windows and Select/Batch pages now separate
+that implementation progress defect from the interface's terminal ownership
+contract. Windows execution of the new harnesses is still pending at this
+entry. An early Linux development archive captured proof files during agent
+edits and failed formatting/registration lint; it is not runtime evidence for
+the new work and will be superseded by clean-commit gates.

@@ -2,17 +2,19 @@
 id: select-and-batch
 title: std.Io Select and Batch ownership
 kind: pattern
-status: runtime-verified
+status: source-verified
 zig: "0.16.0"
 summary: Select owns typed tasks and their result queue, while Batch owns a fixed set of low-level operation slots; both require explicit draining and terminal cancellation paths.
 updated: 2026-09-04
 sources:
   - "[[zig-0.16.0-release-notes]]"
   - "[[zig-0.16.0-stdlib]]"
+  - "[[zig-0.16-windows-io-source]]"
 proofs:
   - proofs/select_and_batch.zig
 platforms:
   - macos
+  - windows
 ---
 
 # `std.Io.Select` and `std.Io.Batch` ownership
@@ -116,6 +118,12 @@ The batch owns operation machinery, not every resource referenced by an
 operation. Files, sockets, buffers, and result-owned values remain the
 application owner's responsibility according to their individual contracts.
 
+The exact Windows 0.16.0 Threaded implementation has a pending-batch progress
+defect: it performs an unbounded alertable wait before sending cancellation
+requests. The platform analysis and bounded witness belong in
+[[windows-iocp-and-overlapped-io]]. The terminal ownership contract above does
+not itself guarantee a shutdown time bound on that implementation.
+
 ## Evidence
 
 The [Select/Batch proof](../proofs/select_and_batch.zig) runs two Zig 0.16
@@ -138,4 +146,5 @@ and verifies slot indexes/data. It ran with `std.testing.io` on aarch64 macOS on
 
 Related: [[async-vs-concurrent]], [[cancellation]],
 [[task-lifetimes-and-structured-concurrency]],
-[[static-allocation-and-constant-work]], [[io-uring]].
+[[static-allocation-and-constant-work]], [[io-uring]],
+[[windows-iocp-and-overlapped-io]].

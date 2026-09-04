@@ -121,6 +121,10 @@ jobs:
             windows_full_build = "$($versionKey.CurrentBuild).$($versionKey.UBR)"
             powershell_version = $PSVersionTable.PSVersion.ToString()
             zig_version = $actual
+            processors = @(Get-CimInstance Win32_Processor | Select-Object Name, NumberOfCores, NumberOfLogicalProcessors)
+            memory_bytes = (Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory
+            logical_disks = @(Get-CimInstance Win32_LogicalDisk -Filter "DriveType=3" | Select-Object DeviceID, FileSystem, Size)
+            disk_models = @(Get-CimInstance Win32_DiskDrive | Select-Object Model, InterfaceType, Size)
           } | ConvertTo-Json | Tee-Object -FilePath (Join-Path $env:REVIEW_PACKET "host-and-toolchain.json")
 
           & zig env 2>&1 | Tee-Object -FilePath (Join-Path $env:REVIEW_PACKET "zig-env.txt")
@@ -154,6 +158,36 @@ jobs:
             throw "threaded_blocked_read_cancel_windows.zig failed with exit code $LASTEXITCODE"
           }
 
+      - name: Run APC batch and device cancellation proofs natively
+        if: always()
+        shell: pwsh
+        run: |
+          & zig test proofs/windows_apc_batch.zig 2>&1 | Tee-Object -FilePath (Join-Path $env:REVIEW_PACKET "windows-apc-batch-native.log")
+          if ($LASTEXITCODE -ne 0) {
+            throw "windows_apc_batch.zig failed with exit code $LASTEXITCODE"
+          }
+
+      - name: Run custom IOCP lifecycle and bounded workload natively
+        if: always()
+        shell: pwsh
+        run: |
+          & zig test proofs/windows_iocp_lifecycle.zig 2>&1 | Tee-Object -FilePath (Join-Path $env:REVIEW_PACKET "windows-iocp-lifecycle-native.log")
+          if ($LASTEXITCODE -ne 0) {
+            throw "windows_iocp_lifecycle.zig failed with exit code $LASTEXITCODE"
+          }
+
+      - name: Run command and retrieval gates
+        shell: pwsh
+        run: |
+          & python3 -m unittest tools.test_wiki_commands tools.test_retrieval_benchmark -v 2>&1 | Tee-Object -FilePath (Join-Path $env:REVIEW_PACKET "command-tests.log")
+          if ($LASTEXITCODE -ne 0) {
+            throw "command tests failed with exit code $LASTEXITCODE"
+          }
+          & python3 tools/retrieval_benchmark.py --format text --enforce-policy 2>&1 | Tee-Object -FilePath (Join-Path $env:REVIEW_PACKET "retrieval-benchmark.log")
+          if ($LASTEXITCODE -ne 0) {
+            throw "retrieval policy failed with exit code $LASTEXITCODE"
+          }
+
       - name: Record checkout status
         if: always()
         shell: pwsh
@@ -161,6 +195,10 @@ jobs:
           & git status --porcelain --untracked-files=all 2>&1 | Tee-Object -FilePath (Join-Path $env:REVIEW_PACKET "repository-status.txt")
           if ($LASTEXITCODE -ne 0) {
             throw "git status failed with exit code $LASTEXITCODE"
+          }
+          $checkoutStatus = [string](Get-Content -Raw (Join-Path $env:REVIEW_PACKET "repository-status.txt"))
+          if ($checkoutStatus.Trim()) {
+            throw "verification modified the checkout"
           }
 
       - name: Upload Windows runtime evidence

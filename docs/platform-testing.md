@@ -75,7 +75,7 @@ The wrapper:
 2. streams the current checkout rather than relying on a possibly stale remote
    clone;
 3. disables macOS AppleDouble/xattr sidecars while archiving;
-4. prints the remote kernel, Zig version, and
+4. prints the local publication commit, remote architecture/OS/kernel, Zig version, and
    `/proc/sys/kernel/io_uring_disabled` value;
 5. requires the remote Zig version to match `.zig-version`;
 6. runs `zig build verify --summary all`; and
@@ -84,6 +84,11 @@ The wrapper:
 It does not modify the remote user's checkout. Do not replace its validated
 temporary path with `$HOME`, `~`, a workspace root, a glob, or another broad
 deletion target.
+
+The archive contains the current working tree. The printed commit identifies
+that tree only when the local checkout is clean. Require a clean checkout and
+matching pushed commit for a publication gate; label earlier dirty-tree runs
+as development checks.
 
 The 2026-09-04 reference host was x86_64 Omarchy 4.0.2 / Arch Linux, kernel
 `7.1.9-arch1-2`, Zig 0.16.0, with `io_uring_disabled=0`. That run proved the
@@ -109,9 +114,12 @@ gh run watch RUN_ID --exit-status
 
 The workflow has `contents: read` only. It downloads the `x86_64-windows`
 archive named by `.zig-version` from Zig's official release index, verifies the
-published SHA-256, records the runner image and exact Windows build/UBR, runs
-the common Zig verifier, then explicitly runs `windows_io_mapping.zig` and
-`threaded_blocked_read_cancel_windows.zig` natively. Logs and host metadata are
+published SHA-256, records the runner image, exact Windows build/UBR, CPU, RAM,
+logical filesystems and reported disk models, runs the common Zig verifier,
+then explicitly runs `windows_io_mapping.zig`,
+`threaded_blocked_read_cancel_windows.zig`, `windows_apc_batch.zig`, and
+`windows_iocp_lifecycle.zig` natively. It also runs the command/retrieval gates
+and fails if verification changes the checkout. Logs and host metadata are
 uploaded for 30 days even when an earlier step fails.
 
 Use `gh run download RUN_ID -D TEMPORARY_DIRECTORY` to inspect the packet. The
@@ -123,6 +131,11 @@ passed the full verifier with 70/70 build steps, 67 passing tests, and 7
 intentional platform skips, then passed the native mapping and synchronous
 named-pipe cancellation proofs explicitly. x86 and aarch64 remain compile-only
 until native runners execute them.
+
+Before interpreting a run, check `headSha` with `gh run view RUN_ID --json
+headSha,status,conclusion,url` and match it to the intended pushed commit.
+A queued workflow has not executed any proof. An in-progress workflow has not
+passed until its conclusion and packet confirm that result.
 
 Windows lessons that must not regress:
 
@@ -138,6 +151,13 @@ Windows lessons that must not regress:
   budget.
 - Passing the synchronous cancellation harness does not prove asynchronous APC
   races, every device/driver, `Batch.cancel`, or a custom IOCP adapter.
+- Zig 0.16.0 `Threaded.batchCancel` waits for an APC/alert before sending
+  cancellation requests for a pending batch. A watchdog-backed witness must
+  distinguish an explicit wake used to release that wait from unassisted
+  cancellation progress. See [[windows-iocp-and-overlapped-io]].
+- New native harnesses must keep control blocks and buffers live until terminal
+  reconciliation even on a failed assertion. A process watchdog may terminate
+  a stuck proof; it must not unwind a stack still borrowed by the kernel.
 
 ## Scheduled source/retrieval review
 

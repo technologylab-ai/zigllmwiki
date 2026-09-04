@@ -21,9 +21,9 @@ produce Zig 0.16.x code that:
 - **Foundation milestone:** M0 is complete. Portable local evidence, the full
   Zig 0.16 release-note scope inventory, deterministic graph scoring, and the
   first semantic lint report are all in place.
-- **Running now:** none. The content, platform, maintenance, and final semantic
-  audit assignments in this milestone have completed; queued work below is not
-  being described as active.
+- **Running now:** M3-004. The continuation agent owns publication and platform
+  gates. Both proof subagents and primary-source review have finished; all
+  three Windows architectures compile. Hosted runtime evidence is pending.
 - **Latest completed content:** M1-001, M1-003, and M1-006 now document and
   prove `std.process.Init`/capability threading, `Select`/`Batch` ownership, and
   the complete `std.Io` synchronization-primitives surface. The six requested
@@ -37,8 +37,7 @@ produce Zig 0.16.x code that:
   synchronous pipe cancellation ran on Windows Server 2025 while continuing to
   compile for x86, x86_64, and aarch64; and M3-005 exposes the remaining custom
   IOCP/load evidence gate.
-- **Queued, not running:** M3-004 custom IOCP lifecycle/load evidence and L-009
-  review-packet-to-PR automation.
+- **Queued, not running:** L-009 review-packet-to-PR automation.
 - **Backend:** intentionally deferred; the Obsidian-first ADR remains in force.
 
 Source status is tracked as `discovered → selected → captured → synthesized →
@@ -126,7 +125,7 @@ Keep interface design separate from backend implementation.
 | M3-001 | done | Pinned TigerBeetle `src/io` map distinguishing Linux `io_uring`, Darwin `kqueue` readiness plus synchronous file I/O, and Windows IOCP/overlapped I/O. |
 | M3-002 | done | Linux kernel/feature floors, finite queues, registered-file/buffer ownership, target/cancel CQE reconciliation, exact Zig-layer readiness, and three Zig 0.16 runtime tests on `omarx1`. |
 | M3-003 | done | Apple-primary `kqueue`, Dispatch I/O, and POSIX AIO lifecycles; exact Zig 0.16 Dispatch/Kqueue mapping and defects; a Zig/C adapter; macOS runtime proof; and bounded comparative evidence. |
-| M3-004 | queued | Microsoft-primary IOCP lifecycle and exact Zig 0.16 Threaded/APC/NtDll mapping are synthesized; mapping and synchronous blocked-read cancellation ran on Windows Server 2025, while APC race breadth plus a custom IOCP lifecycle/load proof remain. |
+| M3-004 | running | Extend the existing Windows evidence with bounded APC/batch/device cancellation and a custom IOCP lifecycle/load proof; retain exact tested branches, limits, watchdogs, shutdown ownership, and runtime-versus-compile scope. |
 | M3-005 | done | Cross-platform decision table selects portable Threaded or platform-specific file/network backends with guarantees, limits, unsupported cases, ownership, resource models, and exact evidence gates. |
 
 | Platform | Research and proof targets |

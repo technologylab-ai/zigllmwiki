@@ -51,12 +51,14 @@ mapping from workload and OS to the right mechanism:
 - macOS/BSD: [[macos-kqueue-and-aio|`kqueue` readiness and POSIX AIO]], plus
   remaining dispatch I/O, worker-thread, and runtime comparison work.
 - Windows: [[windows-iocp-and-overlapped-io|overlapped I/O and completion
-  ports]], including cancellation, plus the remaining Zig 0.16 NtDll mapping.
+  ports]], including cancellation and the exact Zig 0.16 Threaded/NtDll/APC
+  mapping. Threaded is not an IOCP backend.
 
 Primary Linux, Apple, and Microsoft interface semantics and pinned
-TigerBeetle code are now synthesized. They are not yet backend recommendations:
-the remaining alternatives, Zig adapter behavior, and runtime tests on each
-named platform are tracked in M3 of `ROADMAP.md`.
+TigerBeetle code are synthesized in [[platform-io-backend-decision-table]].
+That table recommends choices with explicit evidence boundaries; it does not
+promote a narrow lifecycle proof to production-load or arbitrary-device
+coverage. Remaining platform work is tracked in `ROADMAP.md`.
 
 ## Current TigerBeetle implementation evidence
 
@@ -81,6 +83,7 @@ architecture pattern, not yet a verified recipe for Zig 0.16's experimental
 evented implementations.
 
 Related: [[std-io]], [[io-threaded]], [[async-vs-concurrent]], [[io-uring]],
+[[platform-io-backend-decision-table]],
 [[macos-kqueue-and-aio]], [[windows-iocp-and-overlapped-io]],
 [[tigerbeetle-io]], [[cancellation]],
 [[static-allocation-and-constant-work]], [[tigerstyle]].

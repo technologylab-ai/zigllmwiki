@@ -69,8 +69,8 @@ Read this page first, then follow only the pages needed for the task.
   and cancellation races.
 - [[macos-kqueue-and-aio]] — `kqueue` readiness, Dispatch I/O/POSIX AIO
   completion, exact Zig 0.16 backend gaps, and measured macOS evidence.
-- [[windows-iocp-and-overlapped-io]] — IOCP ordering and capacity, stable
-  `OVERLAPPED` ownership, immediate success, and cancellation races.
+- [[windows-iocp-and-overlapped-io]] — APC/batch/device cancellation, the
+  Windows batch progress defect, and bounded IOCP ownership and shutdown.
 - [[tigerbeetle-io]] — source-verified comparison of TigerBeetle's Linux
   `io_uring`, Darwin `kqueue`, and Windows IOCP backend choices.
 

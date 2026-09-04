@@ -3,6 +3,9 @@ set -eu
 
 linux_host=${1:-omarx1}
 repository_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+publication_commit=$(git -C "$repository_root" rev-parse HEAD)
+printf 'checkout_commit=%s (streamed working tree; inspect local status for edits)\n' \
+    "$publication_commit"
 
 COPYFILE_DISABLE=1 tar \
     --no-xattrs \
@@ -22,10 +25,18 @@ COPYFILE_DISABLE=1 tar \
         trap cleanup EXIT HUP INT TERM
         tar -xzf - -C "$run_directory"
         cd "$run_directory"
-        printf "host=%s kernel=%s zig=%s io_uring_disabled=%s\n" \
+        expected_zig=$(cat .zig-version)
+        actual_zig=$(zig version)
+        if [ "$actual_zig" != "$expected_zig" ]; then
+            printf "expected Zig %s, got %s\n" "$expected_zig" "$actual_zig" >&2
+            exit 1
+        fi
+        printf "host=%s arch=%s kernel=%s zig=%s io_uring_disabled=%s\n" \
             "$(uname -n)" \
+            "$(uname -m)" \
             "$(uname -r)" \
-            "$(zig version)" \
+            "$actual_zig" \
             "$(cat /proc/sys/kernel/io_uring_disabled)"
-        zig build verify
+        cat /etc/os-release
+        zig build verify --summary all
     '

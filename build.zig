@@ -74,6 +74,9 @@ pub fn build(b: *std.Build) void {
         "proofs/threaded_blocked_read_cancel_linux.zig",
         "proofs/threaded_blocked_read_cancel_macos.zig",
         "proofs/threaded_blocked_read_cancel_windows.zig",
+        "proofs/windows_io_mapping.zig",
+        "proofs/windows_apc_batch.zig",
+        "proofs/windows_iocp_lifecycle.zig",
     };
     for (proof_sources) |proof_source| {
         const proof_module = b.createModule(.{
@@ -92,32 +95,25 @@ pub fn build(b: *std.Build) void {
         .x86_64,
         .aarch64,
     };
+    const windows_proof_sources = [_][]const u8{
+        "proofs/windows_io_mapping.zig",
+        "proofs/threaded_blocked_read_cancel_windows.zig",
+        "proofs/windows_apc_batch.zig",
+        "proofs/windows_iocp_lifecycle.zig",
+    };
     for (windows_architectures) |architecture| {
-        const windows_mapping_module = b.createModule(.{
-            .root_source_file = b.path("proofs/windows_io_mapping.zig"),
-            .target = b.resolveTargetQuery(.{
-                .cpu_arch = architecture,
-                .os_tag = .windows,
-            }),
-            .optimize = optimize,
-        });
-        const windows_mapping_tests = b.addTest(.{
-            .root_module = windows_mapping_module,
-        });
-        verify_step.dependOn(&windows_mapping_tests.step);
-
-        const windows_cancellation_module = b.createModule(.{
-            .root_source_file = b.path("proofs/threaded_blocked_read_cancel_windows.zig"),
-            .target = b.resolveTargetQuery(.{
-                .cpu_arch = architecture,
-                .os_tag = .windows,
-            }),
-            .optimize = optimize,
-        });
-        const windows_cancellation_tests = b.addTest(.{
-            .root_module = windows_cancellation_module,
-        });
-        verify_step.dependOn(&windows_cancellation_tests.step);
+        for (windows_proof_sources) |proof_source| {
+            const windows_module = b.createModule(.{
+                .root_source_file = b.path(proof_source),
+                .target = b.resolveTargetQuery(.{
+                    .cpu_arch = architecture,
+                    .os_tag = .windows,
+                }),
+                .optimize = optimize,
+            });
+            const windows_tests = b.addTest(.{ .root_module = windows_module });
+            verify_step.dependOn(&windows_tests.step);
+        }
     }
 
     const single_threaded_testing_module = b.createModule(.{

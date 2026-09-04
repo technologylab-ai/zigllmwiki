@@ -8,11 +8,15 @@ summary: Windows IOCP adapters require stable OVERLAPPED ownership and terminal 
 updated: 2026-09-04
 sources:
   - "[[microsoft-windows-iocp]]"
+  - "[[microsoft-windows-iocp-api]]"
+  - "[[microsoft-windows-nt-fs-control]]"
   - "[[zig-0.16-windows-io-source]]"
   - "[[tigerbeetle-io-source]]"
 proofs:
   - proofs/windows_io_mapping.zig
   - proofs/threaded_blocked_read_cancel_windows.zig
+  - proofs/windows_apc_batch.zig
+  - proofs/windows_iocp_lifecycle.zig
 platforms:
   - windows
 ---
@@ -45,6 +49,12 @@ completion packet must never reclaim the same operation twice.
 
 The same word “asynchronous” appears in several rows, but the dispatch,
 wakeup, resource, and cancellation contracts are different.
+
+Do not attach the APC fixture's handle to an IOCP to combine these designs.
+Microsoft's `NtFsControlFile` contract forbids an APC routine on a handle
+already associated with an I/O completion object. Its `ApcContext` parameter
+has different roles in the callback and port cases. See
+[[microsoft-windows-nt-fs-control]].
 
 ## Exact Zig 0.16 `std.Io.Threaded` behavior
 
@@ -95,6 +105,22 @@ contract in [[select-and-batch]].
 
 These are backend-specific limits, not contradictions in the portable
 `std.Io.Batch` interface.
+
+### Pending batch cancellation has a progress defect
+
+In the exact 0.16.0 `Threaded.batchCancel` implementation, a nonempty pending
+list first calls `waitForApcOrAlert()` with no deadline, **before** issuing any
+`NtCancelIoFileEx` requests. It then requests cancellation and waits again
+until the pending list empties. With no queued APC or alert and no operation
+able to finish, that first wait can prevent cancellation from ever reaching
+the kernel. This follows directly from [[zig-0.16-windows-io-source]]; do not
+mistake the public terminal-ownership contract for a backend progress proof.
+
+An ordinary `defer batch.cancel(io)` still describes who owns cleanup, but it
+does not impose a shutdown deadline on this Windows path. A bounded adapter
+needs a separately owned wake/escape mechanism and a watchdog for its tested
+environment. That mechanism is an implementation-specific integration seam,
+not an additional requirement of the portable `Batch` interface.
 
 ### Networking goes through NT AFD, not IOCP
 
@@ -177,6 +203,45 @@ Use this state machine:
 
 This is the Windows instance of [[cancellation|request and acknowledgement]].
 Closing a handle or freeing an operation record is not an acknowledgement.
+
+`GetQueuedCompletionStatus` returning false is not always a wait failure. If
+it returns a non-null `OVERLAPPED`, it dequeued a terminal failed I/O packet;
+reconcile that operation using `GetLastError`. If the pointer is null, no
+packet was dequeued and the byte/key outputs are indeterminate. A synthetic
+successful packet with a null pointer can instead be an application control
+message, provided its identity and handling are explicit.
+[[microsoft-windows-iocp-api]] supplies the exact API contracts.
+
+## Bounded proof design
+
+The two new harnesses implement deliberately narrow fixtures, not a complete
+`std.Io` backend. Their records remain at final addresses while the kernel can
+borrow them; cleanup drains terminal outcomes before closing handles. The
+named-pipe buffer reservation is a requested kernel quota, not an application
+memory cap or a guarantee about every driver's buffering.
+
+| Harness | Application limits and ownership | Shutdown/failure boundary |
+| --- | --- | --- |
+| [APC/batch/device](../proofs/windows_apc_batch.zig) | NPFS pipes; one or two fixed operation slots; a 4096-byte requested pipe quota; 1-byte and 8192-byte transfers; one permitted Threaded concurrent task plus bounded helper threads. Raw NT calls record actual immediate/pending statuses. | Direct task cancellation joins; batch cleanup explicitly alerts the issuing thread to release the 0.16.0 initial-wait defect, then drains retained successes. The device fixture is message-pipe `FSCTL_PIPE_TRANSCEIVE` through `NtFsControlFile`. |
+| [Custom IOCP](../proofs/windows_iocp_lifecycle.zig) | Four stable slots and 64-byte buffers, port concurrency one, four pipe pairs or four handles to one 256-byte regular file. Admission counts submitted operations until terminal dispatch, including queued completions. Both default and skip-on-success modes have separate runs. | Stop admission, post one uniquely identified control packet, cancel outstanding operations, keep draining after the control packet, reconcile every data result, then close handles and port. Capacity exhaustion and closed admission fail explicitly. |
+
+The IOCP proof uses one-packet `GetQueuedCompletionStatus` dequeue and bounded
+submission batches. It does not exercise `GetQueuedCompletionStatusEx` or
+Winsock. Aborted results do not imply byte rollback: race fixtures close their
+pipe only after the writer and target are terminal, then create a fresh pair.
+The regular-file fixture uses the exact 0.16.0
+`openFile(.follow_symlinks = false)` implementation to obtain an asynchronous
+handle and checks its flag; that is an implementation fixture, not a portable
+API promise that symlink policy selects a scheduling mechanism.
+
+Watchdogs bound the test's willingness to wait: the APC harness has a 20-second
+process watchdog; IOCP has a 3-second drain deadline and a separate 30-second
+process watchdog. These are scheduler-dependent diagnostic bounds, not hard
+real-time guarantees. Failure terminates the isolated test process instead of
+unwinding live operation storage. Even `TerminateProcess` depends on pending
+I/O completing or canceling, so the hosted workflow's outer job timeout
+remains necessary; no watchdog proves arbitrary-driver cancellation progress.
+See [[microsoft-windows-iocp-api]].
 
 ## TigerBeetle comparison
 

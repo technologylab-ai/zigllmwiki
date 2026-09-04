@@ -81,6 +81,8 @@ when a concrete systems-programming question needs them.
 | Apple libdispatch I/O headers | synthesized + adapter proved | Dispatch channel/data/callback lifecycles and the Zig/C macOS proof in [[macos-kqueue-and-aio]] |
 | Zig 0.16 Dispatch/Kqueue source | synthesized + selected macOS paths proved | Exact Evented alias, synchronous regular-file calls, unavailable networking, 60 MiB fibers, and broken deinit in [[macos-kqueue-and-aio]] |
 | Microsoft IOCP, overlapped I/O, and `CancelIoEx` documentation | synthesized | Completion ownership, immediate-success handling, ordering, capacity, and cancellation in [[windows-iocp-and-overlapped-io]] |
+| Microsoft SDK API contracts at `5f2625b6782d3e9c0df08756583c527a0a2872ca` | synthesized; runtime gates pending | Failed terminal packets versus wait failures, skip-on-success, named-pipe fixtures, advisory quotas, and process-watchdog limits in [[windows-iocp-and-overlapped-io]] |
+| Microsoft `NtFsControlFile` at `7515063cea4c9e98db6a92986c5b4ddb0463fd16` | synthesized; runtime gates pending | APC versus port-context ownership and the bounded NPFS device-control fixture; the source's nonexistent `Asynchronous` parameter is explicitly excluded. |
 | Zig 0.16 Windows `std.Io` source | synthesized + three-target compile proof | Exact synchronous-worker, APC/NtDll, AFD networking, batch, cancellation, error-mapping, and missing-IOCP boundaries in [[windows-iocp-and-overlapped-io]] |
 
 ## TigerBeetle — current slice
@@ -112,7 +114,7 @@ agent is currently working on it.
 | M2-010 retry/defer curation | done | Both retry-loop essays and the defer-pattern essay are synthesized into one-deadline retry and terminal cleanup guidance. |
 | M3-003 macOS evented I/O | done | Primary `kqueue`/AIO/Dispatch lifecycles, exact Zig mappings and defects, an actual Dispatch I/O adapter, macOS runtime evidence, and a bounded comparison are recorded. |
 | M3-002 Linux evented I/O | done | Kernel/feature floors, registered resources, cancellation races, and real Zig 0.16 `omarx1` evidence are integrated. |
-| M3-004 Windows evented I/O | queued | Exact Zig mapping and Threaded synchronous cancellation ran on Windows Server 2025; APC race breadth plus custom IOCP lifecycle/load evidence remain. |
+| M3-004 Windows evented I/O | running | Both proof implementations and source review are complete. The continuation agent owns publication and platform gates; Windows runtime evidence is pending. |
 | M3-005 backend decision table | done | File/network choices, guarantees, limits, unsupported paths, ownership, resource models, and evidence gates are synthesized across all three platforms. |
 
 M1-001 is complete: [[process-init-and-capabilities]] synthesizes the official

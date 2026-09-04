@@ -10,9 +10,12 @@ The repository is a usable Obsidian-first, agent-first Zig 0.16.0 systems
 knowledge base. M0 (trustworthy foundation), M2 (TigerStyle in Zig), and the
 cross-platform M3 decision synthesis are complete. M1 covers the public
 `std.Io` field-guide surface targeted by the roadmap, including blocked-call
-cancellation on macOS, Linux, and Windows. The exact Windows implementation
-mapping and synchronous cancellation harness ran, but custom IOCP and broader
-APC/device/load behavior remain unproved.
+cancellation on macOS, Linux, and Windows. M3-004 is being extended with
+registered APC/batch/NPFS-device and custom IOCP lifecycle/load harnesses.
+The earlier mapping and synchronous cancellation harness ran on Windows;
+the new harnesses still require the hosted runtime gate before evidence
+promotion. Their implementation found a 0.16.0 Windows `batchCancel` progress
+defect: an unbounded alertable wait occurs before cancellation requests.
 
 The active compiler is exactly the value in `.zig-version`: `0.16.0`. Do not
 silently follow Zig master, 0.15 examples, or a future 0.16 patch. The installed
@@ -145,9 +148,10 @@ traps, read `docs/platform-testing.md` before changing any platform claim.
 
 ## Honest remaining work
 
-1. Extend the established Windows runner from synchronous Threaded
-   cancellation into watchdog-backed APC/batch/device and custom IOCP lifecycle
-   and load evidence before promoting those broader claims.
+1. Finish M3-004's new hosted Windows runtime gate, preserve observed statuses
+   and bounded workload metrics, and distinguish the explicit batch wake from
+   unassisted cancellation. NPFS evidence does not cover arbitrary drivers,
+   Winsock IOCP, cold storage, or deployment load.
 2. Extend the platform performance matrix only for a concrete workload,
    hardware, filesystem/device, queue depth, and correctness witness.
 3. Continue selected TigerBeetle storage/recovery/operations ingestion by a
