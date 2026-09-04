@@ -622,3 +622,65 @@ the loopback bind with errno 1: 85/87 steps, 68/78 tests passed, 9 skips,
 sandbox network restriction. Graph and retrieval policy passed; the caller's
 independent gates and publication remain pending. No new Linux/Windows runtime
 evidence, full-vault semantic pass, or successful curator publication is claimed.
+
+## [2026-09-04] maintenance | installed curator opens its first reviewed PR
+
+The installed omarx1 service selected maxross and consumed successful packet
+33921176578 at `0e82e97e6eb9314c4dd70cecdedd3449556bdd81`. The bounded agent
+found Queue/Select contention, partial-delivery and join-ownership corrections.
+Its sandbox denied loopback binding; the independent caller subsequently
+passed all 87 Zig steps, 69/78 tests with 9 skips, 28 Python tests and the
+25-query retrieval policy. The caller published
+[PR #1](https://github.com/technologylab-ai/zigllmwiki/pull/1), and the owning
+interactive agent separately reviewed and merged it as e3fccc362e8b4504b3660916e4bde277fe104667.
+The consumer never merged automatically.
+
+Service routing to the Mac, an unavailable-Mac idle fallback, and a repeat
+service invocation falling back to Linux and finding the existing PR all
+passed. No duplicate agent or PR was started. The service exited successfully;
+the enabled Monday 05:17 UTC timer is waiting. L-009 is complete at this bounded
+operational scope; new queue proof gaps are being implemented separately.
+[The operational receipt](reports/2026-09-04-curation-operations.md) preserves
+exact phases and the first failed trial without retroactive success claims.
+
+## [2026-09-04] proof | exercise curator-found queue and Select ownership cases
+
+Added four tests to the existing registered synchronization and Select/Batch
+proofs: zero-minimum mutex contention, partial put/get cancellation followed by
+fast progress and explicit checkCancel, close with blocked producers/consumers
+and separate join, and a short owned awaitMany prefix with an untouched sentinel.
+The Batch fixture now actually asserts bounded unique completion indexes.
+Exact implementation-state witnesses avoid inferring submission from sleeps;
+finite attempt counts and native watchdog threads retain ownership on failures.
+
+On arm64 macOS 26.6.2 build 25G83, exact Zig 0.16.0 passed 87/87 steps,
+73/82 tests with 9 skips (nine synchronization and three Select/Batch tests).
+Linux/Windows publication gates remain pending for these new cases. Historical
+curator reports and six/two-test results are unchanged. Guidance, retrieval,
+curation and roadmap now distinguish implemented proofs from platform evidence.
+
+## [2026-09-04] runtime | WOW64 and ARM64 execution with explicit compiler boundaries
+
+At 0e82e97, [run 33921176754](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33921176754)
+passed its x64 job and all five x86 executables under WOW64. Its ARM64 job
+failed overall while three standalone native compiler/test commands passed.
+Diagnostic branch commit `96215657c1e682334f40b7b0d77cc0a6688da4ca` in
+[run 33921810785](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33921810785)
+separated compilation and execution: all five default native ARM compiler
+attempts failed with -1073741819 before launching a test; seven of eight focused
+variants also failed. No general native-compiler remedy or root cause is claimed.
+
+The same diagnostic job used the checksum-verified exact 0.16.0 x64 compiler
+under Windows ARM emulation, compiled ARM64 baseline PEs, verified their machine
+headers and executed all five successfully on Windows 11 ARM64. The full ARM64
+target gate passed 87/87 steps, 71/78 tests with 7 skips, explicit ARM64 assembly,
+28 Python tests and retrieval/clean checks. These successful phases do not turn
+the original diagnostic workflow's overall failure into success.
+
+The Windows page preserves Cobalt 100 / Windows 11 Enterprise 25H2 build 26200.9168,
+image win11-arm64/20260830.155.1, 8,579,493,888 bytes RAM, NTFS C: and virtual-device
+identities, measured TCP/file counts and timings. ARM64 observed all 64 file
+writes pending while x64/WOW64 observed immediate writes; none of the file
+cancellation races produced a canceled file result. The final workflow uses an
+explicit x64-compiler/ARM64-runtime qualification path with optional fatal
+native-compiler diagnostics. Physical deployment evidence remains unavailable.

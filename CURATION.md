@@ -122,7 +122,7 @@ agent is currently working on it.
 | M3-002 Linux evented I/O | done | Kernel/feature floors, registered resources, cancellation races, and real Zig 0.16 `omarx1` evidence are integrated. |
 | M3-004 Windows evented I/O | done | APC/batch/NPFS plus custom IOCP pipe/file lifecycle and bounded load ran on Windows Server 2025; exact observations, defects, watchdogs and limits are preserved. All subagents finished. |
 | M3-005 backend decision table | done | File/network choices, guarantees, limits, unsupported paths, ownership, resource models, and evidence gates are synthesized across all three platforms. |
-| M3-006 Windows deployment qualification | running | Windows proof agent is implementing a bounded TCP-to-file fixture; broader qualification still requires Winsock, file-write/cold-storage/durability, native architecture, and unassisted-shutdown evidence. |
+| M3-006 Windows deployment qualification | running | x64 TCP/file, five WOW64 proofs, and all five ARM64 executables plus full ARM64 target verification passed. Native ARM compiler crash is recorded separately; final publication gates remain. Physical storage/deployment qualification is unavailable. |
 
 M1-001 is complete: [[process-init-and-capabilities]] synthesizes the official
 Zig 0.16 initializer/startup source and the local migration guide, with a real
@@ -134,8 +134,10 @@ operation slots and proves result draining plus arbitrary completion order.
 
 M1-006 is complete from `Io.zig`, `Io/RwLock.zig`, and `Io/Semaphore.zig`:
 [[io-synchronization-primitives]] covers the entire public synchronization
-surface with six tests for cancellation, predicate, capacity, close/drain,
-permit, shared-lock, and futex behavior.
+surface with six original tests for cancellation, predicate, capacity, close/drain,
+permit, shared-lock, and futex behavior. Three additional queue tests now pass
+locally for contention, partial cancellation and close/join ownership; their
+Linux/Windows gates are pending. The selected source revision is unchanged.
 
 M1-007 is complete from the installed time interface and the pinned monotonic
 time design note: [[io-time-clocks-and-deadlines]] distinguishes all five clock

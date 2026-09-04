@@ -16,27 +16,29 @@ or physical durability experiment is claimed. The fresh full semantic audit is
 The verified-proof-excerpt design is accepted in
 [ADR 0002](docs/decisions/0002-verified-proof-excerpts.md); no renderer is enabled.
 
-M3-006 has an implemented four-slot TCP-to-file IOCP fixture with partial
-transfer handling, batched per-operation results, file write/flush/readback,
-cancellation races and public-API stop/cancel/drain. Native x64 passed; ARM64
-and WOW64 runtime gates are the next active validation work. Hosted VMs cannot
-supply physical power-loss evidence or a named deployment's driver/storage/SLO
-qualification. Preserve these limits rather than declaring all of M3 complete.
+M3-006 now has a four-slot TCP-to-file IOCP fixture with partial transfers,
+batched per-operation results, file write/flush/readback, cancellation races
+and public-API stop/cancel/drain. All five Windows proofs ran on x64, as x86
+processes under WOW64, and as ARM64 processes. The broad deployment item still
+requires physical power-loss/controlled-cold-storage evidence and a named
+production driver/error/workload/SLO matrix. A hosted virtual disk cannot
+establish those missing requirements; do not declare all of M3 complete.
 
-L-009's consumer and scheduler are implemented. The first live curator trial
-correctly retained an unpushed proposal when the caller verifier exposed an
-absolute-path cache-filter bug in the linter. The fix and regression are now
-implemented; a new packet and successful draft-PR trial remain required.
+L-009 is complete. The installed omarx1 service selected maxross, consumed the
+current packet, ran bounded Codex curation, passed independent caller gates
+and opened [draft PR #1](https://github.com/technologylab-ai/zigllmwiki/pull/1).
+The owning interactive agent separately reviewed and merged it. The
+[operational receipt](reports/2026-09-04-curation-operations.md) preserves the
+first rejected trial, successful publication, idle routing and repeat Linux
+fallback without a duplicate agent. The consumer never auto-merges.
 
-[Bounded review 33921176578, attempt 1](reports/curation-review-33921176578-1.md)
-inspected the fresh packet at `0e82e97e6eb9314c4dd70cecdedd3449556bdd81`
-and qualified `Queue`/`Select.awaitMany` contention, partial delivery, and
-shutdown ownership against installed Zig 0.16.0. Synchronization guidance is
-now `source-verified`; its earlier six-test platform results are preserved,
-while additional adversarial proofs are queued in ROADMAP.md. Local structural
-verification passed, but the sandboxed full gate failed the loopback bind with
-errno 1. Independent caller gates and publication are still required; this
-bounded content review does not complete L-009 or revalidate the full vault.
+The curator found additional Queue/Select ownership caveats. Four new tests
+and actual Batch index assertions now cover them in existing registered proofs.
+Mac integration passed 87/87 steps, 73/82 tests with 9 skips; a Linux development
+run passed 87/87, 74/82 with 8 skips. Final clean/pushed platform gates for
+these new tests are being completed by the root agent; all subagents finished.
+The historical [bounded report](reports/curation-review-33921176578-1.md)
+retains its sandbox bind failure and then-missing proof coverage.
 
 ## Exact baseline and editing contract
 
@@ -69,9 +71,12 @@ parallelism. Preserve authoring checkouts and identify exact input revisions.
 The runbook owns commands and host metadata requirements.
 
 Windows runtime tests use **GitHub-hosted VMs**, not a local Windows VM. The
-manual workflow now defines native x64 and ARM64 jobs, and x86 executables
-under WOW64 on the x64 host. Until those new jobs complete, x86/ARM64 remain
-compile-only evidence. WOW64 is not a native 32-bit Windows OS.
+manual workflow now supplies x64 and ARM64 runtime jobs, and x86 executables
+under WOW64 on the x64 host. All five Windows proofs have run in each process
+architecture. WOW64 is not a native 32-bit Windows OS. ARM64 qualification uses
+exact Zig 0.16.0's x64 compiler under Windows emulation, explicitly targets
+ARM64 baseline and runs ARM64 PE executables. The native ARM compiler crashed
+during compilation; that separate opt-in diagnostic remains an explicit limit.
 
 The weekly/manual GitHub review stays read-only. The separate local consumer
 uses `gh` for GitHub packets/branches/draft PRs and the authenticated Codex CLI
@@ -83,7 +88,8 @@ On omarx1 the user-systemd timer is installed and enabled for Mondays at
 05:17 UTC, with `Persistent=true`; the preexisting user manager has Linger=yes.
 Units are under `~/.config/systemd/user/zig-wiki-curation.*`; their dedicated
 runner clone is `~/.local/state/zigllmwiki-curator/runner`. The timer is waiting,
-not a continuously running agent. Service routing validation is still pending.
+not a continuously running agent. Service routing, successful publication and
+idempotent Linux fallback were tested; the service is inactive after success.
 The wrapper prefers an available clean/current maxross checkout, otherwise
 runs locally; once an agent starts remotely it never launches a second fallback
 agent on failure. No current successful review packet produces an idle result.
@@ -105,10 +111,29 @@ At pushed `0bdca5a38331fe9ae0a3db04cc4a6955152969fc`:
   PowerShell 7.6.5, AMD EPYC 7763, two logical processors,
   8,584,425,472 bytes RAM, NTFS D:, Microsoft Virtual Disk (SCSI).
 
+The expanded architecture evidence at
+[run 33921176754](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33921176754)
+on 0e82e97 passed the x64 job and all five x86 proofs under WOW64. The ARM64
+job had three native standalone passes but failed overall. At diagnostic
+commit 96215657c1e682334f40b7b0d77cc0a6688da4ca,
+[run 33921810785](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33921810785)
+proved native ARM compiler crashes before test execution. Its separately
+compiled ARM64 executables from the exact x64 compiler all passed, alongside
+87/87 target steps, 71/78 tests, 7 skips, ARM64 assembly, 28 Python tests and
+retrieval. The original native-compiler steps keep that run failed overall.
+
+ARM host: Windows 11 Enterprise 25H2 build 26200.9168, win11-arm64 image
+20260830.155.1, ARM64 PowerShell 7.6.4, Cobalt 100, two cores/logical processors,
+8,579,493,888 bytes RAM, NTFS C:, Microsoft Virtual Disk and Microsoft NVMe
+Direct Disk v2 reported as SCSI. The final workflow's default compiler/target
+path is explicit; `native_arm64_diagnostics=true` repeats the failing native
+compiler investigation without hiding errors or upgrading the compiler.
+
 Exact Windows metrics, observed paths and watchdogs are retained in
-[[windows-iocp-and-overlapped-io]]. The TCP/file sample observed immediate file
-writes, all file reads pending, and successful file cancellation races; it did
-not observe a canceled file completion or a short OS receive. Flush/readback on
+[[windows-iocp-and-overlapped-io]]. The x64/WOW64 TCP/file samples observed immediate file writes, while ARM64
+observed pending writes. All observed file reads were pending and file
+cancellation races successful; none observed a canceled file completion or a
+short OS receive. Flush/readback on
 a virtual disk is not physical power-loss durability. Earlier failed runs and
 narrower proof counts stay in log.md; do not promote them to full success.
 

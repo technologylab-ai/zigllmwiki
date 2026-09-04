@@ -111,3 +111,13 @@ manager and authenticated tools must be available; local credentials never
 become GitHub Actions secrets.
 
 The CLI behavior is documented in [OpenAI's non-interactive-mode guide](https://learn.chatgpt.com/docs/non-interactive-mode).
+
+## Observed installation and publication
+
+The omarx1 timer was installed and enabled on 2026-09-04. Its service selected
+maxross, completed one bounded agent pass and opened
+[draft PR #1](https://github.com/technologylab-ai/zigllmwiki/pull/1) after the
+independent caller gates passed. A separate root review merged it. Idle and
+Linux-fallback/idempotence checks also passed; the service then stopped and
+the timer remained waiting. See the [operational receipt](../reports/2026-09-04-curation-operations.md)
+for exact revisions, environments, failed first trial and validation limits.

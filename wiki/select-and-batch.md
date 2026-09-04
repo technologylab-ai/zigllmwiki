@@ -164,14 +164,23 @@ tests. The select test puts owned allocations in task results, consumes one
 through `await`, then loops over `cancel` until all remaining ownership is
 released. The batch test supplies exactly two fixed operation slots, reads two
 separate files, accepts arbitrary completion order, dispatches results by tag,
-counts completions, and verifies byte counts and data. It arms indexes 0 and 1
-but does not assert the returned `completion.index` values; that mapping is
-supported here by the `Batch.addAt`/`next` source contract. It ran with
-`std.testing.io` on aarch64 macOS on 2026-09-04.
+counts completions, and verifies byte counts and data. The current proof also
+asserts every returned index is in range, appears once, and covers both armed
+slots. These assertions were added after the historical curator report exposed
+the earlier description's missing index check; they do not change the older
+run's coverage.
 
-The select test uses `await`, not `awaitMany`; the latter's partial-delivery
-and mutex-contention boundaries are supported by the exact `Select.awaitMany`
-and `Queue.get` source, not exercised by this proof.
+A third test gives `Select.awaitMany` one owned result and requests two. A
+witnessed pending getter establishes partial delivery before cancellation;
+only the returned prefix is released, the unused output slot retains its
+sentinel, and `checkCancel` observes the re-armed request. It uses two result
+slots, one result producer, one consumer and one watchdog, with at most 5,000
+witness attempts and a process exit after 3,000 ten-millisecond watchdog sleeps.
+The queue-state witness is specific to the exact 0.16 implementation; the
+watchdog is a scheduler-dependent diagnostic budget, not a real-time guarantee.
+
+All three current tests passed on arm64 macOS 26.6.2 build 25G83 with Zig 0.16.0
+on 2026-09-04. Linux/Windows execution of the added cases remains pending.
 
 The Windows-specific [APC/batch proof](../proofs/windows_apc_batch.zig) ran with
 Zig 0.16.0 on x86_64 Windows Server 2025 build 26100.33296 on 2026-09-04.

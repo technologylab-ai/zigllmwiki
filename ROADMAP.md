@@ -8,7 +8,7 @@ complete.” Update this file when ownership, completion, or scope changes.
 ## North star
 
 A coding agent designing Zig systems software can consult this repository and
-produce Zig 0.16.x code that:
+produce Zig 0.16.0 code that:
 
 - compiles under the pinned compiler;
 - models `std.Io`, scheduling, cancellation, and limits correctly;
@@ -21,26 +21,17 @@ produce Zig 0.16.x code that:
 - **Foundation milestone:** M0 is complete. Portable local evidence, the full
   Zig 0.16 release-note scope inventory, deterministic graph scoring, and the
   first semantic lint report are all in place.
-- **Running now:** M3-006 Windows qualification, L-009 maintenance-agent
-  connection and a fresh semantic audit. Selected storage/recovery curation
-  is complete as source synthesis.
-  The first x64/Linux gates passed; native ARM64/WOW64 and a successful
-  curator PR are being validated. Agent assignments are reported when started.
-- **Latest completed content:** M1-001, M1-003, and M1-006 now document and
-  prove `std.process.Init`/capability threading, `Select`/`Batch` ownership, and
-  the complete `std.Io` synchronization-primitives surface. The six requested
-  matklad essays and five
-  TigerBeetle documents are joined by structured-concurrency, `io_uring`,
-  bounded error-diagnostics, full TigerStyle-coverage, and pinned TigerBeetle
-  cross-platform I/O syntheses. `Future`/`Group` ownership, protection, and
-  `recancel` have a macOS `Io.Threaded` proof.
-- **Latest platform evidence:** M3-004 adds Windows APC/batch/NPFS cancellation,
-  both custom IOCP notification policies, cancellation/shutdown ownership, and
-  bounded pipe/hot-NTFS read measurements. Zig 0.16.0 native Windows verification
-  passed 82/82 steps, 70/77 tests, 7 skips; x86/aarch64 remain compile-only.
-  The initial-wait batch defect and no-follow open metadata mismatch are
-  preserved, not hidden by successful fixtures. Linux `omarx1` also passed
-  82/82 steps, 70 tests and 7 skips.
+- **Completed in this session:** selected TigerBeetle storage/recovery/ops
+  synthesis, a fresh full semantic audit, verified-excerpt design, and L-009's
+  installed curator. Its first reviewed draft PR was separately merged.
+- **Platform evidence:** M3-004 remains complete. M3-006 adds native x64
+  TCP-to-file/batched IOCP and all five x86 proofs under WOW64. ARM64 has three
+  standalone native compiler/test passes; the explicit x64-compiler/ARM64-runtime
+  route then passed all five proofs and the full target gate. Final publication
+  gates remain; physical durability/deployment gaps are explicit.
+- **Proof follow-up:** four new Queue/Select tests and Batch index assertions
+  pass locally: 87/87 steps, 73/82 tests, 9 skips. Linux/Windows publication
+  gates for these additions are pending. The implementing subagents finished.
 - **Session scope:** finish actionable wiki work; M4 is reserved by the user
   for a separate in-depth session. External evidence gaps remain explicit.
 - **Backend:** intentionally deferred; the Obsidian-first ADR remains in force.
@@ -88,7 +79,7 @@ existing verification rules.
 | M1-011 | done | `std.Io.Threaded` allocation, limits, thread growth, and eager dispatch seam. |
 | M1-012 | done | Separate typed recovery codes from bounded human-facing diagnostics and reporting ownership. |
 
-Exit condition: every public recommendation has a 0.16.x source citation; every
+Exit condition: every public recommendation has a 0.16.0 source citation; every
 behavioral trap has a runnable proof; Threaded-specific facts are labeled.
 
 M1 exited on 2026-09-04 after the Windows Server 2025 run completed the
@@ -187,7 +178,7 @@ a second content store. A mutable service and database come only after that.
 | L-006 | done | Deterministic read-only `query`/`lint` and plan-only `ingest`/`upgrade` commands expose versioned JSON and never silently mutate knowledge. |
 | L-007 | done | Machine lint classifies broken evidence, stale versions, schema, links, graph health, and style with stable codes. |
 | L-008 | done | Weekly/manual GitHub workflow installs the exact checksum-verified Zig baseline, verifies proofs, checks sources/releases and retrieval, proves the checkout stayed unchanged, and uploads a 30-day review packet. |
-| L-009 | running | Connect a separately authorized coding agent that consumes the review packet and opens a reviewable PR; the read-only workflow intentionally lacks write/PR authority. |
+| L-009 | done | Installed weekly omarx1 consumer prefers maxross with Linux fallback, validates a current read-only packet, runs bounded semantic curation and independent gates, and opens a draft PR. Real PR #1, idle and idempotent fallback passed; root reviewed/merged separately. See the operational receipt. |
 | L-010 | done | Read-only `review` reports coarse upstream-head differences and newer stable Zig releases while preserving source records and requiring an explicit upgrade workflow. |
 | L-011 | done | A versioned 25-query benchmark scores the deterministic index/lexical layer; MRR 1.0, hit@3 1.0, and recall@5 0.98 do not justify hybrid search yet. |
 
@@ -196,12 +187,11 @@ hybrid search when thresholds fail or real agent queries demonstrate misses.
 
 ## Research queue
 
-- Add focused `Queue`/`Select.awaitMany` proofs for zero-minimum mutex
-  contention, partial-transfer cancellation, and close with blocked callers.
-  These are queued follow-ups from
-  [bounded review 33921176578](reports/curation-review-33921176578-1.md), which
-  permits guidance edits only; the existing six synchronization tests do not
-  establish those additional runtime claims.
+- Implemented the Queue/Select follow-ups from
+  [bounded review 33921176578](reports/curation-review-33921176578-1.md):
+  zero-minimum contention, partial-transfer cancellation and re-armed fast
+  progress, close/join with blocked callers, owned awaitMany prefixes, and
+  actual Batch index assertions. Local tests pass; publication gates remain.
 - Monitor a future Zig release through the explicit upgrade workflow; the 0.16
   inventory has no stale queued rows.
 - Extend the completed Windows NPFS/IOCP fixtures only against M3-006's named
@@ -211,8 +201,8 @@ hybrid search when thresholds fail or real agent queries demonstrate misses.
   evidence. Future source selection remains question-driven; old Zig syntax
   must not enter guidance without an exact 0.16 proof.
 - Extend the three-platform matrix with workload-specific filesystem/device,
-  cold-storage and durability evidence; the native ARM64/WOW64 gates are
-  implemented and awaiting their first runtime result.
+  cold-storage and durability evidence; ARM64/WOW64 fixtures now have named
+  runtime results with distinct compiler and process architectures.
 - Verified-excerpt design is complete in
   [ADR 0002](docs/decisions/0002-verified-proof-excerpts.md): proof files remain
   canonical, future exports require provenance/drift gates, and wiki Zig fences

@@ -199,12 +199,27 @@ x86_64 Linux 7.1.9 and x86_64 Windows Server 2025 build 26100.33296 on
 2026-09-04; the Windows evidence is retained in
 [Actions run 33911991858](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33911991858).
 
-The queue test uses an uncontended two-element ring and checks zero-minimum
-capacity plus close/drain behavior. It does not exercise mutex contention,
-partial-transfer cancellation, or closure with blocked participants. Those
-boundaries above are release-source evidence. This page is `source-verified`
-so the existing six runtime tests are not mistaken for runtime coverage of
-these additional cases; their recorded platform results remain valid.
+The original queue test uses an uncontended two-element ring and checks
+zero-minimum capacity plus close/drain behavior. Three additional tests now
+exercise contended zero-minimum put/get cancellation, partial transfers that
+re-arm cancellation before immediate progress and `checkCancel`, and closure
+with witnessed blocked producers and consumers. A separate release barrier
+shows that `close` has returned before the participant finishes; explicit join
+precedes storage reclamation.
+
+The new fixtures inspect exact 0.16 queue mutex/pending-list state under that
+mutex. This is an implementation witness, not a portable inspection API. Each
+case has at most one worker and a native watchdog thread, one or two element
+slots, at most 5,000 witness attempts, and a watchdog that exits the process
+after 3,000 ten-millisecond sleeps. These are finite diagnostic budgets subject
+to OS scheduling, not hard real-time bounds. Failure cleanup preserves or
+terminates live ownership instead of unwinding borrowed storage.
+
+All nine tests passed on arm64 macOS 26.6.2 build 25G83 with exact Zig 0.16.0
+on 2026-09-04. The new cases still need their own Linux/Windows gate; the older
+six-test results above are not enlarged retroactively. The page remains
+`source-verified` for its broader synchronization contracts and implementation
+qualifications.
 
 ## Review checklist
 

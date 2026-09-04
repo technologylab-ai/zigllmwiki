@@ -296,8 +296,8 @@ the relevant NtDll declarations and absence of stdlib IOCP bindings, and
 constructs a fixed-slot Windows `Io.Batch` operation. It was compiled as PE
 test executables for `x86-windows`, `x86_64-windows`, and `aarch64-windows`
 with Zig 0.16.0 on 2026-09-04. It also ran natively on x86_64 Windows Server
-2025 Datacenter 24H2, build 26100.33296. Cross-compilation remains compile
-evidence for the other two architectures.
+2025 Datacenter 24H2, build 26100.33296. At that first checkpoint, the other two architectures had only compile
+evidence; subsequent architecture results below add narrower runtime scopes.
 
 The
 [blocked-read cancellation harness](../proofs/threaded_blocked_read_cancel_windows.zig)
@@ -423,8 +423,8 @@ all five standalone Windows proofs, and 27 command/consumer tests. The host
 was x86_64 Windows Server 2025 Datacenter 24H2 build 26100.33296, image
 `win25-vs2026`/`20260824.214.3`, PowerShell 7.6.5, reported AMD EPYC 7763
 (one core/two logical processors), 8,584,425,472 bytes RAM, and NTFS on D:
-on Microsoft Virtual Disk devices. ARM64 and x86 process runtime gates are
-being added separately; cross-compilation alone remains compile-only.
+on Microsoft Virtual Disk devices. Subsequent ARM64 and WOW64 evidence is recorded separately below;
+cross-compilation alone remains compile-only.
 
 The standalone TCP-to-file observation completed 32 KiB in 13.3986 ms
 (2,445,628 bytes/s), with cycle p50 373.1 microseconds and p99/max 744.1
@@ -464,12 +464,77 @@ not repair the shipped `Threaded.batchCancel` initial wait, supply a general
 `std.Io` replacement, or qualify arbitrary drivers. No private AFD protocol or
 manual APC alert is part of this new strategy.
 
+### ARM64 and WOW64 architecture evidence
+
+At `0e82e97e6eb9314c4dd70cecdedd3449556bdd81`,
+[run 33921176754](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33921176754)
+had a successful x64 job: 87/87 build steps, 71/78 tests, seven skips,
+28 Python tests, retrieval policy and all five standalone proofs. It also
+compiled all five as x86 PE32/I386 executables and **executed** each under
+WOW64 on Windows Server 2025 x64; all returned zero. This is 32-bit process
+runtime evidence, not a native 32-bit Windows OS. Host/image/storage were the
+same x64 environment described for the first TCP/file run above.
+
+That run's ARM64 job failed overall, but its native compiler and test commands
+ran mapping, blocked-read cancellation, and the original IOCP lifecycle proof
+successfully. Full build/APC/TCP commands exited with an access violation before
+test output. The following diagnostic separates those phases rather than
+calling a compiler failure a failed kernel operation.
+
+At diagnostic commit `96215657c1e682334f40b7b0d77cc0a6688da4ca`,
+[run 33921810785](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33921810785)
+proved that all five default native ARM64 `--test-no-exec` compiler invocations
+exited **-1073741819 (0xC0000005)**. No test executable was launched for those
+attempts. Of eight CPU/LLVM compilation variants for APC and TCP/file, only
+one APC baseline-only attempt compiled and ran; the other seven compiler
+attempts failed. This identifies the failing phase, not the compiler's root
+cause or a reliable native-compiler remedy. The original failing steps keep
+that workflow's overall result **failure**.
+
+The same job separately installed the checksum-verified **x86_64-windows
+Zig 0.16.0 compiler**, executed it under Windows ARM emulation, and targeted
+`aarch64-windows` with CPU `baseline`. It checked emitted PE machine `aa64`
+and ran **all five ARM64 executables on the ARM64 OS**, each with exit zero.
+The full target gate also passed **87/87 steps, 71/78 tests, seven skips**,
+with an explicit ARM64 generated-code inspection, 28 Python tests, retrieval
+policy and clean checkout. Compilation under emulation and native ARM64 proof
+execution are separate facts; this is neither native ARM64 compiler success
+nor cross-compilation alone.
+
+Exact ARM host: Windows 11 Enterprise 25H2 build **26200.9168**,
+`win11-arm64` image **20260830.155.1**, ARM64 PowerShell **7.6.4**,
+reported **Cobalt 100**, two cores/two logical processors,
+**8,579,493,888 bytes RAM**. The checkout fixture was on **NTFS C:**,
+274,284,392,448 bytes volume capacity; reported devices were Microsoft Virtual
+Disk and Microsoft NVMe Direct Disk v2, both exposing SCSI interfaces. These
+names do not establish physical backing or power-loss protection.
+
+| Standalone TCP/file sample | Elapsed ms | Bytes/s | Cycle p50 / p99 / max, microseconds |
+| --- | --- | --- | --- |
+| x86 under WOW64, run 33921176754 | 12.7380 | 2,572,460 | 382.9 / 596.0 / 596.0 |
+| ARM64 executable from emulated x64 compiler, run 33921810785 | 127.6582 | 256,685 | 2,886.1 / 29,033.1 / 29,033.1 |
+
+Both samples met the existing diagnostic criteria and checksum 4,090,822,
+with 453 submissions/packets, 449 successes, three canceled receives, one
+file-EOF completion and one rejected read-only write initiation. Both retained
+peak ownership two of four slots, maximum dequeue batch three, zero short OS
+receives, and 32 successful/zero canceled results in each file race direction.
+The ARM sample observed **all 64 file writes pending**, whereas WOW64 observed
+all 64 immediate; both observed all 65 file reads pending. TCP receive/send
+immediate counts were 257/32 and pending counts 35/0. No watchdog expired.
+These tiny VM samples are not a cross-architecture performance comparison.
+
+The standard hosted ARM64 qualification path now uses the explicit x64 compiler
+and ARM64 target. Native ARM compiler diagnostics remain opt-in and fail when
+the compiler fails; the installed compiler release is never patched or upgraded
+silently. The runbook records commands and artifact distinctions.
+
 This page remains `source-verified` because its broad OS and implementation
 claims exceed the narrow runtime fixtures. M3-006 cannot be fully discharged
 by a hosted VM: physical power-loss persistence, controlled cold storage,
 deployment driver/error coverage, and a specified production workload/SLO
-require additional environments or requirements. ARM64 native and x86 WOW64
-process execution are separate hosted gates now being attempted. A
+require additional environments or requirements. ARM64 and WOW64 fixture
+execution now have named evidence above. A
 successful `FlushFileBuffers` and immediate readback are API observations,
 not power-loss recovery evidence about unidentified virtual-disk backing.
 The x64 counters establish immediate file-write success; immediate file-read

@@ -163,24 +163,55 @@ gh run list --workflow windows-runtime-verify.yml --limit 1
 gh run watch RUN_ID --exit-status
 ```
 
-The workflow has `contents: read` only. It downloads the matching `x86_64-windows` or `aarch64-windows`
-archive named by `.zig-version` from Zig's official release index, verifies the
-published SHA-256, records the runner image, exact Windows build/UBR, CPU, RAM,
-logical filesystems and reported disk models, runs the common Zig verifier,
-then explicitly runs `windows_io_mapping.zig`,
-`threaded_blocked_read_cancel_windows.zig`, `windows_apc_batch.zig`,
-`windows_iocp_lifecycle.zig`, and `windows_iocp_tcp_file.zig` natively. It also runs the command/retrieval gates
-and fails if verification changes the checkout. Logs and host metadata are
-uploaded for 30 days even when an earlier step fails. Artifacts are named
-`zig-wiki-windows-runtime-ARCH-RUN-ATTEMPT`; keep the two native environments
-separate. The installer validates the compiler PE machine and actual OS
-architecture, so an emulated compiler is not mislabeled as native ARM64.
+The workflow has `contents: read` only. Its standard path downloads the
+`x86_64-windows` archive named by `.zig-version` from Zig's official index and
+verifies SHA-256. On x64 the compiler and tests run natively. On ARM64 that
+**x64 compiler runs under Windows emulation**, while all project tests target
+`aarch64-windows` with CPU `baseline` and execute as **ARM64 processes** on the
+ARM64 OS. Compiler and emitted-test PE machines and actual OS architecture are
+checked separately. Host JSON records those distinctions alongside image,
+Windows build/UBR, CPU, RAM, logical filesystems and reported disk models.
 
-The x64 job additionally builds each of the five Windows proofs using exact
-0.16.0 `--test-no-exec -target x86-windows`, verifies PE32/I386 headers, executes
-each binary under WOW64, and records SHA-256 and exit status. This is runtime
-evidence for 32-bit processes on that 64-bit OS, not a native 32-bit Windows OS.
-Native ARM64 execution uses the ARM64 compiler and its own full gate.
+The x64 common gate is `zig build verify --summary all`; the ARM64 common gate
+is `zig build verify -Dtarget=aarch64-windows -Dcpu=baseline --summary all`.
+The ARM64 job additionally inspects generated code with explicit ARM64 target
+and baseline CPU, since the ordinary inspector inherits its compiler's x64
+host default. This path uses the same unmodified exact compiler release; it
+does not count emulated x64 test execution as ARM64 evidence.
+
+Each job separately compiles the five Windows proofs with `--test-no-exec`,
+checks emitted PE architecture, then executes each and records phase-specific
+exit codes, binary SHA-256 and logs: `windows_io_mapping.zig`,
+`threaded_blocked_read_cancel_windows.zig`, `windows_apc_batch.zig`,
+`windows_iocp_lifecycle.zig`, and `windows_iocp_tcp_file.zig`. Command/retrieval
+gates and a clean-checkout check follow. Artifacts named
+`zig-wiki-windows-runtime-ARCH-RUN-ATTEMPT` retain logs and host metadata for
+30 days, including failures. Keep compiler success and actual executable
+runtime distinct when interpreting their phase records.
+
+The x64 job additionally builds all five proofs for `x86-windows`, validates
+PE32/I386 headers, executes them under WOW64 and records SHA-256/exit status.
+This proves 32-bit processes on the named 64-bit OS, not a native 32-bit OS.
+
+The native ARM64 Zig 0.16.0 compiler crashed during compilation on the hosted
+Cobalt 100 image. In
+[diagnostic run 33921810785](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33921810785)
+all five default `--test-no-exec` commands failed with -1073741819 before test
+execution; seven of eight CPU/LLVM variants also failed. The root cause is
+unknown. That run remains failed overall, even though its explicit x64-compiler
+ARM64-runtime path and full target gate passed. Do not silently patch Zig or
+claim the standard path validates the native ARM compiler.
+
+To repeat that separate diagnostic deliberately, dispatch:
+
+```text
+gh workflow run windows-runtime-verify.yml --ref main -f native_arm64_diagnostics=true
+```
+
+The optional diagnostic installs the exact checksum-verified ARM compiler and
+keeps its compile/execution failure fatal. Default publication gates use the
+proven explicit compiler/target path; diagnostics are not run silently or
+turned green with `continue-on-error`.
 
 The [January 2026 GitHub runner announcement](https://github.blog/changelog/2026-01-29-arm64-standard-runners-are-now-available-in-private-repositories/)
 establishes standard ARM64 runner availability for private repositories. An
@@ -194,8 +225,9 @@ first reference host was x86_64 Windows Server 2025 Datacenter 24H2, build
 [run 33911991858](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33911991858)
 passed the full verifier with 70/70 build steps, 67 passing tests, and 7
 intentional platform skips, then passed the native mapping and synchronous
-named-pipe cancellation proofs explicitly. x86 and aarch64 remain compile-only
-until native runners execute them.
+named-pipe cancellation proofs explicitly. At that historical checkpoint,
+x86 and aarch64 had only compile evidence; subsequent WOW64/ARM64 results
+and the precise compiler boundary are recorded in the Windows page.
 
 The M3-004 expansion's native gate at commit
 `959a93ac690abbde9f9ea55cf5f06437fedcec30` in
