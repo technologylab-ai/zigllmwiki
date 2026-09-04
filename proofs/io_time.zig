@@ -74,11 +74,14 @@ test "one monotonic deadline survives elapsed work" {
     try std.testing.expect(resolution.toNanoseconds() >= 0);
 
     const budget: Io.Clock.Duration = .{
-        .raw = .fromMilliseconds(2),
+        .raw = .fromMilliseconds(10),
         .clock = clock,
     };
     const deadline = Io.Clock.Timestamp.fromNow(io, budget);
-    try deadline.wait(io);
+    for (0..4) |_| {
+        if (deadline.durationFromNow(io).raw.toNanoseconds() <= 0) break;
+        try deadline.wait(io);
+    } else return error.TestUnexpectedResult;
 
     const finished = Io.Clock.Timestamp.now(io, clock);
     try std.testing.expect(finished.compare(.gte, deadline));

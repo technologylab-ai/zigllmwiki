@@ -60,7 +60,7 @@ test "host names and IP literals are validated before network operations" {
 test "process.run owns bounded captured output" {
     const io = std.testing.io;
     const argv: []const []const u8 = if (builtin.os.tag == .windows)
-        &.{ "cmd.exe", "/d", "/c", "echo out&echo err 1>&2&exit /b 7" }
+        &.{ "cmd.exe", "/d", "/c", "echo out&1>&2 echo err&exit /b 7" }
     else
         &.{ "/bin/sh", "-c", "printf out; printf err >&2; exit 7" };
     const expected_stdout = if (builtin.os.tag == .windows) "out\r\n" else "out";
