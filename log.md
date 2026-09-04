@@ -159,3 +159,152 @@ permit balance, and futex spurious wakeups.
 Six Zig 0.16 tests exercise event and mutex cancellation, condition handoff,
 bounded queue drain after close, shared/exclusive locking, semaphore permit
 balance, and an atomic futex predicate loop.
+
+## [2026-09-04] ingest | files, buffering, and atomic publication
+
+Completed M1-008 from the installed Zig 0.16 `Io.File`, `Io.Dir`, reader,
+writer, and atomic-file contracts. The new page separates buffered visibility,
+file synchronization, atomic namespace publication, and containing-directory
+durability instead of treating “saved” as one guarantee.
+
+Three registered tests observe flush behavior, prove that a short positional
+overwrite retains its old suffix until `Writer.end` truncates it, synchronize
+and atomically replace a temporary file, and exercise the exclusive
+`readFileAlloc` limit boundary. The page records the missing portable
+directory-sync surface as an explicit seam rather than claiming crash
+durability from replacement alone.
+
+## [2026-09-04] ingest | std.Io clocks and absolute deadlines
+
+Completed M1-007 from the installed Zig 0.16 time interface, release notes,
+portable migration guide, hermit timeout evidence, and a pinned matklad design
+note. The new page distinguishes real, awake, boot, process CPU, and thread CPU
+clocks; raw from clock-tagged values; relative timeouts from one captured
+absolute deadline; and cancelable sleeping from concurrent progress.
+
+Five registered tests cover duration units and formatting, clock-tagged
+arithmetic, timeout conversion, an absolute monotonic deadline, cancellation
+of a threaded sleep, and the mechanics of an application-owned strictly
+increasing guard. Suspend behavior, wall-clock jumps, and Linux/Windows runtime
+coverage remain explicit platform gaps.
+
+## [2026-09-04] ingest | networking, child processes, and entropy
+
+Completed M1-009 from the installed Zig 0.16 networking, process, and entropy
+interfaces. Three focused pages cover fixed DNS and connection-result queues,
+losing-stream cleanup, stream/datagram ownership, one-deadline network budgets,
+bounded dual-pipe process capture, wait/kill terminal paths, and the failure
+policy difference between process randomness and fresh external entropy.
+
+Five registered tests validate hostnames and literals, exchange data over a
+real loopback TCP connection with explicit task and resource cleanup, exercise
+inclusive process-output limits and owned output with an absolute deadline,
+and execute both entropy operations without probabilistic assertions.
+
+## [2026-09-04] ingest | testing I/O and single-threaded execution
+
+Completed M1-010 with a guide separating host-backed `std.testing.io`, the
+fixed hostile `std.Io.failing` profile, bounded fixed/failing stream adapters,
+and whole-compilation `-fsingle-threaded` semantics. Four tests are registered
+twice so ordinary verification executes them in both normal and explicitly
+single-threaded modules.
+
+The exact 0.16 implementation exposes a documentation mismatch worth retaining:
+`Io.failing` returns a zero timestamp, treats sleep as a successful no-op, and
+reports `ClockUnavailable` from resolution despite its broader prose saying
+unsupported clock operations fail differently. The proof pins implementation
+behavior for this release without generalizing it to future versions.
+
+## [2026-09-04] ingest | bounded memory, integer domains, and persistence pairs
+
+Completed M2-003, M2-004, and the bounded-memory/layout slice M2-009. Four
+pinned matklad sources now support reserve-before-mutate, finite working state
+versus retained output, screen-sized function review, and interior-pointer
+lifetime decisions. The integer guide separates domain integers, `usize`
+boundaries, native/ABI layout, and stable wire encoding.
+
+Seven tests cover checked narrowing and arithmetic, explicit little-endian
+encoding, reserved bits, and independent producer/consumer invariant checks
+across malformed, corrupted, and semantically invalid records. Debug and
+ReleaseSafe tests passed on macOS; Linux and Windows checks are compile-only
+and are not presented as runtime evidence.
+
+## [2026-09-04] ingest | function shape and centralized control flow
+
+Completed M2-005 with applied guidance for the 70-line review bound,
+inverse-hourglass shape, parent-owned policy and state mutation, bounded leaf
+mechanics, positive nested decision trees, and iterative traversal in place of
+input-shaped recursion.
+
+Three tests exercise a centralized batch transition, the complete admission
+decision space, and a fixed-stack traversal whose separate visit and capacity
+limits reject cycles and excessive width. Mechanical size checks remain a
+guardrail; whole-component semantic review still owns the claim that policy
+and state are truly centralized.
+
+## [2026-09-04] ingest | TigerStyle seams with Zig and OS resources
+
+Completed M2-008 with a seam map that labels strict core, isolated exception,
+and nonconforming dependency boundaries. It connects explicit-width domains to
+`usize`, visible allocators to actual allocation lifetime, fixed application
+state to `Io.Threaded` growth, portable `std.Io` calls to backend behavior, and
+atomic publication to platform-specific durability.
+
+The guide requires system-wide admission to include descriptors, kernel
+queues/buffers, worker stacks, DNS/process state, completion capacity, and
+drain rate. Existing proofs support individual boundaries; the page explicitly
+does not promote them into a claim that the whole standard-library runtime is
+startup-reserved or that OS behavior is uniform.
+
+## [2026-09-04] ingest | bounded retries and defer ownership patterns
+
+Completed M2-010 by pinning and synthesizing matklad's two retry-loop essays
+and defer-pattern note. The new guide defines a total attempt limit, one
+absolute deadline, transient/terminal classification, preservation of the last
+cause, no final sleep, side-effect ambiguity, and cancellation-aware cleanup.
+
+Four tests prove retry success/exhaustion counts, exact delay placement,
+terminal-error preservation, expired-deadline behavior, and rejected attempt
+limits. The defer patterns are constrained by explicit ownership transfer,
+reverse cleanup order, and one reporting boundary rather than copied as
+context-free idioms.
+
+## [2026-09-04] ingest | performance sketches and bounded batching
+
+Completed M2-006 with a resource/frequency worksheet, a quantified durable
+command-server sketch, explicit control/data-plane ownership, finite queues,
+and size/deadline/shutdown flush triggers. The worked arithmetic shows a case
+where durability-call frequency breaks the headroom policy while raw disk
+bandwidth still appears comfortable.
+
+The registered Zig proof checks the capacity arithmetic and separates bounded
+control-plane admission from a dense allocation-free data-plane loop. Its
+runtime-parameterized executable performs warm-up, reports individual samples,
+and consumes a correctness digest without imposing a nonportable timing
+threshold; ordinary verification runs a small deterministic harness invocation.
+
+## [2026-09-04] ingest | naming, comments, API shape, and formatting policy
+
+Completed M2-007 from the pinned TigerStyle and Zig 0.16 style guides. The new
+page makes their naming conflicts explicit, documents unit/qualifier and
+allocator-lifetime names, options structs, positional unique dependencies,
+callback ordering, top-down files, and reasoning-bearing comments.
+
+The formatter proof now exercises the API-shape fixture, and deterministic
+lint separately enforces TigerStyle's 100-character maximum across maintained
+Zig files. Captured source snapshots, generated caches, and foreign-language
+shims are deliberately outside that local Zig policy.
+
+## [2026-09-04] ingest | macOS kqueue, Dispatch I/O, and Zig mapping
+
+Completed M3-003 with pinned Apple Dispatch I/O headers and exact Zig 0.16
+Dispatch/Kqueue source. The synthesis distinguishes readiness, Dispatch
+channel completion, POSIX AIO, and bounded workers; it records that Apple
+`Io.Evented` aliases Dispatch, whose regular-file path uses direct syscalls,
+whose networking is unavailable, whose fibers reserve 60 MiB, and whose
+`deinit` does not compile in this release.
+
+A registered Zig/C Blocks adapter performs an actual Dispatch I/O read, while
+a second test initializes Zig's Dispatch backend and completes an asynchronous
+positional read. A seven-run hot-cache comparison is retained with strict
+limitations: it measures this wrapper shape, not production backend quality.

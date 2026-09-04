@@ -21,4 +21,8 @@ stable enough for retrieval, while line numbers create copied state.
 
 Relevant pages: [[process-init-and-capabilities]], [[std-io]],
 [[async-vs-concurrent]], [[select-and-batch]],
-[[io-synchronization-primitives]], and [[evented-io-backends]].
+[[io-synchronization-primitives]], [[io-time-clocks-and-deadlines]],
+[[files-buffering-and-atomic-persistence]], [[networking-and-dns-racing]],
+[[child-process-lifecycles]], [[entropy-and-deterministic-randomness]],
+[[testing-io-and-single-threaded-builds]], [[integer-widths-and-boundaries]],
+[[tigerstyle-seams-with-zig-and-os]], and [[evented-io-backends]].

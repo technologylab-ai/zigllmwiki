@@ -11,7 +11,8 @@ sources:
   - "[[matklad-mechanical-habits]]"
   - "[[source-tigerstyle]]"
   - "[[tigerbeetle-performance]]"
-proofs: []
+proofs:
+  - proofs/performance_sketch.zig
 platforms:
   - cross-platform
 ---
@@ -64,9 +65,11 @@ controlled conditions.
   surrogate?
 - Is architecture-level arithmetic consistent with the measured result?
 
-This page is source-verified guidance, not a claim that a Zig 0.16 benchmark
-harness is already proved in this repository. M2-006 remains open for the
-performance-sketch template and a reproducible example.
+The harness in [[performance-sketches-and-batching]] now proves these mechanics
+with Zig 0.16: runtime parameters, an untimed warm-up, separately reported
+samples, a consumed digest, and deterministic CI witnesses. Its local timings
+are deliberately not promoted to portable performance evidence.
 
 Related: [[tigerstyle]], [[code-reading-and-mechanical-checks]],
-[[static-allocation-and-constant-work]].
+[[static-allocation-and-constant-work]],
+[[performance-sketches-and-batching]].

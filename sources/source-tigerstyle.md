@@ -16,4 +16,7 @@ Use this as the authority for TigerStyle principles. Later work should inspect
 TigerBeetle's current code separately before claiming a principle maps to a
 specific implementation technique.
 
-Relevant pages: [[tigerstyle]] and [[evented-io-backends]].
+Relevant pages: [[tigerstyle]], [[tigerstyle-coverage]],
+[[function-shape-and-control-flow]], [[performance-sketches-and-batching]],
+[[naming-comments-and-api-shape]], [[tigerstyle-seams-with-zig-and-os]], and
+[[evented-io-backends]].

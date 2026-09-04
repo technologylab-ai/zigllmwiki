@@ -8,6 +8,7 @@ summary: Use trailing commas, array line breaks, and deliberate expression bound
 updated: 2026-09-04
 sources:
   - "[[matklad-steering-zig-fmt]]"
+  - "[[zig-0.16.0-style-guide]]"
 proofs:
   - proofs/fmt_steering.zig
 platforms:
@@ -32,6 +33,12 @@ The formatter does not choose conceptual structure. Blank lines, intermediate
 variables, names, and expression boundaries remain the author's tools for
 making control flow and data layout obvious.
 
+It also does not enforce the entire style policy. The Zig 0.16 guide recommends
+four-space indentation and aiming for 100 columns, while strict TigerStyle
+makes 100 characters a hard maximum and adds naming, comment, file-order,
+callback, and call-site rules. Those non-formatting rules live in
+[[naming-comments-and-api-shape]].
+
 ## Agent rule
 
 Express the intended shape, then run the formatter. Do not hand-align code
@@ -39,9 +46,12 @@ against the formatter or collapse a meaningful intermediate value merely to
 reduce line count. Treat an unstable layout as feedback that the expression may
 need a clearer boundary.
 
-The [formatting fixture](../proofs/fmt_steering.zig) is compiled and included in
-the repository-wide `zig fmt --check`. This proves that Zig 0.16.0 accepts and
-preserves the checked-in shape; it does not claim that future versions make the
-same formatting choices.
+The [style fixture](../proofs/fmt_steering.zig) is compiled and included in the
+repository-wide `zig fmt --check`. A separate deterministic lint rejects lines
+over 100 characters in maintained Zig sources. Together they prove that Zig
+0.16.0 accepts and preserves the checked-in shape; they do not claim that
+future versions make the same formatting choices or that formatting proves
+good naming and API design.
 
-Related: [[tigerstyle]], [[zig-0.16-baseline]].
+Related: [[naming-comments-and-api-shape]], [[tigerstyle]],
+[[zig-0.16-baseline]].

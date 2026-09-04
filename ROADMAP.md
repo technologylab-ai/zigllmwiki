@@ -1,8 +1,9 @@
 # Roadmap
 
 This is the persistent plan for the Zig LLM Wiki. Status values are `done`,
-`active`, `next`, `later`, and `blocked`. Update this file in the same change
-that completes or materially changes an item.
+`running`, `queued`, `deferred`, and `blocked`. `running` means an agent is
+executing that item now; it never means merely “important” or “partially
+complete.” Update this file when ownership, completion, or scope changes.
 
 ## North star
 
@@ -20,9 +21,9 @@ produce Zig 0.16.x code that:
 - **Foundation milestone:** M0 is complete. Portable local evidence, the full
   Zig 0.16 release-note scope inventory, deterministic graph scoring, and the
   first semantic lint report are all in place.
-- **M1/M2 content expansion is active in parallel:** M1-005 and M2-009 are
-  explicitly `active` in the milestone tables below. Selected M1/M2 work is
-  already running because it directly constrains the seed pages.
+- **Running now:** M1-005/M3-002 Linux (`/root/linux_runtime`), M3-004
+  (`/root/windows_mapping`), and LLM maintenance commands
+  (`/root/llm_operations`). These are actual concurrent agent assignments.
 - **Latest completed content:** M1-001, M1-003, and M1-006 now document and
   prove `std.process.Init`/capability threading, `Select`/`Batch` ownership, and
   the complete `std.Io` synchronization-primitives surface. The six requested
@@ -31,9 +32,8 @@ produce Zig 0.16.x code that:
   bounded error-diagnostics, full TigerStyle-coverage, and pinned TigerBeetle
   cross-platform I/O syntheses. `Future`/`Group` ownership, protection, and
   `recancel` have a macOS `Io.Threaded` proof.
-- **Current next slice:** M1-007 clocks, deadlines, timeouts, and sleeping,
-  while M1-005 platform evidence and M2 integer boundaries remain active
-  content work.
+- **Queued, not running:** M1-005 Windows cancellation evidence, M2-011,
+  M2-012, and M3-005.
 - **Backend:** intentionally deferred; the Obsidian-first ADR remains in force.
 
 Source status is tracked as `discovered → selected → captured → synthesized →
@@ -62,7 +62,7 @@ M0 exited on 2026-09-04 after the first unsupervised semantic pass produced a
 reviewable report and deterministic graph scoring without weakening the
 existing verification rules.
 
-## M1: `std.Io` field guide (active)
+## M1: `std.Io` field guide (in progress)
 
 | ID | Status | Deliverable / exit condition |
 | --- | --- | --- |
@@ -70,47 +70,50 @@ existing verification rules.
 | M1-002 | done | `Future` and `Group` ownership/lifetime page plus terminal-path proof. |
 | M1-003 | done | `Select` and `Batch` ownership, fixed capacity, result draining, cancellation traps, and runtime proof. |
 | M1-004 | done | `async` versus `concurrent`, including saturated runtime evidence. |
-| M1-005 | active | Cancellation acknowledgement, `recancel`, protection, cleanup, and blocked-syscall platform matrix. Task semantics and a blocked pipe read are proved on macOS; Linux/Windows syscall interruption remains. |
+| M1-005 | running | `/root/linux_runtime`: task semantics and a blocked pipe read are proved on macOS; Linux blocked-syscall evidence is running on `omarx1`, while Windows runtime evidence remains queued. |
 | M1-006 | done | `Event`, `Queue`, `Mutex`, `RwLock`, `Condition`, `Semaphore`, and futex semantics plus six runtime tests. |
-| M1-007 | next | Clocks, durations, timestamps, deadlines, timeouts, and sleeping. |
-| M1-008 | next | Files, directories, buffered readers/writers, flush, and atomic persistence. |
-| M1-009 | next | Networking, DNS racing, sockets, processes, and entropy. |
-| M1-010 | next | `-fsingle-threaded`, `std.testing.io`, and failing/test implementations. |
+| M1-007 | done | Clock domains, durations, timestamps, one-deadline budgets, timeout conversion, cancelable sleeping, strict-clock guard caveats, and five runtime tests. |
+| M1-008 | done | Files, directories, buffered readers/writers, exclusive read limits, flush versus truncation, atomic publication, and the directory-durability seam plus three runtime tests. |
+| M1-009 | done | Networking and DNS queue/race ownership, stream/datagram lifecycles, bounded subprocess capture and termination, entropy failure policy, and five macOS runtime tests. |
+| M1-010 | done | Host-backed `std.testing.io`, exact `Io.failing` behavior, fixed/failing stream adapters, ordinary and `-fsingle-threaded` execution, and four tests run in both modes. |
 | M1-011 | done | `std.Io.Threaded` allocation, limits, thread growth, and eager dispatch seam. |
 | M1-012 | done | Separate typed recovery codes from bounded human-facing diagnostics and reporting ownership. |
 
 Exit condition: every public recommendation has a 0.16.x source citation; every
 behavioral trap has a runnable proof; Threaded-specific facts are labeled.
 
-## M2: TigerStyle in Zig (active)
+## M2: TigerStyle in Zig (in progress)
 
 | ID | Status | Deliverable / exit condition |
 | --- | --- | --- |
 | M2-001 | done | Every principle in the pinned TigerStyle source is mapped in `tigerstyle-coverage.md` to current guidance, a proof target, or an explicit pending artifact. |
 | M2-002 | done | Applied startup-allocation, overload, constant-work, and `Io.Threaded` seam page. |
-| M2-003 | active | Invariant derivation, assertion placement, bounded progress, positive/negative-space testing, and DST are synthesized; a persistence-boundary assertion-pair proof remains. |
-| M2-004 | next | Explicit integer widths, typed indexes, layout assertions, and serialization boundaries. Typed indexes are proved; the broader integer-width guide remains. |
-| M2-005 | next | Function shape and centralized control flow. Orientation exists; applied counterexamples remain. |
-| M2-006 | next | Batching, control/data planes, and performance sketches. Benchmark correctness guidance is source-verified; the quantified sketch and reproducible Zig harness remain. |
-| M2-007 | next | Naming, comments, and canonical formatting. `zig fmt` steering is proved; full TigerStyle coverage remains. |
-| M2-008 | next | Document seams with `usize`, standard-library allocation, concurrency runtimes, and platform APIs. |
-| M2-009 | active | Curate matklad and TigerBeetle engineering sources by concrete design decision; track state in `CURATION.md`. |
+| M2-003 | done | Invariant guidance plus an independent producer/consumer persistence assertion pair with malformed, corrupt, reserved, and semantically invalid cases. |
+| M2-004 | done | Explicit integer domains, checked narrowing/arithmetic, `usize` seams, layout assertions, serialization boundaries, reserved fields, and stale-handle risks. |
+| M2-005 | done | Function-size and inverse-hourglass guidance, centralized policy/state mutation, explicit decision trees, bounded iterative traversal, applied counterexamples, and three runtime tests. |
+| M2-006 | done | Resource/frequency sketches, bounded control/data planes, batching/deadline tradeoffs, a quantified durable-server worksheet, and a reproducible Zig harness. |
+| M2-007 | done | TigerStyle/Zig naming seams, comments, API/file/callback shape, explicit options, canonical formatting, and a deterministic 100-character Zig lint. |
+| M2-008 | done | Strict-core/exception labels and seams for `usize`, allocator-using standard-library APIs, concurrency runtimes, atomic persistence, and finite platform resources. |
+| M2-009 | done | Ingested the selected bounded-memory/layout cluster into reservation, working-set/output, explicit-layout, and stable-handle decisions. |
+| M2-010 | done | Ingested both retry-loop essays and the defer-pattern essay into bounded total-attempt/deadline, side-effect ambiguity, cancellation, and cleanup guidance with four runtime tests. |
+| M2-011 | queued | Close scope/state/lifetime gaps: duplicate aliases, large-value copying, in-place initialization, place-of-check/use, run-to-completion, buffer clearing/padding, paired cleanup, and division intent. |
+| M2-012 | queued | Close design/tooling gaps: disciplined revision and exception policy, strict build diagnostics, fault-injection catalog, generated-code inspection, dependency acceptance, and the Python/Zig tooling seam. |
 
 Exit condition: the TigerStyle inventory has no unrepresented rule and an agent
 can derive a review checklist for a concrete Zig subsystem without rereading the
 source document.
 
-## M3: evented I/O across operating systems (active)
+## M3: evented I/O across operating systems (in progress)
 
 Keep interface design separate from backend implementation.
 
 | ID | Status | Deliverable / exit condition |
 | --- | --- | --- |
 | M3-001 | done | Pinned TigerBeetle `src/io` map distinguishing Linux `io_uring`, Darwin `kqueue` readiness plus synchronous file I/O, and Windows IOCP/overlapped I/O. |
-| M3-002 | active | Linux `io_uring` kernel-version/feature matrix, registered-resource ownership, cancellation, and runnable Linux evidence. Interface and TigerBeetle queue lifecycle are source-verified. |
-| M3-003 | active | Apple-primary `kqueue` and POSIX AIO lifecycles are synthesized; dispatch I/O, a Zig 0.16 wrapper, comparative performance, and macOS runtime evidence remain. |
-| M3-004 | active | Microsoft-primary IOCP, overlapped ownership, immediate completion, and `CancelIoEx` races are synthesized; Zig 0.16 source mapping, error translation, and Windows runtime evidence remain. |
-| M3-005 | next | Cross-platform backend decision table with guarantees, limits, unsupported cases, and measured evidence. |
+| M3-002 | running | `/root/linux_runtime` on `omarx1`: Linux `io_uring` kernel/version features, registered-resource ownership, cancellation, and runtime evidence. |
+| M3-003 | done | Apple-primary `kqueue`, Dispatch I/O, and POSIX AIO lifecycles; exact Zig 0.16 Dispatch/Kqueue mapping and defects; a Zig/C adapter; macOS runtime proof; and bounded comparative evidence. |
+| M3-004 | running | `/root/windows_mapping`: Microsoft-primary lifecycle is synthesized; exact Zig 0.16 source mapping and Windows cross-target proof are running, while Windows runtime evidence remains unavailable. |
+| M3-005 | queued | Cross-platform backend decision table with guarantees, limits, unsupported cases, and measured evidence. |
 
 | Platform | Research and proof targets |
 | --- | --- |

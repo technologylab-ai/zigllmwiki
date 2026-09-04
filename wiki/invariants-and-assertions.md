@@ -2,7 +2,7 @@
 id: invariants-and-assertions
 title: Invariants and assertion placement
 kind: principle
-status: runtime-verified
+status: source-verified
 zig: "0.16.0"
 summary: State the property preserved across every transition, assert it at ownership boundaries and independent paths, and test both the valid and forbidden state space.
 updated: 2026-09-04
@@ -11,8 +11,10 @@ sources:
   - "[[matklad-what-is-an-invariant]]"
   - "[[matklad-look-for-bugs]]"
   - "[[tigerbeetle-safety]]"
+  - "[[zig-0.16.0-language-reference]]"
 proofs:
   - proofs/invariants.zig
+  - proofs/persistence_assertion_pair.zig
 platforms:
   - cross-platform
 ---
@@ -99,6 +101,31 @@ preservation of the search partition, and the return postcondition. Its test
 checks every candidate position for small arrays with duplicates, so both the
 unique valid answer and the negative space are exercised under Zig 0.16.0.
 
+### Persistence assertion pair
+
+For data that crosses a persistence or communication boundary, check the same
+critical property through independent producer and consumer paths:
+
+1. Before encoding, assert that trusted in-memory state satisfies the property.
+2. Encode a versioned representation with every byte initialized.
+3. On decoding, treat bytes as untrusted: validate framing, version, reserved
+   space, integrity data, ranges, and semantic relationships with returned
+   errors.
+4. Only after validation constructs trusted state, assert the property again
+   on the consumer path.
+
+The second assertion is not a replacement for validation. It is an executable
+claim that the independent decoder has re-established the producer's
+invariant. A checksum can detect tested corruptions but does not authenticate
+data and cannot establish crash consistency.
+
+`proofs/persistence_assertion_pair.zig` applies this shape to an explicit byte
+representation and exercises valid state, malformed length and header fields,
+stale integrity data, and a semantically invalid record whose integrity data
+has been recomputed. It ran with Zig 0.16.0 on `aarch64-macos` on 2026-09-04.
+It deliberately does not claim filesystem atomicity or durability; see the
+M1-008 persistence work tracked in the roadmap.
+
 ## Agent review checklist
 
 - Can the invariant be written as a precise predicate over named state?
@@ -109,7 +136,9 @@ unique valid answer and the negative space are exercised under Zig 0.16.0.
 - Do tests cross both sides of each boundary?
 - Can a suspension, callback, cancellation, or late completion invalidate the
   property between check and use?
+- Does external data return validation errors before any assertion assumes it
+  is trusted?
 
 Related: [[tigerstyle]], [[deterministic-simulation-testing]],
 [[static-allocation-and-constant-work]],
-[[code-reading-and-mechanical-checks]].
+[[integer-widths-and-boundaries]], [[code-reading-and-mechanical-checks]].

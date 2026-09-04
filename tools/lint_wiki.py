@@ -17,6 +17,11 @@ ROOT = Path(__file__).resolve().parents[1]
 WIKI_FILES = [ROOT / "index.md", *sorted((ROOT / "wiki").glob("**/*.md"))]
 SOURCE_FILES = sorted((ROOT / "sources").glob("**/*.md"))
 CONTENT_FILES = WIKI_FILES + SOURCE_FILES
+MAINTAINED_ZIG_FILES = [
+    *sorted(ROOT.glob("*.zig")),
+    *sorted((ROOT / "proofs").glob("**/*.zig")),
+]
+ZIG_LINE_LENGTH_MAX = 100
 ALL_MARKDOWN = [
     path
     for path in ROOT.glob("**/*.md")
@@ -26,6 +31,107 @@ WIKILINK = re.compile(r"!?\[\[([^\]]+)\]\]")
 KEY = re.compile(r"^([A-Za-z0-9_-]+):(?:\s*(.*))?$")
 PROOF = re.compile(r"^\s+-\s+(proofs/[^\s]+\.zig)\s*$")
 REGISTERED_PROOF = re.compile(r'"(proofs/[^"\s]+\.zig)"')
+
+
+def issue_from_failure(message: str) -> dict[str, object]:
+    """Turn the stable human diagnostic into a machine-readable issue."""
+    code = "WIKI_VALIDATION_FAILED"
+    category = "validation"
+
+    if message.startswith("zig version is "):
+        code = "STALE_COMPILER_VERSION"
+        category = "version"
+    elif "verified page targets" in message:
+        code = "STALE_VERIFIED_PAGE_VERSION"
+        category = "version"
+    elif "missing snapshot" in message:
+        code = "BROKEN_EVIDENCE_SNAPSHOT_MISSING"
+        category = "evidence"
+    elif " sha256 is " in message or "has no corresponding sha256" in message:
+        code = "BROKEN_EVIDENCE_SNAPSHOT_HASH"
+        category = "evidence"
+    elif "not registered in build.zig" in message:
+        code = "BROKEN_EVIDENCE_PROOF_UNREGISTERED"
+        category = "evidence"
+    elif "registered proof does not exist" in message or ": missing proofs/" in message:
+        code = "BROKEN_EVIDENCE_PROOF_MISSING"
+        category = "evidence"
+    elif "broken wikilink" in message:
+        code = "BROKEN_WIKILINK"
+        category = "link"
+    elif "ambiguous wikilink" in message:
+        code = "AMBIGUOUS_WIKILINK"
+        category = "link"
+    elif "orphan wiki page" in message:
+        code = "ORPHAN_WIKI_PAGE"
+        category = "graph"
+    elif "Zig source line is" in message:
+        code = "ZIG_LINE_TOO_LONG"
+        category = "style"
+    elif "fenced Zig is forbidden" in message:
+        code = "UNVERIFIED_INLINE_ZIG"
+        category = "evidence"
+    elif "missing source key revision" in message:
+        code = "UNPINNED_SOURCE_REVISION"
+        category = "evidence"
+    elif "missing source key captured" in message:
+        code = "SOURCE_CAPTURE_DATE_MISSING"
+        category = "evidence"
+    elif "frontmatter" in message or "missing frontmatter key" in message:
+        code = "INVALID_FRONTMATTER"
+        category = "schema"
+    elif "duplicate id" in message:
+        code = "DUPLICATE_CONTENT_ID"
+        category = "schema"
+    elif "unsupported status" in message:
+        code = "UNSUPPORTED_CONTENT_STATUS"
+        category = "schema"
+
+    location: dict[str, object] = {}
+    location_match = re.match(r"^([^:]+)(?::(\d+))?:\s", message)
+    if location_match:
+        location["path"] = location_match.group(1)
+        if location_match.group(2):
+            location["line"] = int(location_match.group(2))
+
+    issue: dict[str, object] = {
+        "code": code,
+        "category": category,
+        "severity": "error",
+        "message": message,
+    }
+    if location:
+        issue["location"] = location
+    return issue
+
+
+def lint_report(
+    failures: list[str],
+    baseline: str,
+    actual: str | None,
+    graph: dict[str, object],
+) -> dict[str, object]:
+    issues = [issue_from_failure(failure) for failure in failures]
+    categories: dict[str, int] = defaultdict(int)
+    for issue in issues:
+        category = issue["category"]
+        assert isinstance(category, str)
+        categories[category] += 1
+    return {
+        "schema_version": 1,
+        "command": "lint",
+        "ok": not issues,
+        "zig_baseline": baseline,
+        "zig_actual": actual,
+        "summary": {
+            "errors": len(issues),
+            "issues_by_category": dict(sorted(categories.items())),
+            "wiki_pages": len(WIKI_FILES),
+            "sources": len(SOURCE_FILES),
+        },
+        "issues": issues,
+        "graph": graph,
+    }
 
 
 def frontmatter(path: Path) -> tuple[dict[str, str], list[str]]:
@@ -188,18 +294,42 @@ def main() -> int:
         action="store_true",
         help="emit a deterministic JSON graph/backlink report after verification",
     )
+    parser.add_argument(
+        "--format",
+        choices=("text", "json"),
+        default="text",
+        help="emit human-readable diagnostics or the versioned lint JSON schema",
+    )
     args = parser.parse_args()
 
     failures: list[str] = []
     baseline = (ROOT / ".zig-version").read_text(encoding="utf-8").strip()
-    actual = subprocess.run(
-        ["zig", "version"],
-        check=True,
-        capture_output=True,
-        text=True,
-    ).stdout.strip()
-    if actual != baseline:
+    try:
+        actual = subprocess.run(
+            ["zig", "version"],
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip()
+    except (OSError, subprocess.CalledProcessError) as error:
+        actual = None
+        failures.append(f"unable to determine zig version: {error}")
+    if actual is not None and actual != baseline:
         failures.append(f"zig version is {actual}, expected exact baseline {baseline}")
+
+    # TigerStyle's 100-character ceiling is stricter than zig fmt's canonical
+    # whitespace rules. Check maintained Zig sources, excluding captured source
+    # snapshots, generated cache files, and foreign-language shims.
+    for path in MAINTAINED_ZIG_FILES:
+        for line_number, line in enumerate(
+            path.read_text(encoding="utf-8").splitlines(),
+            start=1,
+        ):
+            if len(line) > ZIG_LINE_LENGTH_MAX:
+                failures.append(
+                    f"{path.relative_to(ROOT)}:{line_number}: Zig source line is "
+                    f"{len(line)} characters; maximum is {ZIG_LINE_LENGTH_MAX}"
+                )
 
     proof_files = {
         path.relative_to(ROOT).as_posix()
@@ -331,20 +461,21 @@ def main() -> int:
                 f"{page['path']}: orphan wiki page has no inbound wiki link"
             )
 
-    if failures:
+    result = lint_report(failures, baseline, actual, report)
+    if args.format == "json":
+        print(json.dumps(result, indent=2, sort_keys=True))
+    elif failures:
         print("wiki verification failed:", file=sys.stderr)
         for failure in failures:
             print(f"- {failure}", file=sys.stderr)
-        return 1
-
-    if args.graph_report:
+    elif args.graph_report:
         print(json.dumps(report, indent=2, sort_keys=True))
     else:
         print(
             f"wiki verification passed: {len(WIKI_FILES)} pages, "
             f"{len(SOURCE_FILES)} sources, Zig {actual}"
         )
-    return 0
+    return 1 if failures else 0
 
 
 if __name__ == "__main__":

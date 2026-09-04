@@ -38,6 +38,22 @@ Read this page first, then follow only the pages needed for the task.
   completion identity, result draining, and cancellation-buffer traps.
 - [[io-synchronization-primitives]] — `Event`, `Queue`, `Mutex`, `RwLock`,
   `Condition`, `Semaphore`, and futex cancellation/capacity rules.
+- [[io-time-clocks-and-deadlines]] — clock domains, absolute deadlines,
+  timeout conversion, cancelable sleep, and strict-clock application guards.
+- [[bounded-retries-and-cleanup]] — transient classification, total-attempt
+  and absolute-time bounds, ambiguous side effects, and ownership cleanup.
+- [[files-buffering-and-atomic-persistence]] — bounded reads, buffered writer
+  state, truncation, atomic namespace publication, and the directory-durability
+  seam.
+- [[networking-and-dns-racing]] — hostname lookup queues, connection racing,
+  absolute deadlines, stream ownership, datagrams, and admission limits.
+- [[child-process-lifecycles]] — bounded output capture, process deadlines,
+  pipe ownership, termination tags, and wait/kill cleanup.
+- [[entropy-and-deterministic-randomness]] — infallible process randomness,
+  fallible fresh entropy, and deterministic replay boundaries.
+- [[testing-io-and-single-threaded-builds]] — host-backed test I/O, the fixed
+  hostile `Io.failing` profile, bounded stream adapters, and explicit
+  single-threaded compilation.
 - [[error-context]] — structured diagnostics without misreporting handled
   cancellation.
 - [[error-handling-and-diagnostics]] — typed recovery codes, invariant failures,
@@ -46,8 +62,8 @@ Read this page first, then follow only the pages needed for the task.
   research boundary.
 - [[io-uring]] — Linux submission/completion ownership, finite rings, ordering,
   and cancellation races.
-- [[macos-kqueue-and-aio]] — `kqueue` readiness versus POSIX asynchronous file
-  completion, with descriptor and buffer ownership kept distinct.
+- [[macos-kqueue-and-aio]] — `kqueue` readiness, Dispatch I/O/POSIX AIO
+  completion, exact Zig 0.16 backend gaps, and measured macOS evidence.
 - [[windows-iocp-and-overlapped-io]] — IOCP ordering and capacity, stable
   `OVERLAPPED` ownership, immediate success, and cancellation races.
 - [[tigerbeetle-io]] — source-verified comparison of TigerBeetle's Linux
@@ -59,8 +75,16 @@ Read this page first, then follow only the pages needed for the task.
   with Zig 0.16.
 - [[tigerstyle-coverage]] — complete rule inventory with covered, partial, and
   missing guidance made explicit.
+- [[tigerstyle-seams-with-zig-and-os]] — strict-core versus exception labels
+  for `usize`, allocators, concurrency runtimes, and finite OS resources.
+- [[performance-sketches-and-batching]] — quantified network/disk/memory/CPU
+  budgets, bounded control/data planes, batching, and a reproducible harness.
+- [[naming-comments-and-api-shape]] — explicit TigerStyle/Zig naming seams,
+  unit-bearing names, options structs, callback order, comments, and file shape.
 - [[invariants-and-assertions]] — derive preserved properties, place assertions
   at transitions, and prove the positive and forbidden state space.
+- [[function-shape-and-control-flow]] — inverse-hourglass functions,
+  parent-owned policy/state, bounded leaf mechanics, and iterative traversal.
 - [[code-reading-and-mechanical-checks]] — reconstruct whole-subsystem control
   flow and state, then turn stable findings into cheap repository checks.
 - [[trustworthy-microbenchmarks]] — runtime-variable inputs, correctness
@@ -68,6 +92,8 @@ Read this page first, then follow only the pages needed for the task.
 - [[static-allocation-and-constant-work]] — limits, startup reservation,
   overload, and fixed-state transitions.
 - [[newtype-indexes]] — compact typed handles for bounded collections.
+- [[integer-widths-and-boundaries]] — domain widths, checked conversion and
+  arithmetic, layout contracts, serialization, and stale-handle boundaries.
 - [[deterministic-simulation-testing]] — seeded virtual time, fault injection,
   assertions, and replay.
 - [[tigerbeetle-engineering-corpus]] — curated TigerBeetle docs by reusable

@@ -11,6 +11,8 @@ sources:
   - "[[tigerbeetle-architecture]]"
   - "[[tigerbeetle-performance]]"
   - "[[matklad-static-allocation-constant-work]]"
+  - "[[matklad-reserve-first]]"
+  - "[[matklad-static-allocation-compilers]]"
 proofs:
   - proofs/static_pool.zig
 platforms:
@@ -41,6 +43,34 @@ capacity before serving requests.
 This creates system-wide backpressure only if adjacent components honor one
 another's limits. A bounded application queue does not help if an I/O runtime or
 kernel submission path can still grow without bound.
+
+### Reserve before mutation
+
+When initialization or another permitted control-plane phase still allocates,
+reserve every fallible capacity requirement before changing logical state.
+Only after all participating collections and buffers can accommodate the
+operation should code enter a commit phase made solely of infallible mutations.
+This avoids half-applied changes when the second of several allocations fails
+and makes rollback unnecessary for allocation errors.
+
+Reservation is not transactional by itself: every later operation must truly
+be infallible, external I/O may still fail, and reserving one collection does
+not reserve dependent structures. TigerStyle's startup-only policy applies the
+same separation at system scale—finish all fallible resource acquisition
+before the steady-state loop begins.
+
+### Bound the working set, not necessarily all output
+
+Derive capacities from the physical shape of the problem. A service with a
+finite maximum message size can bound per-message work while its durable data
+continues to grow. The compiler essay explores the same split: finite chunks
+and bounded intermediate state feed a separate arena or persistent store for
+potentially unbounded immutable output.
+
+This is a useful architecture question, not a general proof of constant-memory
+processing. State which bytes count as input, scratch, retained output, cache,
+and kernel/runtime state. Moving growth into an “output arena” or file changes
+ownership and failure policy; it does not remove growth or `ENOSPACE`.
 
 ## Constant work is a separate option
 
@@ -83,6 +113,7 @@ cancellation state. Put those objects under the component that owns the limit.
 The [fixed-pool proof](../proofs/static_pool.zig) checks the bounded transition
 mechanics with Zig 0.16.0. It does not claim to benchmark the approach.
 
-Related: [[tigerstyle]], [[newtype-indexes]], [[cancellation]],
+Related: [[tigerstyle]], [[newtype-indexes]],
+[[integer-widths-and-boundaries]], [[cancellation]],
 [[select-and-batch]], [[io-synchronization-primitives]],
 [[evented-io-backends]].

@@ -8,6 +8,9 @@ summary: Use non-exhaustive enums as compact, type-distinct indexes while retain
 updated: 2026-09-04
 sources:
   - "[[matklad-zig-newtype-index-pattern]]"
+  - "[[matklad-static-allocation-compilers]]"
+  - "[[matklad-memory-safety-hardest-problem]]"
+  - "[[zig-0.16.0-language-reference]]"
   - "[[zig-0.16.0-stdlib]]"
 proofs:
   - proofs/newtype_index.zig
@@ -51,9 +54,24 @@ review when it changes.
 - Keep arithmetic in a checked integer domain and convert only after proving
   the result fits the backing type.
 
+## Stable handle versus interior pointer
+
+Indexes make relocation and persistence easier because they describe a
+position in an owning collection rather than a process address. The static
+allocation compiler essay uses this property when separating bounded working
+state from a potentially larger immutable output arena.
+
+They also avoid one class of interior-pointer failure: a pointer captured from
+the active field of a tagged union can retain its old type after the union's
+storage is overwritten with another variant. An index still needs validation
+at access time, however. If a slot may be released and reused, pair the index
+with a generation (and, where values cross owners, an owner identity) so a
+stale handle cannot silently select a new object.
+
 The [Zig 0.16 proof](../proofs/newtype_index.zig) ports the source pattern,
 checks the compact representation and named sentinels, and demonstrates access
 through the owning collection. It does not attempt to compile an intentional
 wrong-type call.
 
-Related: [[static-allocation-and-constant-work]], [[tigerstyle]].
+Related: [[integer-widths-and-boundaries]],
+[[static-allocation-and-constant-work]], [[tigerstyle]].

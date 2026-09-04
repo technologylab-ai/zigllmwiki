@@ -60,6 +60,19 @@ see [[evented-io-backends]].
 - Synchronization waits are part of the `Io` contract too: preserve predicate
   loops, cancellation, queue closure, and explicit capacity. See
   [[io-synchronization-primitives]].
+- Use one clock-tagged absolute deadline for a multi-step budget; sleeping is
+  cancelable I/O, not a scheduling guarantee. See
+  [[io-time-clocks-and-deadlines]].
+- Buffered writes, file synchronization, atomic replacement, and directory
+  durability are separate transitions. See
+  [[files-buffering-and-atomic-persistence]].
+- DNS queues, connection attempts, socket buffers, subprocess output, and
+  entropy failure all retain explicit capacity and ownership. See
+  [[networking-and-dns-racing]], [[child-process-lifecycles]], and
+  [[entropy-and-deterministic-randomness]].
+- `std.testing.io`, `std.Io.failing`, fixed stream adapters, and
+  `-fsingle-threaded` exercise different contracts; none is automatically a
+  deterministic scheduler. See [[testing-io-and-single-threaded-builds]].
 - Do not log every propagating I/O error from `errdefer`; expected cancellation
   may be handled by the owner. See [[error-context]].
 - File writers are buffered; missing flushes and multiple independent writers
@@ -76,4 +89,7 @@ capability from `std.process.Init` without coupling reusable libraries to the
 whole process initializer.
 
 Related: [[zig-0.16-baseline]], [[io-threaded]], [[async-vs-concurrent]],
-[[cancellation]], [[error-context]], [[tigerstyle]].
+[[cancellation]], [[io-time-clocks-and-deadlines]],
+[[files-buffering-and-atomic-persistence]], [[networking-and-dns-racing]],
+[[child-process-lifecycles]], [[entropy-and-deterministic-randomness]],
+[[testing-io-and-single-threaded-builds]], [[error-context]], [[tigerstyle]].

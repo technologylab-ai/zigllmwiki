@@ -53,13 +53,21 @@ topics have already been synthesized.
 | [Look Out For Bugs](https://matklad.github.io/2025/09/04/look-for-bugs.html) | synthesized | Whole-subsystem control-flow and state review in [[code-reading-and-mechanical-checks]] |
 | [Mechanical Habits](https://matklad.github.io/2025/12/06/mechanical-habits.html) | synthesized | Repository invariants and maintained benchmark entry points |
 | [Do Not Optimize Away](https://matklad.github.io/2025/12/09/do-not-optimize-away.html) | synthesized | Runtime inputs and correctness witnesses in [[trustworthy-microbenchmarks]] |
+| [Considering Strictly Monotonic Time](https://matklad.github.io/2026/01/23/strictly-monotonic-time.html) | synthesized + guard mechanics proved | [[io-time-clocks-and-deadlines]] |
+| [Reserve First](https://matklad.github.io/2025/08/16/reserve-first.html) | synthesized | Reserve-before-mutate in [[static-allocation-and-constant-work]] |
+| [Size Matters](https://matklad.github.io/2025/11/28/size-matters.html) | synthesized | Human and architectural size limits in [[tigerstyle-coverage]]; applied function work is M2-005 |
+| [Static Allocation for Compilers](https://matklad.github.io/2025/12/23/static-allocation-compilers.html) | synthesized | Bounded working state versus retained output in [[static-allocation-and-constant-work]] and index/layout pages |
+| [Memory Safety's Hardest Problem](https://matklad.github.io/2026/07/20/memory-safety-hardest-problem.html) | synthesized | Interior-pointer lifetime and validated-handle guidance in [[newtype-indexes]] and [[integer-widths-and-boundaries]] |
+| [Retry Loop](https://matklad.github.io/2023/12/21/retry-loop.html) | synthesized + mechanics proved | Explicit outcomes, visible attempt bound, terminal cause, and no final sleep in [[bounded-retries-and-cleanup]] |
+| [Retry Loop Retry](https://matklad.github.io/2025/08/23/retry-loop-retry.html) | synthesized + mechanics proved | Guaranteed first attempt expressed as a validated total `attempt_limit` |
+| [Zig defer Patterns](https://matklad.github.io/2024/03/21/defer-patterns.html) | synthesized | Postconditions, infallible commit, grouped lifetime, and reporting constraints in [[bounded-retries-and-cleanup]] |
 
 ## matklad — selected next
 
 | Cluster | Sources | Intended decision page |
 | --- | --- | --- |
-| Bounded memory and layout | [Reserve First](https://matklad.github.io/2025/08/16/reserve-first.html), [Size Matters](https://matklad.github.io/2025/11/28/size-matters.html), [Static Allocation for Compilers](https://matklad.github.io/2025/12/23/static-allocation-compilers.html), [Memory Safety's Hardest Problem](https://matklad.github.io/2026/07/20/memory-safety-hardest-problem.html) | Extend [[static-allocation-and-constant-work]] and [[newtype-indexes]] |
-| Time, retries, and cleanup | [Strictly Monotonic Time](https://matklad.github.io/2026/01/23/strictly-monotonic-time.html), [Retry Loop](https://matklad.github.io/2023/12/21/retry-loop.html), [Retry Loop, Retry](https://matklad.github.io/2025/08/23/retry-loop-retry.html), [Defer Patterns](https://matklad.github.io/2024/03/21/defer-patterns.html) | `std.Io` clocks, deadlines, retries, cleanup, and cancellation |
+No source cluster is currently selected without synthesis. New discoveries move
+here only after they answer a named systems-programming question.
 
 Other Zig/comptime/syntax posts remain discovered. They move to selected only
 when a concrete systems-programming question needs them.
@@ -70,6 +78,8 @@ when a concrete systems-programming question needs them.
 | --- | --- | --- |
 | liburing `io_uring.7` and cancellation manuals | synthesized | Linux lifecycle, ordering, retained resources, and cancellation races in [[io-uring]] |
 | Apple XNU `kqueue.2` and POSIX AIO manuals | synthesized | Readiness versus asynchronous file completion, ownership, cancellation, and cleanup in [[macos-kqueue-and-aio]] |
+| Apple libdispatch I/O headers | synthesized + adapter proved | Dispatch channel/data/callback lifecycles and the Zig/C macOS proof in [[macos-kqueue-and-aio]] |
+| Zig 0.16 Dispatch/Kqueue source | synthesized + selected macOS paths proved | Exact Evented alias, synchronous regular-file calls, unavailable networking, 60 MiB fibers, and broken deinit in [[macos-kqueue-and-aio]] |
 | Microsoft IOCP, overlapped I/O, and `CancelIoEx` documentation | synthesized | Completion ownership, immediate-success handling, ordering, capacity, and cancellation in [[windows-iocp-and-overlapped-io]] |
 
 ## TigerBeetle — current slice
@@ -89,13 +99,20 @@ when a concrete systems-programming question needs them.
 | `src/io{,.zig}/**` | synthesized | [[tigerbeetle-io]] maps caller-owned completions, dispatch, queue pressure, Linux `io_uring`, Darwin `kqueue`, and Windows IOCP while recording the missing cancellation surface. |
 | `src/{vsr,lsm}/**` | selected | implementation evidence for ownership, limits, storage, state machines, and recovery |
 
-## Active curation
+## Current curation execution
 
-| Roadmap item | Status | Current boundary / next artifact |
+`running` below means an agent is executing the item now. `queued` means no
+agent is currently working on it.
+
+| Roadmap item | Execution | Current boundary / next artifact |
 | --- | --- | --- |
-| M1-005 cancellation | active | `Future`, `Group`, `recancel`, protection, and a blocked pipe read are proved on macOS; add blocked-syscall evidence on Linux and Windows. |
-| M2-009 source curation | active | Structured-concurrency, error/diagnostics, and invariant/review clusters are synthesized; bounded-memory/layout and time/retry clusters remain selected. |
-| M3 evented I/O | active research | Primary Linux/Apple/Microsoft lifecycles and TigerBeetle's three backends are synthesized; dispatch I/O, Zig adapters, kernel-version detail, and platform runtime proofs remain. |
+| M1-005 cancellation | running (`/root/linux_runtime`) | `Future`, `Group`, `recancel`, protection, and a blocked pipe read are proved on macOS; Linux is running on `omarx1`, and Windows remains queued. |
+| M2-009 bounded-memory/layout curation | done | Reservation, finite working state, retained output, representation lifetime, and stable-handle consequences are synthesized. |
+| M2-010 retry/defer curation | done | Both retry-loop essays and the defer-pattern essay are synthesized into one-deadline retry and terminal cleanup guidance. |
+| M3-003 macOS evented I/O | done | Primary `kqueue`/AIO/Dispatch lifecycles, exact Zig mappings and defects, an actual Dispatch I/O adapter, macOS runtime evidence, and a bounded comparison are recorded. |
+| M3-002 Linux evented I/O | running (`/root/linux_runtime`) | Kernel/version features, registered resources, cancellation, and real `omarx1` evidence are assigned. |
+| M3-004 Windows evented I/O | running (`/root/windows_mapping`) | Exact Zig mapping and cross-target proof are assigned; no Windows runtime host is available. |
+| M3-005 backend decision table | queued | Final synthesis waits for the running Linux/Windows mapping results. |
 
 M1-001 is complete: [[process-init-and-capabilities]] synthesizes the official
 Zig 0.16 initializer/startup source and the local migration guide, with a real
@@ -109,6 +126,22 @@ M1-006 is complete from `Io.zig`, `Io/RwLock.zig`, and `Io/Semaphore.zig`:
 [[io-synchronization-primitives]] covers the entire public synchronization
 surface with six tests for cancellation, predicate, capacity, close/drain,
 permit, shared-lock, and futex behavior.
+
+M1-007 is complete from the installed time interface and the pinned monotonic
+time design note: [[io-time-clocks-and-deadlines]] distinguishes all five clock
+domains, relative and absolute budgets, sleep semantics, and the optional
+strict-clock application guard with five runtime tests.
+
+M1-010 is complete: [[testing-io-and-single-threaded-builds]] distinguishes
+host-backed tests, the exact fixed `Io.failing` profile, stream adapters, and
+whole-build single-threaded semantics. Its four tests run in both normal and
+`-fsingle-threaded` modules.
+
+M2-003, M2-004, and M2-009 are complete. The persistence proof independently
+checks a state invariant before encoding and after validation/decoding;
+[[integer-widths-and-boundaries]] covers domain widths, arithmetic, native
+layout, wire encoding, and stale representation handles; and all four selected
+bounded-memory/layout essays have decision-level synthesis.
 
 ## Immediate curation order
 

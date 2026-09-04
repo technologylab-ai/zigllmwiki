@@ -47,14 +47,16 @@ the complete rule-by-rule inventory and remaining gaps live in
   boundary/toolchain type, not an automatic domain model.
 - Keep functions small enough to reason about, centralize branching and state
   changes, and push repetitive loops into focused leaves. See
-  [[matklad-push-ifs-up-fors-down]].
+  [[function-shape-and-control-flow]].
 
 ## Performance consequences
 
 Sketch network, disk, memory, and CPU bandwidth and latency during design.
 Optimize in resource order adjusted for frequency, separate control and data
 planes, and batch work to amortize costs. Make limits and backpressure part of
-the sketch; an unbounded fast path is not a performance design.
+the sketch; an unbounded fast path is not a performance design. The quantified
+worksheet, bounded server example, and Zig harness are in
+[[performance-sketches-and-batching]].
 
 Microbenchmarks need runtime-variable inputs and a consumed correctness witness
 before timing is credible. See [[trustworthy-microbenchmarks]].
@@ -70,7 +72,12 @@ a future and grow its thread pool when called. Strict no-allocation-after-startu
 designs therefore need a proven reservation strategy, a bounded/custom backend,
 or a deliberately isolated exception. This is an open design seam; do not
 declare strict TigerStyle compatibility merely because the application passes
-limits in its own code.
+limits in its own code. Use [[tigerstyle-seams-with-zig-and-os]] to label the
+strict core, isolated exceptions, and nonconforming dependencies.
+
+TigerStyle and Zig's general style guide make different choices for callable,
+file, and acronym casing. [[naming-comments-and-api-shape]] records the strict
+project profile and the API/comment rules that `zig fmt` cannot enforce.
 
 ## Review lens
 
@@ -91,5 +98,7 @@ see [[code-reading-and-mechanical-checks]].
 Related: [[std-io]], [[cancellation]], [[error-context]], [[newtype-indexes]],
 [[deterministic-simulation-testing]], [[evented-io-backends]],
 [[invariants-and-assertions]], [[code-reading-and-mechanical-checks]],
-[[trustworthy-microbenchmarks]], [[tigerstyle-coverage]],
+[[trustworthy-microbenchmarks]], [[performance-sketches-and-batching]],
+[[function-shape-and-control-flow]], [[naming-comments-and-api-shape]],
+[[tigerstyle-seams-with-zig-and-os]], [[tigerstyle-coverage]],
 [[zig-0.16-baseline]].

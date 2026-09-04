@@ -115,4 +115,5 @@ execute it.
 
 Related: [[std-io]], [[io-threaded]], [[async-vs-concurrent]],
 [[task-lifetimes-and-structured-concurrency]],
-[[static-allocation-and-constant-work]], [[zig-0.16-baseline]].
+[[child-process-lifecycles]], [[static-allocation-and-constant-work]],
+[[zig-0.16-baseline]].

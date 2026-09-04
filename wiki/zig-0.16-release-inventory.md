@@ -85,8 +85,8 @@ its declared scope and preserved the primary-source link.
 | Entropy | queued | M1-009, explicit `Io` capability use and failure semantics. |
 | Time | queued | M1-007: clocks, durations, deadlines, timeouts, and sleeping. |
 | File System | queued | M1-008: files, directories, buffering, flush, and atomic persistence. |
-| Networking | queued | M1-009 and M3: portable interface, DNS/sockets, then backend-specific evidence. |
-| Process | queued | [[process-init-and-capabilities]] covers initialization; M1-009 retains child-process execution and lifetime. |
+| Networking | integrated | [[networking-and-dns-racing]] covers the portable DNS/socket interface; M3 retains backend-specific evidence. |
+| Process | integrated | [[process-init-and-capabilities]] covers initialization and [[child-process-lifecycles]] covers execution, output, and terminal ownership. |
 | `File.MemoryMap` | queued | M1-008 and M2-008: mapping lifetime, alignment, limits, and platform seams. |
 | `posix` and `os.windows` removals | queued | M2-008 and M3: document the portable-interface/native-API boundary. |
 
