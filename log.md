@@ -684,3 +684,27 @@ writes pending while x64/WOW64 observed immediate writes; none of the file
 cancellation races produced a canceled file result. The final workflow uses an
 explicit x64-compiler/ARM64-runtime qualification path with optional fatal
 native-compiler diagnostics. Physical deployment evidence remains unavailable.
+
+## [2026-09-05] verification and handoff | all available gates pass; deployment evidence blocked
+
+Clean pushed a92ec380adaad914a304021d1502a77e93dd549c passed 87/87 build steps
+on maxross, omarx1 and both hosted Windows targets. Mac passed 73/82 tests with
+9 skips; Linux 74/82 with 8; Windows x64 and ARM64 each 75/82 with 7. All 28 Python
+tests and the 25-query retrieval policy passed. The
+[Windows matrix 33922946389](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33922946389)
+and [read-only review 33922946096](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33922946096)
+concluded success on that exact commit, including the new Queue/Select proofs,
+five standalone binaries per Windows job and all five WOW64 binaries. No proof
+or compiler was weakened to hide the separate native ARM compiler failures.
+
+The [publication receipt](reports/2026-09-04-publication-verification.md)
+preserves proof hashes and exact environments, including the new Intel Xeon
+6973P-C/NVMe x64 runner rather than silently reusing older AMD host metadata.
+Updated current evidence counts, reciprocal retrieval, curation, roadmap and
+handoff. L-009, selected storage synthesis, semantic/curator fixes and excerpt
+design are complete; all subagents and the curator finished, timer waiting.
+M3-006's available fixture work is complete but its broad deployment exit is
+blocked by unavailable physical power-loss/controlled cold-storage and named
+deployment driver/error/SLO evidence. M4 remains reserved. This documentation
+publication is followed by the required exact-final-commit local/Linux/Windows
+gates; it does not predict their outcome or rewrite earlier failure records.

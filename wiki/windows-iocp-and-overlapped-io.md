@@ -5,7 +5,7 @@ kind: platform
 status: source-verified
 zig: "0.16.0"
 summary: Windows IOCP adapters require stable OVERLAPPED ownership and terminal cancellation reconciliation, while Zig 0.16 std.Io.Threaded instead mixes worker-blocking and APC-based NtDll paths and has no Windows Evented backend.
-updated: 2026-09-04
+updated: 2026-09-05
 sources:
   - "[[microsoft-windows-iocp]]"
   - "[[microsoft-windows-iocp-api]]"
@@ -528,6 +528,17 @@ The standard hosted ARM64 qualification path now uses the explicit x64 compiler
 and ARM64 target. Native ARM compiler diagnostics remain opt-in and fail when
 the compiler fails; the installed compiler release is never patched or upgraded
 silently. The runbook records commands and artifact distinctions.
+
+The standard matrix then passed completely at
+`a92ec380adaad914a304021d1502a77e93dd549c` in
+[run 33922946389](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33922946389):
+87/87 steps, 75/82 tests with seven skips on both x64 and ARM64, five native
+executables per job, five WOW64 executables, 28 Python tests and retrieval.
+This includes the newly added Queue/Select ownership cases. The
+[publication receipt](../reports/2026-09-04-publication-verification.md) retains
+the changed Intel Xeon/NVMe x64 host, Cobalt ARM64 host and exact new samples;
+sharing a runner image does not imply identical hardware. Known native ARM
+compiler diagnostics remain separate and were not enabled for that passing run.
 
 This page remains `source-verified` because its broad OS and implementation
 claims exceed the narrow runtime fixtures. M3-006 cannot be fully discharged

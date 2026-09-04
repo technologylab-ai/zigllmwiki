@@ -5,7 +5,7 @@ kind: pattern
 status: source-verified
 zig: "0.16.0"
 summary: Select owns typed task results, while fixed Batch slots still require backend allocation budgeting, cleanup after wait errors, and completion draining.
-updated: 2026-09-04
+updated: 2026-09-05
 sources:
   - "[[zig-0.16.0-release-notes]]"
   - "[[zig-0.16.0-stdlib]]"
@@ -159,8 +159,8 @@ not itself guarantee a shutdown time bound on that implementation.
 
 ## Evidence
 
-The [Select/Batch proof](../proofs/select_and_batch.zig) runs two Zig 0.16
-tests. The select test puts owned allocations in task results, consumes one
+The [Select/Batch proof](../proofs/select_and_batch.zig) now runs three Zig 0.16
+tests. The original select test puts owned allocations in task results, consumes one
 through `await`, then loops over `cancel` until all remaining ownership is
 released. The batch test supplies exactly two fixed operation slots, reads two
 separate files, accepts arbitrary completion order, dispatches results by tag,
@@ -179,8 +179,13 @@ witness attempts and a process exit after 3,000 ten-millisecond watchdog sleeps.
 The queue-state witness is specific to the exact 0.16 implementation; the
 watchdog is a scheduler-dependent diagnostic budget, not a real-time guarantee.
 
-All three current tests passed on arm64 macOS 26.6.2 build 25G83 with Zig 0.16.0
-on 2026-09-04. Linux/Windows execution of the added cases remains pending.
+All three current tests passed with exact Zig 0.16.0 on 2026-09-04 at
+`a92ec380adaad914a304021d1502a77e93dd549c`: arm64 macOS 26.6.2 build 25G83,
+x86_64 Linux 7.1.9-arch1-2, Windows Server 2025 x64 build 26100.33296, and
+Windows 11 ARM64 build 26200.9168. The ARM64 path used an emulated x64 compiler
+with explicit ARM64 target and native ARM64 executable runtime. See the
+[publication receipt](../reports/2026-09-04-publication-verification.md) for
+exact commands, environments and the successful Windows matrix.
 
 The Windows-specific [APC/batch proof](../proofs/windows_apc_batch.zig) ran with
 Zig 0.16.0 on x86_64 Windows Server 2025 build 26100.33296 on 2026-09-04.

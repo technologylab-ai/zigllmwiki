@@ -5,7 +5,7 @@ kind: concept
 status: source-verified
 zig: "0.16.0"
 summary: Choose synchronization by state and ownership; Queue minimums do not remove mutex contention, partial-transfer accounting, or the need to join blocked participants.
-updated: 2026-09-04
+updated: 2026-09-05
 sources:
   - "[[zig-0.16.0-release-notes]]"
   - "[[zig-0.16.0-stdlib]]"
@@ -189,8 +189,8 @@ an implementation resource, not a public pool API to couple library code to.
 
 ## Evidence
 
-The [synchronization proof](../proofs/io_sync_primitives.zig) runs six tests
-with Zig 0.16 `std.testing.io`: event cancellation/reset after join; canceled
+Six baseline tests in the [synchronization proof](../proofs/io_sync_primitives.zig)
+use Zig 0.16 `std.testing.io`: event cancellation/reset after join; canceled
 mutex acquisition and reuse; condition predicate handoff; queue capacity,
 close, and drain; shared/exclusive lock and semaphore balance; and an atomic
 futex predicate loop. It ran on aarch64 macOS on 2026-09-04. Interface claims
@@ -215,9 +215,14 @@ after 3,000 ten-millisecond sleeps. These are finite diagnostic budgets subject
 to OS scheduling, not hard real-time bounds. Failure cleanup preserves or
 terminates live ownership instead of unwinding borrowed storage.
 
-All nine tests passed on arm64 macOS 26.6.2 build 25G83 with exact Zig 0.16.0
-on 2026-09-04. The new cases still need their own Linux/Windows gate; the older
-six-test results above are not enlarged retroactively. The page remains
+All nine tests passed with exact Zig 0.16.0 on 2026-09-04 at clean pushed
+`a92ec380adaad914a304021d1502a77e93dd549c`: arm64 macOS 26.6.2 build 25G83,
+x86_64 Linux 7.1.9-arch1-2, Windows Server 2025 x64 build 26100.33296, and
+Windows 11 ARM64 build 26200.9168. ARM64 used an emulated x64 compiler with
+explicit ARM64 target and native ARM64 execution. The
+[publication receipt](../reports/2026-09-04-publication-verification.md) retains
+commands, environments and [Windows run 33922946389](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33922946389).
+The older six-test results are not enlarged retroactively. The page remains
 `source-verified` for its broader synchronization contracts and implementation
 qualifications.
 

@@ -155,3 +155,7 @@ Read this page first, then follow only the pages needed for the task.
   future proof-derived displays with provenance, without duplicated Zig.
 - [Retrieval benchmark](reports/2026-09-04-retrieval-benchmark.md) — 25 reviewed
   queries currently support keeping deterministic lexical retrieval.
+
+[Publication verification](reports/2026-09-04-publication-verification.md)
+records the completed four-environment gate, proof identities and remaining
+external deployment limits; [ROADMAP.md](ROADMAP.md) keeps M4 reserved.

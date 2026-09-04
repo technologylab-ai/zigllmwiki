@@ -16,7 +16,7 @@ produce Zig 0.16.0 code that:
 - applies TigerStyle as concrete engineering constraints;
 - can trace important recommendations to primary sources and runnable proofs.
 
-## Progress snapshot — 2026-09-04
+## Progress snapshot — 2026-09-05
 
 - **Foundation milestone:** M0 is complete. Portable local evidence, the full
   Zig 0.16 release-note scope inventory, deterministic graph scoring, and the
@@ -24,14 +24,17 @@ produce Zig 0.16.0 code that:
 - **Completed in this session:** selected TigerBeetle storage/recovery/ops
   synthesis, a fresh full semantic audit, verified-excerpt design, and L-009's
   installed curator. Its first reviewed draft PR was separately merged.
-- **Platform evidence:** M3-004 remains complete. M3-006 adds native x64
-  TCP-to-file/batched IOCP and all five x86 proofs under WOW64. ARM64 has three
-  standalone native compiler/test passes; the explicit x64-compiler/ARM64-runtime
-  route then passed all five proofs and the full target gate. Final publication
-  gates remain; physical durability/deployment gaps are explicit.
-- **Proof follow-up:** four new Queue/Select tests and Batch index assertions
-  pass locally: 87/87 steps, 73/82 tests, 9 skips. Linux/Windows publication
-  gates for these additions are pending. The implementing subagents finished.
+- **Platform evidence:** all available M3-006 fixtures passed on x64, x86
+  WOW64 and ARM64. The ARM64 runtime path explicitly uses emulated x64 Zig to
+  produce ARM64 executables; native ARM compiler failures remain documented.
+- **Verification:** 87/87 steps on each host; Mac 73/82 tests with 9 skips,
+  Linux 74/82 with 8, Windows x64 and ARM64 75/82 with 7. Four new Queue/Select
+  tests and Batch index assertions passed across the four runtime environments.
+  28 Python tests and the 25-query retrieval policy passed. See
+  [the publication receipt](reports/2026-09-04-publication-verification.md).
+- **Remaining blocker:** M3-006's physical storage/deployment qualification
+  requires unavailable external evidence; no implementation agent is active.
+  The curator service is inactive, with its weekly timer enabled and waiting.
 - **Session scope:** finish actionable wiki work; M4 is reserved by the user
   for a separate in-depth session. External evidence gaps remain explicit.
 - **Backend:** intentionally deferred; the Obsidian-first ADR remains in force.
@@ -71,7 +74,7 @@ existing verification rules.
 | M1-003 | done | `Select` and `Batch` ownership, fixed capacity, result draining, cancellation traps, and runtime proof. |
 | M1-004 | done | `async` versus `concurrent`, including saturated runtime evidence. |
 | M1-005 | done | Task semantics and blocked pipe-read cancellation are runtime-proved on macOS, Linux, and Windows; exact Windows APC/IOCP cancellation breadth remains the platform-specific M3-004 gate. |
-| M1-006 | done | `Event`, `Queue`, `Mutex`, `RwLock`, `Condition`, `Semaphore`, and futex semantics plus six runtime tests. |
+| M1-006 | done | `Event`, `Queue`, `Mutex`, `RwLock`, `Condition`, `Semaphore`, and futex semantics plus nine runtime tests, including contended queue cancellation, partial transfer and close/join ownership. |
 | M1-007 | done | Clock domains, durations, timestamps, one-deadline budgets, timeout conversion, cancelable sleeping, strict-clock guard caveats, and five runtime tests. |
 | M1-008 | done | Files, directories, buffered readers/writers, exclusive read limits, flush versus truncation, atomic publication, and the directory-durability seam plus three runtime tests. |
 | M1-009 | done | Networking and DNS queue/race ownership, stream/datagram lifecycles, bounded subprocess capture and termination, entropy failure policy, and five macOS runtime tests. |
@@ -112,7 +115,7 @@ revision mapped to focused guidance and all local Zig claims registered for
 Zig 0.16 verification. This is guidance coverage, not automatic conformance by
 projects that consult it.
 
-## M3: evented I/O across operating systems (in progress)
+## M3: evented I/O across operating systems (deployment evidence blocked)
 
 Keep interface design separate from backend implementation.
 
@@ -123,7 +126,7 @@ Keep interface design separate from backend implementation.
 | M3-003 | done | Apple-primary `kqueue`, Dispatch I/O, and POSIX AIO lifecycles; exact Zig 0.16 Dispatch/Kqueue mapping and defects; a Zig/C adapter; macOS runtime proof; and bounded comparative evidence. |
 | M3-004 | done | Pinned Microsoft/0.16 source, raw immediate/pending APC, fixed batch races and NPFS device-control cancellation, custom IOCP immediate/pending/cancel/shutdown ownership, finite limits/watchdogs, and bounded pipe/hot-file read metrics ran on Windows Server 2025. Initial-wait and wrapper-mode defects are explicit; broader qualification is M3-006. |
 | M3-005 | done | Cross-platform decision table selects portable Threaded or platform-specific file/network backends with guarantees, limits, unsupported cases, ownership, resource models, and exact evidence gates. |
-| M3-006 | running | Qualify a named Windows deployment workload: Winsock and batched dequeue, overlapped file writes, regular-file immediate-success/cancellation, cold storage/durability, required driver/error paths, and a supported solution to unassisted batch shutdown. Record load/tail-latency criteria and native architecture/device matrix before extending runtime claims. |
+| M3-006 | blocked | Available work complete: Winsock/batched TCP-to-file IOCP, file writes/flush/readback, cancel races, public stop/cancel/drain and x64/WOW64/ARM64 runtime gates. Remaining exit requires unavailable physical power-loss/controlled cold-storage evidence and a named deployment filesystem/device/driver/error/SLO matrix; immediate file-read and canceled file terminal results remain unobserved. Native ARM compiler failure is separate from the passing explicit ARM64 runtime path. |
 
 | Platform | Research and proof targets |
 | --- | --- |
@@ -191,7 +194,8 @@ hybrid search when thresholds fail or real agent queries demonstrate misses.
   [bounded review 33921176578](reports/curation-review-33921176578-1.md):
   zero-minimum contention, partial-transfer cancellation and re-armed fast
   progress, close/join with blocked callers, owned awaitMany prefixes, and
-  actual Batch index assertions. Local tests pass; publication gates remain.
+  actual Batch index assertions. Completed with clean exact-commit Mac, Linux,
+  Windows x64 and ARM64 gates; historical reports retain their earlier gaps.
 - Monitor a future Zig release through the explicit upgrade workflow; the 0.16
   inventory has no stale queued rows.
 - Extend the completed Windows NPFS/IOCP fixtures only against M3-006's named

@@ -1,4 +1,4 @@
-# Project handoff — 2026-09-04
+# Project handoff — 2026-09-05
 
 This is the durable entry point for a fresh session. ROADMAP.md owns scope and
 status; historical log entries and reports retain narrower and failed runs.
@@ -33,12 +33,17 @@ first rejected trial, successful publication, idle routing and repeat Linux
 fallback without a duplicate agent. The consumer never auto-merges.
 
 The curator found additional Queue/Select ownership caveats. Four new tests
-and actual Batch index assertions now cover them in existing registered proofs.
-Mac integration passed 87/87 steps, 73/82 tests with 9 skips; a Linux development
-run passed 87/87, 74/82 with 8 skips. Final clean/pushed platform gates for
-these new tests are being completed by the root agent; all subagents finished.
-The historical [bounded report](reports/curation-review-33921176578-1.md)
-retains its sandbox bind failure and then-missing proof coverage.
+and actual Batch index assertions cover them in existing registered proofs.
+All passed at clean pushed a92ec380adaad914a304021d1502a77e93dd549c on Mac,
+Linux, Windows x64 and Windows ARM64. The
+[publication receipt](reports/2026-09-04-publication-verification.md) contains
+exact counts, proof SHA-256 identities, commands, images and workflow links.
+Historical curator reports preserve their sandbox failures and earlier gaps.
+
+All subagents and the curator finished. The service is inactive; its enabled
+weekly timer is waiting. No queued item is described as running. M3-006 is
+blocked only on the explicitly unavailable external deployment evidence above;
+M4 remains reserved. All other selected actionable work is complete.
 
 ## Exact baseline and editing contract
 
@@ -95,6 +100,16 @@ runs locally; once an agent starts remotely it never launches a second fallback
 agent on failure. No current successful review packet produces an idle result.
 
 ## Verification checkpoints
+
+The completed integration gate at
+**a92ec380adaad914a304021d1502a77e93dd549c** passed 87/87 steps on every host:
+Mac 73/82 tests with 9 skips; Linux 74/82 with 8; Windows x64 and ARM64 75/82
+with 7 each. All 28 Python tests and the 25-query retrieval policy passed.
+[Windows matrix 33922946389](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33922946389)
+and [read-only review 33922946096](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33922946096)
+are successful on that commit. The publication receipt records the latest
+Intel Xeon 6973P-C/NVMe x64 runner; the older AMD environment below belongs to
+its own earlier run. Match headSha to the current checkout for later gates.
 
 At pushed `0bdca5a38331fe9ae0a3db04cc4a6955152969fc`:
 
