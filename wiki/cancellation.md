@@ -110,6 +110,8 @@ Related: [[io-threaded]], [[async-vs-concurrent]],
 Also see [[task-lifetimes-and-structured-concurrency]].
 For result-buffer sizing and terminal draining in task/operation aggregators,
 see [[select-and-batch]].
+For cancelable versus uncancelable waits and lock reacquisition, see
+[[io-synchronization-primitives]].
 
 ## Runtime evidence
 

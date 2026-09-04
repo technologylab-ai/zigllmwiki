@@ -40,6 +40,7 @@ pub fn build(b: *std.Build) void {
         "proofs/error_context.zig",
         "proofs/fmt_steering.zig",
         "proofs/invariants.zig",
+        "proofs/io_sync_primitives.zig",
         "proofs/newtype_index.zig",
         "proofs/process_init_capabilities.zig",
         "proofs/select_and_batch.zig",

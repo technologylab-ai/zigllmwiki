@@ -23,15 +23,17 @@ produce Zig 0.16.x code that:
 - **M1/M2 content expansion is active in parallel:** M1-005 and M2-009 are
   explicitly `active` in the milestone tables below. Selected M1/M2 work is
   already running because it directly constrains the seed pages.
-- **Latest completed content:** M1-001 and M1-003 now document and prove
-  `std.process.Init`/capability threading and `Select`/`Batch` ownership. The six requested
+- **Latest completed content:** M1-001, M1-003, and M1-006 now document and
+  prove `std.process.Init`/capability threading, `Select`/`Batch` ownership, and
+  the complete `std.Io` synchronization-primitives surface. The six requested
   matklad essays and five
   TigerBeetle documents are joined by structured-concurrency, `io_uring`,
   bounded error-diagnostics, full TigerStyle-coverage, and pinned TigerBeetle
   cross-platform I/O syntheses. `Future`/`Group` ownership, protection, and
   `recancel` have a macOS `Io.Threaded` proof.
-- **Current next slice:** M1-006 synchronization primitives, while M1-005
-  platform evidence and M2 integer boundaries remain active content work.
+- **Current next slice:** M1-007 clocks, deadlines, timeouts, and sleeping,
+  while M1-005 platform evidence and M2 integer boundaries remain active
+  content work.
 - **Backend:** intentionally deferred; the Obsidian-first ADR remains in force.
 
 Source status is tracked as `discovered → selected → captured → synthesized →
@@ -69,7 +71,7 @@ existing verification rules.
 | M1-003 | done | `Select` and `Batch` ownership, fixed capacity, result draining, cancellation traps, and runtime proof. |
 | M1-004 | done | `async` versus `concurrent`, including saturated runtime evidence. |
 | M1-005 | active | Cancellation acknowledgement, `recancel`, protection, cleanup, and blocked-syscall platform matrix. Task semantics and a blocked pipe read are proved on macOS; Linux/Windows syscall interruption remains. |
-| M1-006 | next | `Event`, `Queue`, `Mutex`, `RwLock`, `Condition`, `Semaphore`, and `Futex`. |
+| M1-006 | done | `Event`, `Queue`, `Mutex`, `RwLock`, `Condition`, `Semaphore`, and futex semantics plus six runtime tests. |
 | M1-007 | next | Clocks, durations, timestamps, deadlines, timeouts, and sleeping. |
 | M1-008 | next | Files, directories, buffered readers/writers, flush, and atomic persistence. |
 | M1-009 | next | Networking, DNS racing, sockets, processes, and entropy. |

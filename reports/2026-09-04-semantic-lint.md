@@ -12,15 +12,15 @@ disposition: pass-with-findings
 ## Summary
 
 This first unsupervised pass followed [the semantic lint
-procedure](../tools/semantic_lint.md). It reviewed all 28 navigable Markdown
-pages (the index plus 27 wiki pages), 34 source records, eleven registered Zig
+procedure](../tools/semantic_lint.md). It reviewed all 29 navigable Markdown
+pages (the index plus 28 wiki pages), 34 source records, twelve registered Zig
 proof files, and the claims most likely to mislead an agent: `std.Io` versus
 `std.Io.Threaded`, `async` versus `concurrent`, cancellation ownership, and
 Linux/macOS/Windows I/O boundaries.
 
 `zig build verify --summary all` passed with the exact Zig 0.16.0 compiler:
-27/27 build steps and 17/17 tests. The graph report contains 27 pages excluding
-the index and 190 directed wiki edges: 26 strong, one connected, zero weak, and
+29/29 build steps and 23/23 tests. The graph report contains 28 pages excluding
+the index and 204 directed wiki edges: 27 strong, one connected, zero weak, and
 zero orphan pages.
 
 No critical or high finding remains. Two overstatements/maintenance defects
@@ -77,12 +77,16 @@ without adding a synthetic graph-only edge.
   executed by verification.
 - [[select-and-batch]] distinguishes task results from low-level operation
   storage and proves owned-result draining plus index-based batch completion.
+- [[io-synchronization-primitives]] distinguishes cancelable waits from narrow
+  uncancelable variants and makes predicate, capacity, close/drain, permit, and
+  futex wake obligations explicit.
 
 ## Roadmap effect
 
 This pass completes L-004 and therefore closes M0. It does not close any open
 content evidence merely because that evidence was audited. M1-005, M2-003,
 M2-009, and M3-002 through M3-004 remain active with their stated boundaries.
-M1-001 (`std.process.Init`) and M1-003 (`Select`/`Batch`) were completed and
-included in the final pass. The next primary content slice is M1-006, the
-`std.Io` synchronization primitives.
+M1-001 (`std.process.Init`), M1-003 (`Select`/`Batch`), and M1-006
+(synchronization primitives) were completed and included in the final pass.
+The next primary content slice is M1-007: clocks, deadlines, timeouts, and
+sleeping.

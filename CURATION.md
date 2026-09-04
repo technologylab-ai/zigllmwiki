@@ -105,6 +105,11 @@ M1-003 is complete from the installed Zig 0.16 `Io.zig` contract:
 [[select-and-batch]] distinguishes typed task results from fixed low-level
 operation slots and proves result draining plus arbitrary completion order.
 
+M1-006 is complete from `Io.zig`, `Io/RwLock.zig`, and `Io/Semaphore.zig`:
+[[io-synchronization-primitives]] covers the entire public synchronization
+surface with six tests for cancellation, predicate, capacity, close/drain,
+permit, shared-lock, and futex behavior.
+
 ## Immediate curation order
 
 1. Complete cancellation with Linux and Windows blocked-syscall evidence; the

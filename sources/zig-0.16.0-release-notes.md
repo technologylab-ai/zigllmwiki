@@ -21,5 +21,6 @@ implementation behavior.
 
 Relevant pages: [[zig-0.16-baseline]], [[zig-0.16-release-inventory]],
 [[process-init-and-capabilities]], [[std-io]], [[evented-io-backends]], and
-[[async-vs-concurrent]], and [[select-and-batch]]. The inventory accounts for every named
+[[async-vs-concurrent]], [[select-and-batch]], and
+[[io-synchronization-primitives]]. The inventory accounts for every named
 table-of-contents topic without reproducing the release document.

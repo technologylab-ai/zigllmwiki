@@ -84,4 +84,5 @@ The [fixed-pool proof](../proofs/static_pool.zig) checks the bounded transition
 mechanics with Zig 0.16.0. It does not claim to benchmark the approach.
 
 Related: [[tigerstyle]], [[newtype-indexes]], [[cancellation]],
-[[select-and-batch]], [[evented-io-backends]].
+[[select-and-batch]], [[io-synchronization-primitives]],
+[[evented-io-backends]].

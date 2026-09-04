@@ -20,4 +20,5 @@ Do not carry file line numbers into wiki claims: paths and declarations are
 stable enough for retrieval, while line numbers create copied state.
 
 Relevant pages: [[process-init-and-capabilities]], [[std-io]],
-[[async-vs-concurrent]], [[select-and-batch]], and [[evented-io-backends]].
+[[async-vs-concurrent]], [[select-and-batch]],
+[[io-synchronization-primitives]], and [[evented-io-backends]].

@@ -36,6 +36,8 @@ Read this page first, then follow only the pages needed for the task.
   state generations, serialized callbacks, and child processes.
 - [[select-and-batch]] — typed task races, fixed low-level operation slots,
   completion identity, result draining, and cancellation-buffer traps.
+- [[io-synchronization-primitives]] — `Event`, `Queue`, `Mutex`, `RwLock`,
+  `Condition`, `Semaphore`, and futex cancellation/capacity rules.
 - [[error-context]] — structured diagnostics without misreporting handled
   cancellation.
 - [[error-handling-and-diagnostics]] — typed recovery codes, invariant failures,

@@ -57,6 +57,9 @@ see [[evented-io-backends]].
 - A `Select` needs enough result capacity for terminal cancellation, while a
   `Batch` needs fixed operation storage and raced-completion draining. See
   [[select-and-batch]].
+- Synchronization waits are part of the `Io` contract too: preserve predicate
+  loops, cancellation, queue closure, and explicit capacity. See
+  [[io-synchronization-primitives]].
 - Do not log every propagating I/O error from `errdefer`; expected cancellation
   may be handled by the owner. See [[error-context]].
 - File writers are buffered; missing flushes and multiple independent writers

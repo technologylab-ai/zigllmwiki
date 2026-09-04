@@ -81,7 +81,7 @@ its declared scope and preserved the primary-source link.
 | Group | integrated | [[task-lifetimes-and-structured-concurrency]] and executable cancellation proofs. |
 | Cancelation | integrated | [[cancellation]]; Linux/Windows blocked-call evidence remains M1-005. |
 | Batch | integrated | [[select-and-batch]] covers `Select`, fixed operation storage, result ownership, cancellation, and partial completion. |
-| Sync Primitives | queued | M1-006: `Event`, `Queue`, `Mutex`, `RwLock`, `Condition`, `Semaphore`, and `Futex`. |
+| Sync Primitives | integrated | [[io-synchronization-primitives]] covers `Event`, `Queue`, `Mutex`, `RwLock`, `Condition`, `Semaphore`, and futex operations. |
 | Entropy | queued | M1-009, explicit `Io` capability use and failure semantics. |
 | Time | queued | M1-007: clocks, durations, deadlines, timeouts, and sleeping. |
 | File System | queued | M1-008: files, directories, buffering, flush, and atomic persistence. |
@@ -118,7 +118,7 @@ its declared scope and preserved the primary-source link.
 | Migration to “Unmanaged” Containers | queued | M2-002/M2-008, explicit allocation ownership and limits. |
 | `PriorityDequeue` | watch | Candidate for bounded schedulers; no current standalone decision. |
 | `PriorityQueue` | watch | Candidate for bounded schedulers; no current standalone decision. |
-| `Thread.Pool` Removed | queued | M1-006; do not confuse the removed public pool with [[io-threaded|`std.Io.Threaded`'s internal task pool]]. |
+| `Thread.Pool` Removed | integrated | [[io-synchronization-primitives]] routes task concurrency to `std.Io`; [[io-threaded]] keeps its internal pool an implementation detail. |
 | Remove `builtin.subsystem` | watch | Platform migration fact; no current design depends on it. |
 | Move `Target.SubSystem` to `zig.Subsystem` and update field names | watch | Platform migration fact; use current API if subsystem selection appears. |
 | `Io`: delete `GenericReader`, `AnyReader`, `FixedBufferStream` | queued | M1-008, current reader/writer composition and buffering. |

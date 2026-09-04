@@ -147,3 +147,15 @@ precondition.
 The proof returns owned memory through two select branches and drains every
 result, then drives two file reads through a two-slot batch while accepting
 arbitrary completion order and dispatching by result tag/index.
+
+## [2026-09-04] ingest | std.Io synchronization primitives
+
+Completed M1-006 with focused guidance for `Event`, `Queue`, `Mutex`, `RwLock`,
+`Condition`, `Semaphore`, and futex operations. The page records cancellation
+points, uncancelable shutdown risk, event reset preconditions, condition
+predicate loops, queue partial-transfer/close behavior, fairness boundaries,
+permit balance, and futex spurious wakeups.
+
+Six Zig 0.16 tests exercise event and mutex cancellation, condition handoff,
+bounded queue drain after close, shared/exclusive locking, semaphore permit
+balance, and an atomic futex predicate loop.

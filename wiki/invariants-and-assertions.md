@@ -87,7 +87,9 @@ For an asynchronous I/O operation, a useful invariant family is:
 - a completion slot is recycled only from a terminal state.
 
 See [[task-lifetimes-and-structured-concurrency]], [[cancellation]], and
-[[tigerbeetle-io]] for the backend consequences.
+[[tigerbeetle-io]] for the backend consequences. Predicate loops, balanced
+permits, and lock/queue terminal states are applied in
+[[io-synchronization-primitives]].
 
 ## Proof shape
 
