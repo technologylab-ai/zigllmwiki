@@ -1,0 +1,435 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-05",
+  "wiki_commit": "7a5dd5455858a7f84117e04beeed5181c83693a2",
+  "http_publication_commit": "e07766e4f1a3bf1cd5dc772e8da48f63d085e5ad",
+  "windows_run": {
+    "headSha": "7a5dd5455858a7f84117e04beeed5181c83693a2",
+    "status": "completed",
+    "conclusion": "success",
+    "url": "https://github.com/technologylab-ai/zigllmwiki/actions/runs/33983000614"
+  },
+  "windows": {
+    "aarch64-windows": {
+      "host": {
+        "repository_commit": "7a5dd5455858a7f84117e04beeed5181c83693a2",
+        "runner_image": "win11-arm64",
+        "runner_image_version": "20260830.155.1",
+        "os_caption": "Microsoft Windows 11 Enterprise",
+        "os_version": "10.0.26200",
+        "os_build_number": "26200",
+        "os_architecture": "ARM 64-bit Processor",
+        "native_os_architecture": "Arm64",
+        "powershell_process_architecture": "Arm64",
+        "zig_target_platform": "aarch64-windows",
+        "test_target": "aarch64-windows",
+        "test_cpu": "baseline",
+        "zig_compiler_platform": "x86_64-windows",
+        "compiler_execution": "x64 compiler under Windows ARM64 emulation; test executables are native ARM64",
+        "windows_product_name": "Windows 10 Enterprise",
+        "windows_display_version": "25H2",
+        "windows_current_build": "26200",
+        "windows_update_build_revision": 9168,
+        "windows_full_build": "26200.9168",
+        "powershell_version": "7.6.4",
+        "zig_version": "0.16.0",
+        "processors": [
+          {
+            "Name": "Cobalt 100",
+            "NumberOfCores": 2,
+            "NumberOfLogicalProcessors": 2
+          }
+        ],
+        "memory_bytes": 8579493888,
+        "logical_disks": [
+          {
+            "DeviceID": "C:",
+            "FileSystem": "NTFS",
+            "Size": 274284392448
+          }
+        ],
+        "disk_models": [
+          {
+            "Model": "Microsoft Virtual Disk",
+            "InterfaceType": "SCSI",
+            "Size": 274872407040
+          },
+          {
+            "Model": "Microsoft NVMe Direct Disk v2",
+            "InterfaceType": "SCSI",
+            "Size": 118106795520
+          }
+        ]
+      },
+      "zig_download": {
+        "index_url": "https://ziglang.org/download/index.json",
+        "zig_version": "0.16.0",
+        "platform": "x86_64-windows",
+        "zig_pe_machine": "8664",
+        "archive_url": "https://ziglang.org/download/0.16.0/zig-x86_64-windows-0.16.0.zip",
+        "expected_sha256": "68659eb5f1e4eb1437a722f1dd889c5a322c9954607f5edcf337bc3684a75a7e",
+        "actual_sha256": "68659eb5f1e4eb1437a722f1dd889c5a322c9954607f5edcf337bc3684a75a7e",
+        "declared_bytes": "97217739",
+        "actual_bytes": 97217739
+      },
+      "native_proofs": [
+        {
+          "proof": "proofs/windows_io_mapping.zig",
+          "compiler_platform": "x86_64-windows",
+          "target": "aarch64-windows",
+          "arguments": [
+            "test",
+            "proofs/windows_io_mapping.zig",
+            "-femit-bin=C:\\a\\_temp\\zig-wiki-native\\windows_io_mapping.exe",
+            "--test-no-exec",
+            "-target",
+            "aarch64-windows",
+            "-mcpu=baseline"
+          ],
+          "compiler_exit_code": 0,
+          "runtime_exit_code": 0,
+          "executable_sha256": "d88e24ba99ec81234d1c007c80b593cb13dfce931465c46e0158f84d8606a05a",
+          "execution": "native ARM64 test executable after cross-compilation by emulated x64 Zig"
+        },
+        {
+          "proof": "proofs/threaded_blocked_read_cancel_windows.zig",
+          "compiler_platform": "x86_64-windows",
+          "target": "aarch64-windows",
+          "arguments": [
+            "test",
+            "proofs/threaded_blocked_read_cancel_windows.zig",
+            "-femit-bin=C:\\a\\_temp\\zig-wiki-native\\threaded_blocked_read_cancel_windows.exe",
+            "--test-no-exec",
+            "-target",
+            "aarch64-windows",
+            "-mcpu=baseline"
+          ],
+          "compiler_exit_code": 0,
+          "runtime_exit_code": 0,
+          "executable_sha256": "4e35f9f3a5a02002e01c681e1e294b956f36d98b8e849644ee8adf8566dd7109",
+          "execution": "native ARM64 test executable after cross-compilation by emulated x64 Zig"
+        },
+        {
+          "proof": "proofs/windows_apc_batch.zig",
+          "compiler_platform": "x86_64-windows",
+          "target": "aarch64-windows",
+          "arguments": [
+            "test",
+            "proofs/windows_apc_batch.zig",
+            "-femit-bin=C:\\a\\_temp\\zig-wiki-native\\windows_apc_batch.exe",
+            "--test-no-exec",
+            "-target",
+            "aarch64-windows",
+            "-mcpu=baseline"
+          ],
+          "compiler_exit_code": 0,
+          "runtime_exit_code": 0,
+          "executable_sha256": "80df23e3b3de33dceb5898d202afbeca3fa272683758f3c4e0e1a209c22a2b4a",
+          "execution": "native ARM64 test executable after cross-compilation by emulated x64 Zig"
+        },
+        {
+          "proof": "proofs/windows_iocp_lifecycle.zig",
+          "compiler_platform": "x86_64-windows",
+          "target": "aarch64-windows",
+          "arguments": [
+            "test",
+            "proofs/windows_iocp_lifecycle.zig",
+            "-femit-bin=C:\\a\\_temp\\zig-wiki-native\\windows_iocp_lifecycle.exe",
+            "--test-no-exec",
+            "-target",
+            "aarch64-windows",
+            "-mcpu=baseline"
+          ],
+          "compiler_exit_code": 0,
+          "runtime_exit_code": 0,
+          "executable_sha256": "985ee676702bf99c9e5eb5e1a2ae574ccb9e1f41d6571c9d10275bbaf5185ff1",
+          "execution": "native ARM64 test executable after cross-compilation by emulated x64 Zig"
+        },
+        {
+          "proof": "proofs/windows_iocp_tcp_file.zig",
+          "compiler_platform": "x86_64-windows",
+          "target": "aarch64-windows",
+          "arguments": [
+            "test",
+            "proofs/windows_iocp_tcp_file.zig",
+            "-femit-bin=C:\\a\\_temp\\zig-wiki-native\\windows_iocp_tcp_file.exe",
+            "--test-no-exec",
+            "-target",
+            "aarch64-windows",
+            "-mcpu=baseline"
+          ],
+          "compiler_exit_code": 0,
+          "runtime_exit_code": 0,
+          "executable_sha256": "3aff6ead2c1343a666279e993040394c1edaf28cd46a50530ab2f642935e2c00",
+          "execution": "native ARM64 test executable after cross-compilation by emulated x64 Zig"
+        }
+      ],
+      "build_summary": [
+        "Build Summary: 87/87 steps succeeded; 75/82 tests passed (7 skipped)"
+      ],
+      "command_summary": [
+        "Ran 28 tests in 5.477s"
+      ],
+      "retrieval": "25 queries: MRR=1.0, hit@3=1.0, recall@5=0.96\npolicy met: true; recommendation: keep-index-and-lexical-query\n",
+      "clean_checkout": true,
+      "runtime_logs": {
+        "windows-iocp-tcp-file-native.log": "Executing native aarch64-windows PE: C:\\a\\_temp\\zig-wiki-native\\windows_iocp_tcp_file.exe\n1/1 windows_iocp_tcp_file.test.bounded IOCP TCP-to-file pipeline reconciles batched results and independent shutdown...IOCP TCP-to-file: build=Debug .{ .rounds = 32, .payload_bytes = 1024, .receive_chunk = 127, .working_set_bytes = 32768, .elapsed_ns = 442893400, .bytes_per_second = 73986, .cycle_p50_ns = 9626300, .cycle_p99_ns = 74217900, .cycle_max_ns = 74217900, .checksum = 4090822 }\nIOCP file cancel races: read/write success={ 32, 32 } aborted={ 0, 0 }\nIOCP TCP/file lifecycle (kind order receive/send/read/write): .{ .submitted = 453, .immediate = { 257, 32, 0, 0 }, .pending = { 35, 0, 65, 64 }, .initiation_failed = 1, .packets = 453, .successful = 449, .canceled = 3, .other_failures = 1, .cancel_accepted = 2, .cancel_not_found = 65, .dequeue_calls = 841, .max_batch = 3, .peak_owned = 2, .short_receives = 0 }\nOK\nAll 1 tests passed.\n",
+        "windows-blocked-read-cancel-native.log": "Executing native aarch64-windows PE: C:\\a\\_temp\\zig-wiki-native\\threaded_blocked_read_cancel_windows.exe\n1/1 threaded_blocked_read_cancel_windows.test.Threaded cancellation interrupts a blocked synchronous pipe read on Windows...OK\nAll 1 tests passed.\n",
+        "windows-io-mapping-native.log": "Executing native aarch64-windows PE: C:\\a\\_temp\\zig-wiki-native\\windows_io_mapping.exe\n1/1 windows_io_mapping.test.Zig 0.16 Windows std.Io surface maps to NT status blocks, not IOCP...OK\nAll 1 tests passed.\n",
+        "windows-iocp-lifecycle-native.log": "Executing native aarch64-windows PE: C:\\a\\_temp\\zig-wiki-native\\windows_iocp_lifecycle.exe\n1/1 windows_iocp_lifecycle.test.custom IOCP owns immediate, pending, canceled, and shutdown completions within fixed limits...IOCP competing races: success=0 canceled=16 attempts=16\nIOCP named-pipe-load: mode=default build=Debug .{ .slots = 4, .transfer_bytes = 64, .rounds = 256, .bytes = 65536, .elapsed_ns = 2445100, .bytes_per_s = 26802993, .cycle_p50_ns = 8400, .cycle_p99_ns = 40000, .cycle_max_ns = 108600, .immediate = 0, .pending = 1024, .direct = 0, .packets = 1024, .checksum = 8036480 }\nIOCP pipe lifecycle including shutdown: skip_success=false .{ .submitted = 1054, .immediate = 5, .pending = 1049, .direct = 0, .packets = 1054, .canceled = 21, .canceled_bytes_reported = 0, .canceled_buffer_changes = 0, .successful = 1033, .cancel_accepted = 21, .cancel_not_found = 1, .peak_owned = 4, .checksum = 8071232 }\nIOCP competing races: success=0 canceled=16 attempts=16\nIOCP named-pipe-load: mode=skip-success build=Debug .{ .slots = 4, .transfer_bytes = 64, .rounds = 256, .bytes = 65536, .elapsed_ns = 2446200, .bytes_per_s = 26790941, .cycle_p50_ns = 8500, .cycle_p99_ns = 17700, .cycle_max_ns = 161300, .immediate = 0, .pending = 1024, .direct = 0, .packets = 1024, .checksum = 8036480 }\nIOCP pipe lifecycle including shutdown: skip_success=true .{ .submitted = 1053, .immediate = 4, .pending = 1049, .direct = 4, .packets = 1049, .canceled = 21, .canceled_bytes_reported = 0, .canceled_buffer_changes = 0, .successful = 1032, .cancel_accepted = 21, .cancel_not_found = 0, .peak_owned = 4, .checksum = 8065920 }\nIOCP hot-regular-file-offsets: mode=default build=Debug .{ .slots = 4, .transfer_bytes = 64, .rounds = 256, .bytes = 65536, .elapsed_ns = 2986600, .bytes_per_s = 21943346, .cycle_p50_ns = 11400, .cycle_p99_ns = 15900, .cycle_max_ns = 31000, .immediate = 0, .pending = 1024, .direct = 0, .packets = 1024, .checksum = 2195456 }\nIOCP hot-regular-file-offsets: mode=skip-success build=Debug .{ .slots = 4, .transfer_bytes = 64, .rounds = 256, .bytes = 65536, .elapsed_ns = 2980100, .bytes_per_s = 21991208, .cycle_p50_ns = 11500, .cycle_p99_ns = 16100, .cycle_max_ns = 22200, .immediate = 0, .pending = 1024, .direct = 0, .packets = 1024, .checksum = 2195456 }\nOK\nAll 1 tests passed.\n",
+        "windows-apc-batch-native.log": "Executing native aarch64-windows PE: C:\\a\\_temp\\zig-wiki-native\\windows_apc_batch.exe\n1/1 windows_apc_batch.test.Windows APC read write batch and NPFS control retain ownership through cancellation...APC raw: empty_read=PENDING ready_read=SUCCESS small_write=SUCCESS quota_write=PENDING; bytes=1,1,1,8192; callbacks=4\nAPC Threaded task cancel: empty read + 8192-byte write; 20ms submission allowance, no direct NT submission witness\nAPC Batch.cancel idle witness: finished_in_100ms_before_alert=false; after_explicit_NtAlertThread=true; canceled_result_absent=true\nAPC Batch: capacity=2; success retained=2; pending read canceled=1\nAPC Batch cancel/write race: rounds=32; success=2; canceled=30; each operation reconciled once; no required winning distribution\nAPC device_io_control: NPFS message TRANSCEIVE via NtFsControlFile; direct canceled=1; batch canceled=1; batch success retained=1; arbitrary drivers/NtDeviceIoControlFile not exercised\nOK\nAll 1 tests passed.\n"
+      }
+    },
+    "x86_64-windows": {
+      "host": {
+        "repository_commit": "7a5dd5455858a7f84117e04beeed5181c83693a2",
+        "runner_image": "win25-vs2026",
+        "runner_image_version": "20260824.214.3",
+        "os_caption": "Microsoft Windows Server 2025 Datacenter",
+        "os_version": "10.0.26100",
+        "os_build_number": "26100",
+        "os_architecture": "64-bit",
+        "native_os_architecture": "X64",
+        "powershell_process_architecture": "X64",
+        "zig_target_platform": "x86_64-windows",
+        "test_target": "x86_64-windows",
+        "test_cpu": "compiler-default native",
+        "zig_compiler_platform": "x86_64-windows",
+        "compiler_execution": "native x64 compiler and test executables",
+        "windows_product_name": "Windows Server 2025 Datacenter",
+        "windows_display_version": "24H2",
+        "windows_current_build": "26100",
+        "windows_update_build_revision": 33296,
+        "windows_full_build": "26100.33296",
+        "powershell_version": "7.6.5",
+        "zig_version": "0.16.0",
+        "processors": [
+          {
+            "Name": "AMD EPYC 7763 64-Core Processor                ",
+            "NumberOfCores": 1,
+            "NumberOfLogicalProcessors": 2
+          }
+        ],
+        "memory_bytes": 8584425472,
+        "logical_disks": [
+          {
+            "DeviceID": "C:",
+            "FileSystem": "NTFS",
+            "Size": 160467759104
+          },
+          {
+            "DeviceID": "D:",
+            "FileSystem": "NTFS",
+            "Size": 80528535552
+          }
+        ],
+        "disk_models": [
+          {
+            "Model": "Microsoft Virtual Disk",
+            "InterfaceType": "SCSI",
+            "Size": 80525491200
+          },
+          {
+            "Model": "Microsoft Virtual Disk",
+            "InterfaceType": "SCSI",
+            "Size": 161059207680
+          }
+        ]
+      },
+      "zig_download": {
+        "index_url": "https://ziglang.org/download/index.json",
+        "zig_version": "0.16.0",
+        "platform": "x86_64-windows",
+        "zig_pe_machine": "8664",
+        "archive_url": "https://ziglang.org/download/0.16.0/zig-x86_64-windows-0.16.0.zip",
+        "expected_sha256": "68659eb5f1e4eb1437a722f1dd889c5a322c9954607f5edcf337bc3684a75a7e",
+        "actual_sha256": "68659eb5f1e4eb1437a722f1dd889c5a322c9954607f5edcf337bc3684a75a7e",
+        "declared_bytes": "97217739",
+        "actual_bytes": 97217739
+      },
+      "native_proofs": [
+        {
+          "proof": "proofs/windows_io_mapping.zig",
+          "compiler_platform": "x86_64-windows",
+          "target": "x86_64-windows",
+          "arguments": [
+            "test",
+            "proofs/windows_io_mapping.zig",
+            "-femit-bin=D:\\a\\_temp\\zig-wiki-native\\windows_io_mapping.exe",
+            "--test-no-exec"
+          ],
+          "compiler_exit_code": 0,
+          "runtime_exit_code": 0,
+          "executable_sha256": "6dd68628d4603b5f5da77354ac88b5b0d218c8d7f07e393ccbff7aa8325536ff",
+          "execution": "native x64 compiler and test executable"
+        },
+        {
+          "proof": "proofs/threaded_blocked_read_cancel_windows.zig",
+          "compiler_platform": "x86_64-windows",
+          "target": "x86_64-windows",
+          "arguments": [
+            "test",
+            "proofs/threaded_blocked_read_cancel_windows.zig",
+            "-femit-bin=D:\\a\\_temp\\zig-wiki-native\\threaded_blocked_read_cancel_windows.exe",
+            "--test-no-exec"
+          ],
+          "compiler_exit_code": 0,
+          "runtime_exit_code": 0,
+          "executable_sha256": "b8e49c159fdfbc84a7df17e10416daea6e4e2b326e5e056e8cf87b994a2c942e",
+          "execution": "native x64 compiler and test executable"
+        },
+        {
+          "proof": "proofs/windows_apc_batch.zig",
+          "compiler_platform": "x86_64-windows",
+          "target": "x86_64-windows",
+          "arguments": [
+            "test",
+            "proofs/windows_apc_batch.zig",
+            "-femit-bin=D:\\a\\_temp\\zig-wiki-native\\windows_apc_batch.exe",
+            "--test-no-exec"
+          ],
+          "compiler_exit_code": 0,
+          "runtime_exit_code": 0,
+          "executable_sha256": "df7fcbb0afb214301baac1895d7bddfd53e6401cbadc2bcaa2ac86bd45a98be9",
+          "execution": "native x64 compiler and test executable"
+        },
+        {
+          "proof": "proofs/windows_iocp_lifecycle.zig",
+          "compiler_platform": "x86_64-windows",
+          "target": "x86_64-windows",
+          "arguments": [
+            "test",
+            "proofs/windows_iocp_lifecycle.zig",
+            "-femit-bin=D:\\a\\_temp\\zig-wiki-native\\windows_iocp_lifecycle.exe",
+            "--test-no-exec"
+          ],
+          "compiler_exit_code": 0,
+          "runtime_exit_code": 0,
+          "executable_sha256": "19d7539c57c496c5f3551adfba65f08ef16edb8ddca3da4ed57cddc516b1454c",
+          "execution": "native x64 compiler and test executable"
+        },
+        {
+          "proof": "proofs/windows_iocp_tcp_file.zig",
+          "compiler_platform": "x86_64-windows",
+          "target": "x86_64-windows",
+          "arguments": [
+            "test",
+            "proofs/windows_iocp_tcp_file.zig",
+            "-femit-bin=D:\\a\\_temp\\zig-wiki-native\\windows_iocp_tcp_file.exe",
+            "--test-no-exec"
+          ],
+          "compiler_exit_code": 0,
+          "runtime_exit_code": 0,
+          "executable_sha256": "d78f13e61d3a2ca16c8efad648bbaac81c0493e187e153865cb545111ddbc34b",
+          "execution": "native x64 compiler and test executable"
+        }
+      ],
+      "build_summary": [
+        "Build Summary: 87/87 steps succeeded; 75/82 tests passed (7 skipped)"
+      ],
+      "command_summary": [
+        "Ran 28 tests in 3.730s"
+      ],
+      "retrieval": "25 queries: MRR=1.0, hit@3=1.0, recall@5=0.96\npolicy met: true; recommendation: keep-index-and-lexical-query\n",
+      "clean_checkout": true,
+      "runtime_logs": {
+        "windows-iocp-tcp-file-native.log": "Executing native x86_64-windows PE: D:\\a\\_temp\\zig-wiki-native\\windows_iocp_tcp_file.exe\n1/1 windows_iocp_tcp_file.test.bounded IOCP TCP-to-file pipeline reconciles batched results and independent shutdown...IOCP TCP-to-file: build=Debug .{ .rounds = 32, .payload_bytes = 1024, .receive_chunk = 127, .working_set_bytes = 32768, .elapsed_ns = 12029500, .bytes_per_second = 2723970, .cycle_p50_ns = 363600, .cycle_p99_ns = 536700, .cycle_max_ns = 536700, .checksum = 4090822 }\nIOCP file cancel races: read/write success={ 32, 32 } aborted={ 0, 0 }\nIOCP TCP/file lifecycle (kind order receive/send/read/write): .{ .submitted = 453, .immediate = { 257, 32, 0, 64 }, .pending = { 35, 0, 65, 0 }, .initiation_failed = 1, .packets = 453, .successful = 449, .canceled = 3, .other_failures = 1, .cancel_accepted = 2, .cancel_not_found = 65, .dequeue_calls = 841, .max_batch = 3, .peak_owned = 2, .short_receives = 0 }\nOK\nAll 1 tests passed.\n",
+        "threaded_blocked_read_cancel_windows-wow64-runtime.log": "1/1 threaded_blocked_read_cancel_windows.test.Threaded cancellation interrupts a blocked synchronous pipe read on Windows...OK\nAll 1 tests passed.\n",
+        "windows-blocked-read-cancel-native.log": "Executing native x86_64-windows PE: D:\\a\\_temp\\zig-wiki-native\\threaded_blocked_read_cancel_windows.exe\n1/1 threaded_blocked_read_cancel_windows.test.Threaded cancellation interrupts a blocked synchronous pipe read on Windows...OK\nAll 1 tests passed.\n",
+        "windows-io-mapping-native.log": "Executing native x86_64-windows PE: D:\\a\\_temp\\zig-wiki-native\\windows_io_mapping.exe\n1/1 windows_io_mapping.test.Zig 0.16 Windows std.Io surface maps to NT status blocks, not IOCP...OK\nAll 1 tests passed.\n",
+        "windows_iocp_lifecycle-wow64-runtime.log": "1/1 windows_iocp_lifecycle.test.custom IOCP owns immediate, pending, canceled, and shutdown completions within fixed limits...IOCP competing races: success=0 canceled=16 attempts=16\nIOCP named-pipe-load: mode=default build=Debug .{ .slots = 4, .transfer_bytes = 64, .rounds = 256, .bytes = 65536, .elapsed_ns = 4751500, .bytes_per_s = 13792697, .cycle_p50_ns = 17600, .cycle_p99_ns = 49900, .cycle_max_ns = 117300, .immediate = 0, .pending = 1024, .direct = 0, .packets = 1024, .checksum = 8036480 }\nIOCP pipe lifecycle including shutdown: skip_success=false .{ .submitted = 1054, .immediate = 5, .pending = 1049, .direct = 0, .packets = 1054, .canceled = 21, .canceled_bytes_reported = 0, .canceled_buffer_changes = 0, .successful = 1033, .cancel_accepted = 21, .cancel_not_found = 1, .peak_owned = 4, .checksum = 8071232 }\nIOCP competing races: success=0 canceled=16 attempts=16\nIOCP named-pipe-load: mode=skip-success build=Debug .{ .slots = 4, .transfer_bytes = 64, .rounds = 256, .bytes = 65536, .elapsed_ns = 3616300, .bytes_per_s = 18122390, .cycle_p50_ns = 11900, .cycle_p99_ns = 23300, .cycle_max_ns = 59500, .immediate = 0, .pending = 1024, .direct = 0, .packets = 1024, .checksum = 8036480 }\nIOCP pipe lifecycle including shutdown: skip_success=true .{ .submitted = 1053, .immediate = 4, .pending = 1049, .direct = 4, .packets = 1049, .canceled = 21, .canceled_bytes_reported = 0, .canceled_buffer_changes = 0, .successful = 1032, .cancel_accepted = 21, .cancel_not_found = 0, .peak_owned = 4, .checksum = 8065920 }\nIOCP hot-regular-file-offsets: mode=default build=Debug .{ .slots = 4, .transfer_bytes = 64, .rounds = 256, .bytes = 65536, .elapsed_ns = 3706000, .bytes_per_s = 17683756, .cycle_p50_ns = 12800, .cycle_p99_ns = 35300, .cycle_max_ns = 63900, .immediate = 0, .pending = 1024, .direct = 0, .packets = 1024, .checksum = 2195456 }\nIOCP hot-regular-file-offsets: mode=skip-success build=Debug .{ .slots = 4, .transfer_bytes = 64, .rounds = 256, .bytes = 65536, .elapsed_ns = 4514500, .bytes_per_s = 14516779, .cycle_p50_ns = 12800, .cycle_p99_ns = 53800, .cycle_max_ns = 130700, .immediate = 0, .pending = 1024, .direct = 0, .packets = 1024, .checksum = 2195456 }\nOK\nAll 1 tests passed.\n",
+        "windows-iocp-lifecycle-native.log": "Executing native x86_64-windows PE: D:\\a\\_temp\\zig-wiki-native\\windows_iocp_lifecycle.exe\n1/1 windows_iocp_lifecycle.test.custom IOCP owns immediate, pending, canceled, and shutdown completions within fixed limits...IOCP competing races: success=0 canceled=16 attempts=16\nIOCP named-pipe-load: mode=default build=Debug .{ .slots = 4, .transfer_bytes = 64, .rounds = 256, .bytes = 65536, .elapsed_ns = 4254700, .bytes_per_s = 15403201, .cycle_p50_ns = 15600, .cycle_p99_ns = 49600, .cycle_max_ns = 159500, .immediate = 0, .pending = 1024, .direct = 0, .packets = 1024, .checksum = 8036480 }\nIOCP pipe lifecycle including shutdown: skip_success=false .{ .submitted = 1054, .immediate = 5, .pending = 1049, .direct = 0, .packets = 1054, .canceled = 21, .canceled_bytes_reported = 0, .canceled_buffer_changes = 0, .successful = 1033, .cancel_accepted = 21, .cancel_not_found = 1, .peak_owned = 4, .checksum = 8071232 }\nIOCP competing races: success=0 canceled=16 attempts=16\nIOCP named-pipe-load: mode=skip-success build=Debug .{ .slots = 4, .transfer_bytes = 64, .rounds = 256, .bytes = 65536, .elapsed_ns = 3260400, .bytes_per_s = 20100601, .cycle_p50_ns = 9300, .cycle_p99_ns = 54500, .cycle_max_ns = 73200, .immediate = 0, .pending = 1024, .direct = 0, .packets = 1024, .checksum = 8036480 }\nIOCP pipe lifecycle including shutdown: skip_success=true .{ .submitted = 1053, .immediate = 4, .pending = 1049, .direct = 4, .packets = 1049, .canceled = 21, .canceled_bytes_reported = 0, .canceled_buffer_changes = 0, .successful = 1032, .cancel_accepted = 21, .cancel_not_found = 0, .peak_owned = 4, .checksum = 8065920 }\nIOCP hot-regular-file-offsets: mode=default build=Debug .{ .slots = 4, .transfer_bytes = 64, .rounds = 256, .bytes = 65536, .elapsed_ns = 3160100, .bytes_per_s = 20738584, .cycle_p50_ns = 11700, .cycle_p99_ns = 30000, .cycle_max_ns = 40100, .immediate = 0, .pending = 1024, .direct = 0, .packets = 1024, .checksum = 2195456 }\nIOCP hot-regular-file-offsets: mode=skip-success build=Debug .{ .slots = 4, .transfer_bytes = 64, .rounds = 256, .bytes = 65536, .elapsed_ns = 3651200, .bytes_per_s = 17949167, .cycle_p50_ns = 11700, .cycle_p99_ns = 40800, .cycle_max_ns = 70100, .immediate = 0, .pending = 1024, .direct = 0, .packets = 1024, .checksum = 2195456 }\nOK\nAll 1 tests passed.\n",
+        "windows_iocp_tcp_file-wow64-runtime.log": "1/1 windows_iocp_tcp_file.test.bounded IOCP TCP-to-file pipeline reconciles batched results and independent shutdown...IOCP TCP-to-file: build=Debug .{ .rounds = 32, .payload_bytes = 1024, .receive_chunk = 127, .working_set_bytes = 32768, .elapsed_ns = 16387500, .bytes_per_second = 1999572, .cycle_p50_ns = 427200, .cycle_p99_ns = 2520300, .cycle_max_ns = 2520300, .checksum = 4090822 }\nIOCP file cancel races: read/write success={ 32, 32 } aborted={ 0, 0 }\nIOCP TCP/file lifecycle (kind order receive/send/read/write): .{ .submitted = 453, .immediate = { 257, 32, 0, 64 }, .pending = { 35, 0, 65, 0 }, .initiation_failed = 1, .packets = 453, .successful = 449, .canceled = 3, .other_failures = 1, .cancel_accepted = 2, .cancel_not_found = 65, .dequeue_calls = 841, .max_batch = 3, .peak_owned = 2, .short_receives = 0 }\nOK\nAll 1 tests passed.\n",
+        "windows_io_mapping-wow64-runtime.log": "1/1 windows_io_mapping.test.Zig 0.16 Windows std.Io surface maps to NT status blocks, not IOCP...OK\nAll 1 tests passed.\n",
+        "windows-apc-batch-native.log": "Executing native x86_64-windows PE: D:\\a\\_temp\\zig-wiki-native\\windows_apc_batch.exe\n1/1 windows_apc_batch.test.Windows APC read write batch and NPFS control retain ownership through cancellation...APC raw: empty_read=PENDING ready_read=SUCCESS small_write=SUCCESS quota_write=PENDING; bytes=1,1,1,8192; callbacks=4\nAPC Threaded task cancel: empty read + 8192-byte write; 20ms submission allowance, no direct NT submission witness\nAPC Batch.cancel idle witness: finished_in_100ms_before_alert=false; after_explicit_NtAlertThread=true; canceled_result_absent=true\nAPC Batch: capacity=2; success retained=2; pending read canceled=1\nAPC Batch cancel/write race: rounds=32; success=7; canceled=25; each operation reconciled once; no required winning distribution\nAPC device_io_control: NPFS message TRANSCEIVE via NtFsControlFile; direct canceled=1; batch canceled=1; batch success retained=1; arbitrary drivers/NtDeviceIoControlFile not exercised\nOK\nAll 1 tests passed.\n",
+        "windows_apc_batch-wow64-runtime.log": "1/1 windows_apc_batch.test.Windows APC read write batch and NPFS control retain ownership through cancellation...APC raw: empty_read=PENDING ready_read=SUCCESS small_write=SUCCESS quota_write=PENDING; bytes=1,1,1,8192; callbacks=4\nAPC Threaded task cancel: empty read + 8192-byte write; 20ms submission allowance, no direct NT submission witness\nAPC Batch.cancel idle witness: finished_in_100ms_before_alert=false; after_explicit_NtAlertThread=true; canceled_result_absent=true\nAPC Batch: capacity=2; success retained=2; pending read canceled=1\nAPC Batch cancel/write race: rounds=32; success=26; canceled=6; each operation reconciled once; no required winning distribution\nAPC device_io_control: NPFS message TRANSCEIVE via NtFsControlFile; direct canceled=1; batch canceled=1; batch success retained=1; arbitrary drivers/NtDeviceIoControlFile not exercised\nOK\nAll 1 tests passed.\n"
+      },
+      "wow64_proofs": [
+        {
+          "proof": "proofs/windows_io_mapping.zig",
+          "target": "x86-windows",
+          "executable_pe_machine": "014c",
+          "executable_sha256": "6c7743638ee9ffb6924fcdcb6bf77318d9c51b78556f412ca95deeb3c3670e87",
+          "host_os_architecture": "X64",
+          "execution": "x86 process under WOW64 on x64 Windows; not a 32-bit Windows OS",
+          "runtime_exit_code": 0
+        },
+        {
+          "proof": "proofs/threaded_blocked_read_cancel_windows.zig",
+          "target": "x86-windows",
+          "executable_pe_machine": "014c",
+          "executable_sha256": "d84de19999e3af0eff59c4fa75a51e1a4d5c6da4b7c732a6bc52e39ca8825f3f",
+          "host_os_architecture": "X64",
+          "execution": "x86 process under WOW64 on x64 Windows; not a 32-bit Windows OS",
+          "runtime_exit_code": 0
+        },
+        {
+          "proof": "proofs/windows_apc_batch.zig",
+          "target": "x86-windows",
+          "executable_pe_machine": "014c",
+          "executable_sha256": "7499ab20b4bf69bcfd355fcf61342f008a24ba19bc63ab1f85291cb5212ed599",
+          "host_os_architecture": "X64",
+          "execution": "x86 process under WOW64 on x64 Windows; not a 32-bit Windows OS",
+          "runtime_exit_code": 0
+        },
+        {
+          "proof": "proofs/windows_iocp_lifecycle.zig",
+          "target": "x86-windows",
+          "executable_pe_machine": "014c",
+          "executable_sha256": "4d3a339cdb5190a8599ea378bb72b5bc2298d837ee018e27e850752220a946fb",
+          "host_os_architecture": "X64",
+          "execution": "x86 process under WOW64 on x64 Windows; not a 32-bit Windows OS",
+          "runtime_exit_code": 0
+        },
+        {
+          "proof": "proofs/windows_iocp_tcp_file.zig",
+          "target": "x86-windows",
+          "executable_pe_machine": "014c",
+          "executable_sha256": "193863ace386383be079ecce810e95afcffab0eba5739556bec6f2d8574f37d9",
+          "host_os_architecture": "X64",
+          "execution": "x86 process under WOW64 on x64 Windows; not a 32-bit Windows OS",
+          "runtime_exit_code": 0
+        }
+      ]
+    }
+  },
+  "local_and_linux": {
+    "macos": {
+      "host": "maxross",
+      "os": "macOS26.6.2 build25G83",
+      "cpu": "M3 Max",
+      "architecture": "aarch64",
+      "zig": "0.16.0",
+      "steps": 87,
+      "passed": 73,
+      "skipped": 9
+    },
+    "linux": {
+      "host": "omarx1",
+      "os": "Omarchy4.0.2",
+      "kernel": "7.1.9-arch1-2",
+      "cpu": "Intel Core Ultra7 258V",
+      "architecture": "x86_64",
+      "zig": "0.16.0",
+      "io_uring_disabled": 0,
+      "steps": 87,
+      "passed": 74,
+      "skipped": 8
+    },
+    "python_tests": 28,
+    "retrieval": {
+      "cases": 25,
+      "mrr": 1.0,
+      "hit_at_3": 1.0,
+      "recall_at_5": 0.96,
+      "policy_met": true
+    }
+  },
+  "proof_source_sha256": {
+    "windows_io_mapping.zig": "6fec3307c9e711271fff263531d24f0d243862a8e0d7a94f45d811b66eb05b04",
+    "threaded_blocked_read_cancel_windows.zig": "57dfff29d011d2bc820c48519eec6a3ae7274eacf1273522c6a32fa94590ce32",
+    "windows_apc_batch.zig": "89f47e526bef84f0a1f17d470e41a6643223cbd54574b6fafb8cce768c387f2b",
+    "windows_iocp_lifecycle.zig": "41ffa8d75437373af19671c71a74ed3bcfbc2c8542e8b234671fc6df21cfebea",
+    "windows_iocp_tcp_file.zig": "3cb79ef2a25695750ef07f3f95d26e33977374aad82a5bb3aea4a78da574dfa6"
+  }
+}

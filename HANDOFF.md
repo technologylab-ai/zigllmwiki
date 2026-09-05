@@ -316,3 +316,19 @@ met. This wiki's exact-revision Linux and manual Windows publication gates use
 [the platform runbook](docs/platform-testing.md); inspect the commit-associated
 [Windows run history](https://github.com/technologylab-ai/zigllmwiki/actions/workflows/windows-runtime-verify.yml)
 for the hosted receipt. Those Windows checks cover existing wiki proofs only.
+
+
+## Performance integration publication receipt
+
+Standalone final `e07766e4f1a3bf1cd5dc772e8da48f63d085e5ad` passed clean Mac/Linux
+52 Debug +52 ReleaseSafe tests,26+10+11+22 wire cases,4 comparator tests and30k
+smoke bodies per host. Wiki integration `7a5dd5455858a7f84117e04beeed5181c83693a2`
+passed87/87 steps on Mac/Linux/Windows x64/ARM64, with73/74/75/75 passed and
+9/8/7/7 intentional platform skips. All28 command tests and25 retrieval cases
+passed (MRR1.0/hit@3=1.0/recall@5=.96). Windows run33983000614 passed both jobs,
+five explicit proofs per architecture and five x86 proofs under WOW64.
+[The publication receipt](reports/2026-09-05-http-performance-publication.md)
+and its JSON retain exact environments, proof/compiler hashes and runtime logs
+before hosted artifacts expire. The receipt commit is subsequently rechecked
+at its own pushed head; inspect the matching workflow run for that final result.
+All agents/timed runners finished; M4-004/005/006 have explicit queued work.

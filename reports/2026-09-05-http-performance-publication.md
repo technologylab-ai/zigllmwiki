@@ -56,3 +56,37 @@ The wiki publication uses its complete local verifier, 28 command tests and
 25-query policy, followed by clean-pushed Linux and manual hosted Windows gates.
 Match each hosted run's headSha to the intended final wiki revision; an older
 successful run is not evidence that a new publication has passed.
+
+
+## Wiki integration receipt
+
+Clean pushed wiki commit `7a5dd5455858a7f84117e04beeed5181c83693a2` passed the
+complete Mac/Linux gates: 87/87 steps, respectively 73 tests/9 platform skips
+and 74 tests/8 skips. All 28 command tests and 25 retrieval cases passed with
+MRR1.0/hit@3=1.0/recall@5=0.96. Immutable source snapshots and the append-only log
+prefix were checked; prior source records were not changed.
+
+[Windows run33983000614](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33983000614)
+completed successfully on that exact headSha. Both jobs passed87/87 steps,
+75/82 tests with7 skips, five separately compiled/executed native-target proofs,
+28 command tests and retrieval policy. The x64 job also passed all five x86
+proofs under WOW64. Checkout status was clean in each packet. Full host,
+compiler archive, source/executable hashes and runtime logs are retained in
+[the durable JSON receipt](2026-09-05-http-performance-publication.json).
+
+- x64: Windows Server2025 Datacenter24H2, build26100.33296, image
+  win25-vs2026/20260824.214.3, AMD EPYC7763, two logical processors,
+  8,584,425,472 bytes RAM, PowerShell7.6.5, NTFS and Microsoft Virtual Disk/SCSI.
+  Exact Zig0.16.0 x64 compiler and x64 tests execute natively; x86 tests use WOW64.
+- ARM64: Windows11 Enterprise25H2, build26200.9168, image
+  win11-arm64/20260830.155.1, Cobalt100, two logical processors,
+  8,579,493,888 bytes RAM, PowerShell7.6.4, NTFS, Microsoft Virtual Disk and
+  Microsoft NVMe Direct Disk v2 reported as SCSI. The same exact x64 compiler
+  runs under emulation and emits ARM64-baseline executables that run as ARM64
+  processes. The separate failing native ARM-compiler diagnostic was not enabled.
+
+These hosted lifecycle results do not qualify physical storage, arbitrary
+production Windows drivers or a Windows HTTP adapter. M3-006 remains postponed.
+The following documentation-only receipt commit gets the same complete local,
+Linux and Windows gates; match its own headSha in the workflow history instead
+of treating this earlier successful receipt as that later gate's result.

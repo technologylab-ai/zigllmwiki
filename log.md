@@ -903,3 +903,20 @@ its match rather than always scanning the entire array. The review preserves
 unmeasured attribution and current opaque-token API constraints. All agents and
 timed runners are finished; remaining M4 items are queued. Final local retrieval
 scores are MRR1.0/hit@3=1.0/recall@5=0.96 over25 cases, with policy met.
+
+
+## 2026-09-05 — performance integration publication gates
+
+Clean wiki7a5dd5455858a7f84117e04beeed5181c83693a2 passed87/87 steps on all four
+runtime environments, with Mac73/82, Linux74/82 and Windows x64/ARM64 each75/82;
+remaining tests are deliberate platform skips. All28 command tests and25-query
+retrieval policy passed. Windows run33983000614 also passed all five explicit
+proofs per architecture and five x86/WOW64 executions. Preserved exact host,
+compiler/archive/source/executable hashes and runtime logs in the durable
+publication JSON: x64 Server2025 build26100.33296/AMD EPYC7763 and ARM64 Windows11
+build26200.9168/Cobalt100, with emulated x64 compiler producing native ARM64
+baseline tests. This does not enable native ARM-compiler diagnostics or qualify
+Windows HTTP/physical deployment. The receipt-only commit is rechecked at its
+own pushed revision. Standalone HTTP e07766e had already passed its final clean
+Mac/Linux gates. All worktrees were clean at gate input; owned benchmark state
+was removed after preserving logs.
