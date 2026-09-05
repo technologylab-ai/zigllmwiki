@@ -782,3 +782,21 @@ isolation from the optional trusted/static path.
 Local exact Zig 0.16.0 verification passed 87/87 steps, 73/82 tests with
 9 platform skips (51 pages, 65 sources). The 25-query retrieval policy passed
 with MRR 1.0, hit@3 1.0 and recall@5 0.96. No new runtime evidence is claimed.
+
+## [2026-09-05] M4 reliability contract | provision and test the configured maximum
+
+The user clarified that limits are commitments: support the full configured
+load reliably and refuse work beyond it. Added joint worst-case capacity
+derivation, the distinction between open connections and simultaneous active
+requests, and exact-limit/over-limit/recovery acceptance criteria. Resource
+safety, progress/failure behavior and workload-specific performance guarantees
+are separate obligations. Bounded refusal work and latency-compatible queues
+are part of the budget. Updated roadmap and handoff; no implementation or
+performance guarantee is claimed by these design notes.
+
+The user further clarified responsibility: the framework guarantees its own
+resource/admission bounds, while application developers own workload/performance
+targets. Added bounded measurement tools for pool/queue usage, handler time,
+event-loop lag, output stalls, rejection causes and response latency. The
+reference server will demonstrate a recorded normal-web profile; its numeric
+limits and performance remain to be measured.

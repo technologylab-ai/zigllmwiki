@@ -47,6 +47,77 @@ the same hardware using fixed plaintext and a small index.html as first workload
 Backpressure must be finite: refuse new work before resource exhaustion and
 resume admission only after real capacity returns.
 
+## Reliability at the configured maximum
+
+The user's clarified responsibility split: the framework enforces its configured
+resource and admission limits and exposes measurements; application developers
+choose their workload-specific limits and own latency/throughput guarantees.
+The reference server should demonstrate a defined normal web workload, starting
+with fixed plaintext and a small HTML page. "Normal" needs a recorded request
+mix, sizes, concurrency, arrival rates and client behavior before numeric limits
+are selected; it is not a claim about every possible web application.
+
+The framework's guarantee covers the resources and work it owns. It must not
+silently exceed them, grow a queue/pool or create threads to accommodate demand.
+That is also a useful performance property: overload reaches an explicit
+refusal/deadline boundary instead of hidden resource growth and ever-longer
+queues. Application allocations and computation remain the application's
+responsibility; an interface cannot bound arbitrary code by declaration.
+
+The user's governing requirement is to provision for, and validate, the full
+supported workload. Limits are admission commitments rather than aspirational
+numbers. If the server is configured for 1,024 connections, no 1,025th connection
+may enter its owned connection pool. Startup must reject configurations whose
+combined limits cannot be supported; a derived connection cap is preferable
+to independent knobs that overcommit shared resources.
+
+Define exactly what that cap promises. Supporting 1,024 open connections with
+128 active-request slots is different from supporting 1,024 simultaneous
+maximum-sized active requests. If the latter is promised, every required pool
+must cover that case, including request parsing, bodies, handler/continuation
+state, outstanding I/O, output, completion backlog and cancellation reserve.
+For example, 1,024 fully buffered 256 KiB bodies require 256 MiB before headers,
+output, stacks and kernel resources. Sharing a pool must not conceal a smaller
+active-work guarantee. [[static-allocation-and-constant-work]]
+
+Derive capacity from checked worst-case resource products, taking the tightest
+constraint across memory, handles and operation/buffer/queue credits. Then
+validate the chosen concurrency and admitted request rate against the stated
+CPU, network and handler-work budget. A finite connection count does not bound
+requests per second, handler duration or the time a peer takes to read.
+Worker queues must fit the latency budget as well as the memory budget.
+[[performance-sketches-and-batching]]
+
+Distinguish the guarantees under test:
+
+- **Safety/capacity:** stay within provisioned resources, preserve ownership and
+  protocol invariants, and refuse excess work before overcommit.
+- **Progress/failure:** under documented scheduler/backend assumptions, bounded
+  framework work continues; slow or invalid clients reach a defined timeout,
+  refusal or close path without unbounded queues or unsafe reclamation.
+- **Performance:** meet a stated latency/throughput target for the tested
+  hardware, workload, handler and client-progress conditions, with headroom.
+  Static bounds alone do not prove a real-time or arbitrary-application SLO.
+
+Test empty, typical, near-limit, exact-limit and over-limit states. At the
+maximum, combine supported worst cases rather than testing each resource cap
+in isolation. Include overload/refusal cost in the budget and bound admission
+work per loop turn so rejecting traffic cannot monopolize the I/O owner. Verify
+recovery after real credits return. Fixed-body/HTML measurements establish
+those workloads only; the same acceptance procedure must later cover each
+expanded workload contract. [[invariants-and-assertions]],
+[[deterministic-simulation-testing]]
+
+Proposed measurement tools: allocation/thread counters after startup; current
+and peak pool use; queue occupancy and queue delay; handler execution time;
+event-loop lag; output stalls; admitted/rejected/expired request counts with
+reasons; and response latency/throughput by workload. Counters, histograms and
+trace/export queues must themselves have startup-fixed capacity and bounded
+update cost. Declare histogram ranges/overflow, clock cost and sampling/drop
+policy; a blocked metrics exporter must not stall request handling. Reports
+should connect a rejected request or latency increase to the limiting resource,
+and publish both steady-load and overload/recovery results.
+
 ## Which layer can promise what?
 
 Proposed portable promise: no redundant request/body copies inside the

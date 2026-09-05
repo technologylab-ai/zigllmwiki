@@ -21,6 +21,13 @@ complete syntax/framing scan; and finite admission/backpressure that refuses
 new work until real credits return. Compare leading implementations on our
 hardware/OS. First workloads are exact TechEmpower plaintext (`Hello, World!`,
 13 bytes, driver pipeline depth 16) and a bounded preloaded small index.html.
+The user assigns workload/latency guarantees to the application developer.
+The framework guarantees its own resource/admission bounds and supplies bounded
+metrics to choose and validate them; the reference server demonstrates a defined
+normal web workload. The governing capacity requirement is:
+derive/validate joint resource limits, distinguish open connections from
+simultaneous active requests, and test exact-limit/over-limit behavior and
+recovery. Performance commitments require a stated workload and environment.
 A deterministic event model and worker-stall/overload scenarios are proposed;
 no hard scheduling or arbitrary-callback isolation guarantee is claimed.
 

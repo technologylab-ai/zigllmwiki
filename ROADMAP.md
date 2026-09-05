@@ -155,7 +155,12 @@ workers must avoid blocking work and bound each turn; ownership transitions
 require extensive invariant-based assertions. Follow-up notes propose fixed
 startup I/O/application workers, bounded handle queues, lazy header semantics
 with complete framing validation, finite backpressure with refusal/recovery,
-and exact plaintext plus a preloaded small HTML workload. Callback timeout
+and exact plaintext plus a preloaded small HTML workload. Provision and test
+the combined maximum supported load, derive connection capacity from resource
+budgets, and distinguish open-connection, active-request and performance
+commitments. The framework enforces its own limits and supplies bounded
+measurement tools; application developers own workload/performance guarantees.
+Callback timeout
 cannot reclaim memory still borrowed by a running handler. No server
 implementation or performance result is claimed; M3-006 remains postponed.
 
