@@ -8,6 +8,7 @@ summary: io_uring is a Linux-specific batched asynchronous syscall interface who
 updated: 2026-09-05
 sources:
   - "[[liburing-interface-and-cancellation]]"
+  - "[[zig-http-arena-shards-2026-09-05]]"
   - "[[liburing-registered-resources]]"
   - "[[linux-io-uring-uapi-history]]"
   - "[[matklad-what-is-io-uring]]"
@@ -145,6 +146,16 @@ acknowledgement]].
   long-lived registration ownership and update/drain protocols.
 - Measure batching and polling modes for the actual device and workload; they
   are not automatic wins.
+- A receive submitted before its data exists takes the asynchronous
+  completion path (poll arming, task work, a wake of the submitter), while one
+  submitted after the data arrived completes inline during the same
+  `io_uring_enter`. The HTTP branch measured no throughput gain and more CPU
+  from arming the next receive early, and no gain from submitting sends after
+  every drain instead of once per loop turn, at pipeline depths 1, 16 and 128
+  on loopback with a closed-loop client. `IORING_SETUP_COOP_TASKRUN` avoids
+  the interrupt for a running submitter and still wakes an interruptible
+  sleeper; `SINGLE_ISSUER` and `DEFER_TASKRUN` require the ring to be enabled
+  on the thread that will submit. [[zig-http-arena-shards-2026-09-05]]
 
 ## TigerBeetle implementation evidence
 

@@ -4,7 +4,7 @@ title: Bounded HTTP/1.1 framework MVP and design
 kind: pattern
 status: draft
 zig: "0.16.0"
-summary: Experimental Linux/macOS HTTP with inline callbacks, bounded gathered response batches, borrowed buffers, flush barriers, measured pipeline limits and explicit Windows gaps.
+summary: Experimental Linux/macOS HTTP with inline callbacks, a per-connection output arena, ready-ring scheduling, cell-addressed transport, reuse-port shards, flush barriers, measured pipeline limits and explicit Windows gaps.
 updated: 2026-09-05
 sources:
   - "[[http11-framing-and-limits]]"
@@ -27,6 +27,7 @@ sources:
   - "[[zig-http-performance-profile-2026-09-05]]"
   - "[[zig-http-operation-cells-2026-09-05]]"
   - "[[zig-http-batch-quantum-2026-09-05]]"
+  - "[[zig-http-arena-shards-2026-09-05]]"
 proofs: []
 platforms:
   - linux
@@ -41,8 +42,9 @@ platforms:
 M4 now has a working experimental slice in the private
 [zig-http project](https://github.com/technologylab-ai/zig-http). The original
 implementation is identified by [[zig-http-mvp-2026-09-05]], with subsequent
-performance checkpoints below and the current batching contract in
-[[zig-http-batch-quantum-2026-09-05]]. This page remains
+performance checkpoints below, the batching contract measured on main in
+[[zig-http-batch-quantum-2026-09-05]], and the unmerged arena/shard branch in
+[[zig-http-arena-shards-2026-09-05]]. This page remains
 a draft: implemented Linux/macOS behavior below is separate from candidate
 architecture, Windows support and production qualification still to come.
 
@@ -172,6 +174,41 @@ several depth16 Q64 samples occurred later than Q256 samples. Keep the full
 ranges/sample positions and avoid attributing all of that difference to Q.
 The native cold-service watchdog is a finite witness, not a tail SLO. Corrected
 wrk tails remain rejected; defaults stay16/64 pending further qualification.
+
+## Output arena, constant-work request path and shards
+
+An unmerged branch ([[zig-http-arena-shards-2026-09-05]], local
+`perf/arena-shards`) replaces the fixed response cells with one contiguous
+output arena per connection. The response head is written at `begin()` from a
+per-second cached prefix with no `std.fmt`; generated bodies follow it;
+borrowed spans up to a counted threshold (256 bytes) are copied so a pipeline
+of small responses is one span and one SEND, while larger borrows stay separate
+vectors. Cells become arena ranges plus an optional borrow, so the default batch
+limit rises to 128 without new storage. The scheduler services a FIFO ready ring
+instead of scanning slots, samples the clock per turn and every 16 callbacks,
+sweeps deadlines on a 100 ms interval and configures the callback budget. The
+parser scans each line with one 16-byte lane pass that also validates CR/LF
+placement, classifies octets with tables and compares fixed names as masked
+integers. Transport operations are addressed by fixed cells with caller-owned
+vectors. A cluster runs one complete server per allowed CPU on Linux, each with
+its own `SO_REUSEPORT` listener, ring, slots and arenas, and a shared atomic
+admission counter keeps the connection limit exact; every shard keeps full
+slot capacity because the kernel's hash can place more than an even share on
+one listener. XNU delivered every connection to the last-bound listener, so
+macOS keeps one shard.
+
+Interleaved Linux pairs at `ad424c7` (host in desktop use, direction only):
+three CPUs at depth 16, 7.0–7.2M/s against libreactor's 7.6–7.7M/s; one core
+at depth 16, 3.5–3.7M/s against 3.3–4.4M/s; one core at depth 128, 6.6–6.9M/s
+against 10.0M/s; three CPUs at depth 1, 549–588k/s against 558–568k/s. Both
+servers use far less than the allowed CPU at the multi-core cells, so the wrk
+client bounds them there; at one core and depth 128 libreactor completes about
+1.5× the responses per CPU second, which is the remaining per-request cost.
+Pre-armed receives and eager submission were implemented, measured without
+gain on io_uring (and 6–16% slower on kqueue), and left off by default. Both
+native gates pass, on Linux with eight auto shards. No qualified shuffled
+comparison of this branch exists yet; the branch is kept unmerged as a
+reference while other experiments continue against main.
 
 ## Original implemented MVP boundary
 

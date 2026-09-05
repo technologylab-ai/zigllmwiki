@@ -5,9 +5,10 @@ kind: platform
 status: source-verified
 zig: "0.16.0"
 summary: On macOS, separate kqueue readiness, Apple Dispatch I/O completion, POSIX AIO, and Zig 0.16's unfinished Dispatch backend before choosing a bounded file or network design.
-updated: 2026-09-04
+updated: 2026-09-05
 sources:
   - "[[apple-xnu-kqueue-aio]]"
+  - "[[zig-http-arena-shards-2026-09-05]]"
   - "[[apple-libdispatch-io]]"
   - "[[zig-0.16-dispatch-kqueue-source]]"
   - "[[zig-0.16.0-release-notes]]"
@@ -190,6 +191,15 @@ durability on the deployment hardware.
 | Regular-file read/write | Dispatch I/O, POSIX AIO, memory mapping for a proven access pattern, or a bounded worker backend | Dispatch I/O and POSIX AIO lifecycles are sourced; the proof establishes integration and one hot-cache baseline, not production superiority. |
 | File metadata change | `EVFILT_VNODE` | Notification only; it is not data-operation completion. |
 | Timers/process events | `EVFILT_TIMER` / `EVFILT_PROC`, Dispatch sources, or explicit deadlines | Match the facility's guarantee to the loop; do not treat all event records as I/O completion. |
+
+Two loopback observations from the HTTP branch
+([[zig-http-arena-shards-2026-09-05]]): with several TCP listeners bound to
+one port through `SO_REUSEPORT`, XNU delivered every connection to the most
+recently bound listener, so per-CPU listener sharding does not distribute on
+macOS and needs an acceptor that hands descriptors over. On a readiness
+backend, arming a receive before data exists costs a failed `recv` and a
+`kevent` registration per pipeline; the same early receive that rides a queued
+submission on `io_uring` measured 6–16% slower on `kqueue`.
 
 TigerBeetle currently chooses `kqueue` for readiness and synchronous
 regular-file operations in its callback dispatcher. That is a concrete product

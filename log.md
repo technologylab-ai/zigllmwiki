@@ -1015,3 +1015,15 @@ The final HTTP62c05de clean-commit Mac/Linux gates also passed59 tests/mode,
 [the publication receipt](reports/2026-09-05-http-bounded-tuning-publication.md).
 Reviewed wiki gates passed87 steps,28 command tests and25-query retrieval policy;
 all original log bytes and previously cited sources were preserved.
+
+## 2026-09-05 — Ingest: HTTP output arena, constant-work path and shards (proposal)
+
+Pinned [[zig-http-arena-shards-2026-09-05]] from the user's local `zig-http`
+branch `perf/arena-shards` (measured `ad424c7`, unpublished at capture; the
+snapshot carries the report and design with their SHA-256). Added the arena/
+ready-ring/parser/cell/shard section and the interleaved Linux pairs to
+[[bounded-http-server-design]], an early-receive and task-run observation to
+[[io-uring]], and the XNU reuse-port and readiness pre-arm observations to
+[[macos-kqueue-and-aio]]. Updated the index entry. Prepared on wiki branch
+`wiki/arena-shards-proposal` for review; `zig build verify` run before
+proposing.
