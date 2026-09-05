@@ -24,6 +24,7 @@ sources:
   - "[[zig-http-plaintext-comparison-2026-09-05]]"
   - "[[zig-http-inline-gather-2026-09-05]]"
   - "[[zig-http-response-batching-2026-09-05]]"
+  - "[[zig-http-performance-profile-2026-09-05]]"
 proofs: []
 platforms:
   - linux
@@ -103,6 +104,17 @@ old/current binary control also varied widely; do not attribute the lower
 repeated control to code or select only the faster earlier result. Full ranges,
 CPU masks, exact revisions, errors and client/desktop/latency limits are pinned.
 [[zig-http-response-batching-2026-09-05]]
+
+After the user selected the Linux performance power profile, a separate
+CPU0-only sweep at bda5404 measured Zig medians 1.746/1.742/1.919/1.923M/s
+at client depths 16/32/64/128; libreactor measured 4.298/7.263/10.938/13.627M/s.
+All 24 trials/warmups and 2,880 exact preflights passed. The server batch/callback
+caps stayed 16/64 and all final owners/late allocations were zero. The substantial
+fixed-batch gap remains, including at depth16 where suffix compaction is zero.
+Profile/EPP endpoints were performance, while the governor label remained
+powersave. The earlier profile/EPP were not captured; these higher rates do not
+establish a controlled power-profile speedup. Preserve both conditions, full
+ranges and the untimed nature of frequency endpoints. [[zig-http-performance-profile-2026-09-05]]
 
 Mac/Linux each passed 52 tests in Debug and ReleaseSafe, 26 generic, 10 inline,
 11 gather cases, and the expanded 22-case batch suite. Distinct generated and

@@ -14,6 +14,7 @@ sources:
   - "[[techempower-r23-comparison-inputs]]"
   - "[[zig-http-plaintext-comparison-2026-09-05]]"
   - "[[zig-http-response-batching-2026-09-05]]"
+  - "[[zig-http-performance-profile-2026-09-05]]"
 proofs:
   - proofs/performance_sketch.zig
 platforms:
@@ -96,6 +97,18 @@ from hiding ordering or buffer reuse mistakes. A repeated control varied even
 with an unchanged binary. Preserve that uncertainty and compare revisions in
 the same controlled sweep; sequential groups can still confound time and code.
 [[zig-http-response-batching-2026-09-05]]
+
+The next Linux HTTP sweep records profile/EPP before and after every trial and
+requires the configured performance profile. All 24 trials pass with higher
+observed rates for both servers, but earlier profile/EPP were unknown. A governor
+label alone did not identify the user's power setting. Keep profile, EPP,
+governor, driver, turbo policy and frequency limits separate in the packet;
+instantaneous untimed frequency endpoints do not prove average clocks or
+residency. Affinity and a cooperative host lock do not establish CPU isolation.
+The shared host protocol is in `docs/platform-testing.md`: reserve a host before
+benchmarks/heavy builds and keep that reservation through child cleanup. A lock
+added after a sweep starts cannot qualify its earlier trials retroactively.
+[[zig-http-performance-profile-2026-09-05]]
 
 Related: [[tigerstyle]], [[code-reading-and-mechanical-checks]],
 [[static-allocation-and-constant-work]],

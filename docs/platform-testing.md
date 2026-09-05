@@ -61,9 +61,58 @@ Linux, macOS tests on macOS, and Windows tests on Windows. Cross-compiling on
 the faster Mac does not satisfy another OS's runtime gate. Report any required
 unavailable native gate and its exact blocker explicitly.
 
+## Cooperative host measurement lock
+
+On both `maxross` and `omarx1`, use the host-local directory
+`/tmp/zig-http-measurement.lock`. Acquire it with one atomic `mkdir` before a
+benchmark, heavy build, or runtime test suite. If `mkdir` fails because the path
+exists, hold off on that host and inspect `owner.json`; checking for absence and
+then starting work without acquiring is racy. A lock on one host does not reserve
+the other. Keep lightweight editing and remote orchestration available.
+
+The acquiring agent writes `owner.json` with its identity, purpose, host, UTC
+start, owner PID, unique ownership token and any working directory. For Linux,
+record `/proc/PID/stat` start ticks as well so PID reuse is distinguishable.
+Keep the lock for the entire workload, including warmups and child cleanup.
+Only the owner removes its metadata and uses `rmdir` to release the directory,
+after confirming all owned server/client/build processes have stopped. Use an
+exact path and ownership token; never recursively delete a lock or remove one
+merely because it is old. A missing or incomplete metadata file still means busy.
+An interrupted owner may leave a stale lock: inspect the process identity and
+children, coordinate recovery, and fail closed while ownership is uncertain.
+
+Check existing measurement processes before acquiring too: work that started
+before this protocol, or another tool that ignores it, is not protected. This is
+a cooperative exclusion rule, not CPU isolation or proof of a quiet host. The
+user requested it on 2026-09-05 because another agent also measures on the Mac.
+Never stop that agent's work to make a gate run. Acquire both host-local locks
+only if a workload actually needs both machines; otherwise reserve its execution
+host alone. Recheck and acquire before later builds rather than assuming an
+earlier empty process list still applies.
+
+## Current M4 performance cadence — user decision 2026-09-05
+
+While the HTTP implementation is still being tuned, focus on macOS correctness
+and Linux runtime/performance. The user explicitly deferred further Windows
+measurements and repeated Windows publication gates because they slow this loop
+without validating the current Linux/macOS-only HTTP server. A wiki update that
+records these HTTP experiments does not require a new Windows dispatch.
+
+Keep the manual Windows workflow and all existing receipts. Resume its gates
+when Windows portability/work is explicitly resumed or a change needs new
+Windows-specific evidence; never apply an old successful run to changed Windows
+code. Any affected but unexecuted Windows claim remains pending. This is a
+measurement-cadence decision, separate from M3-006's postponed physical deployment
+qualification and from the absent M4 Windows HTTP adapter.
+
+Use ReleaseSafe for every timing experiment, record power profile and CPU policy,
+and preserve changes of environment as separate measurement conditions. Do not
+silently mix results taken before and after a power-profile change. Mac/Linux
+correctness, ownership, source and retrieval gates remain in force.
+
 ## Release gates
 
-From a clean checkout on every runtime host:
+From a clean checkout on each runtime host required by the current scope:
 
 ```text
 zig version

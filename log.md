@@ -920,3 +920,62 @@ Windows HTTP/physical deployment. The receipt-only commit is rechecked at its
 own pushed revision. Standalone HTTP e07766e had already passed its final clean
 Mac/Linux gates. All worktrees were clean at gate input; owned benchmark state
 was removed after preserving logs.
+
+
+## 2026-09-05 — power profile and platform cadence steering
+
+The user selected omarx1's performance power profile. Read-only observation
+confirmed performance profile/EPP, intel_pstate powersave governor label,
+400MHz–4.8GHz configured bounds and no_turbo=0. Earlier EPP/profile observations
+are unavailable; old timing packets are preserved without retrospective labels.
+The HTTP harness now captures untimed per-trial power/frequency endpoints and
+rejects missing/mismatched required profile observations. Its generated
+preparation config also explicitly selects current inline/zero-worker defaults.
+
+The user then deferred further Windows measurement/publication runs during HTTP
+performance tuning. Updated the agent contract, runbook, roadmap and handoff:
+Mac/Linux gates remain; existing Windows receipts are preserved, with new or
+affected Windows evidence pending until that scope is resumed. The preceding
+Windows run33983581660 passed at1afb4e461c54e4d0d1c3fa3c28d4a05d71d997e6 before
+this decision. No Windows run is active or newly requested.
+
+
+## 2026-09-05 — cooperative Mac/Linux measurement reservations
+
+The user reported concurrent Mac measurements by another agent and requested a
+shared lock. Reserved `/tmp/zig-http-measurement.lock` on omarx1 for the already
+running depth sweep; its initial trials predate acquisition. The same host-local
+path is defined on maxross, left absent while this agent uses no Mac load.
+Documented atomic directory acquisition, owner/PID/token metadata, hold-through-
+cleanup, and explicit stale-owner inspection in the runbook and agent contract.
+This relies on cooperation and does not establish CPU isolation. Never remove
+another agent's reservation or stop their processes to run a gate.
+
+
+## 2026-09-05 — recorded performance-profile HTTP evidence
+
+Pinned [[zig-http-performance-profile-2026-09-05]] before synthesis to private
+HTTP publication c0f87766efa310d517d262781a33ce189c4f9f0d, measured bda5404,
+exact Zig0.16.0 ReleaseSafe. The fresh67-command preparation and native Linux
+52-unit/22-batch/5-comparator gates passed before24 one-core depth trials.
+All643,222,112 timed responses and2,880 exact preflights passed; Zig medians
+1.746/1.742/1.919/1.923M/s versus libreactor4.298/7.263/10.938/13.627M/s.
+Profile/EPP endpoints were performance; prior profile/EPP remain unknown.
+No causal power gain, profiler attribution, request-tail SLO or Windows HTTP
+claim follows. Updated existing HTTP/microbenchmark pages, index, curation,
+roadmap and handoff. Preserved every earlier source/measurement unchanged.
+The preparation agent/timed sweep and HTTP publication gates finished; the
+validated root was removed only after zero owned processes/containers.
+Cooperative locks were released after their respective HTTP checks completed;
+future suites must reacquire rather than assume either host remains free.
+
+
+## 2026-09-05 — power-profile evidence verification
+
+Independent read-only review matched every count/range and both snapshot
+hashes; corrected the stale handoff designation of e07766e as current.
+Reviewed-tree local verification passed87/87 steps,73/82 Mac tests with9
+platform skips,28 command tests and25 retrieval cases atMRR1.0/hit@3=1.0/
+recall@5=0.96. Deterministic lint has no issues; prior log bytes are preserved
+and no cited source was rewritten. Final clean pushed checks use Mac/Linux;
+no Windows dispatch is required by the user-directed current tuning cadence.

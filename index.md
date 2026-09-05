@@ -77,7 +77,7 @@ Read this page first, then follow only the pages needed for the task.
 
 - [[bounded-http-server-design]] — M4 Linux/macOS HTTP/1.1 MVP and design:
   inline callbacks, bounded gathered response batches, lazy headers, borrowed
-  buffers, flush barriers, Linux contender/deep-pipeline evidence and remaining gaps.
+  buffers, flush barriers, Linux contender/deep-pipeline and power-profile evidence.
 
 ## Engineering system
 
@@ -169,3 +169,7 @@ by user decision and tracks the working M4 MVP and remaining experiments.
 [HTTP performance publication](reports/2026-09-05-http-performance-publication.md)
 records the standalone final native gates, cleanup and the boundary between
 measured Linux/macOS HTTP behavior and this wiki's Windows lifecycle proofs.
+
+[Recorded power-profile follow-up](reports/2026-09-05-http-power-profile-publication.md)
+preserves the new Linux depth sweep, native HTTP publication checks and cooperative
+Mac/Linux measurement-lock protocol; Windows tuning gates are deferred.

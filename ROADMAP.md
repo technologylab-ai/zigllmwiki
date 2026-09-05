@@ -43,6 +43,10 @@ produce Zig 0.16.0 code that:
   Inline/gather/batching and Linux contender/deeper-pipeline experiments are
   implemented and pinned; remaining Windows HTTP, API/reliability and broader
   comparison work is queued. M3-006 stays postponed; the roadmap is not entirely complete.
+- **Current measurement cadence:** user-directed Mac/Linux focus while HTTP
+  performance is still being tuned. Repeated Windows measurements/publication
+  gates for HTTP-only changes are deferred; existing receipts remain valid
+  within their original scope. See the platform runbook.
 - **Backend:** intentionally deferred; the Obsidian-first ADR remains in force.
 
 Source status is tracked as `discovered → selected → captured → synthesized →
@@ -174,7 +178,7 @@ claim production capacity or trustworthy tail latency.
 | M4-001 | done | Capture the initial requirements, pinned HTTP/copy-avoidance/benchmark evidence, candidate reader/writer ownership model and unresolved design choices. This is an initial draft, not an accepted final architecture. |
 | M4-002 | done | Establish the first experimental contract: fixed workers and per-slot mailboxes, complete bounded requests, lazy optional headers, explicit flush/resume/finish, requested-byte heap cap and plain loopback HTTP boundary. Implement parser/ownership/failure cases; future API revision remains M4-006. |
 | M4-003 | done | Working standalone Linux io_uring/macOS kqueue HTTP/1.1 MVP with plaintext, preloaded HTML, echo, chunked flush/resume, native gates, watchdogs and retained-borrow shutdown. Source/evidence pinned; not production qualification. Windows portability is tracked explicitly in M4-005. |
-| M4-004 | queued | Completed pinned Linux baseline/client-sensitivity, inline/gather, batch1/16, one-core, deeper-pipeline32/64/128 and old/current control sweeps. Preserve gains, the fixed-batch plateau and unresolved host/code variation. Remaining: preloaded HTML comparisons, macOS contenders, dedicated-host/NIC saturation and qualified request tails. |
+| M4-004 | queued | Completed the recorded-performance-profile Linux depth sweep: 24 trials passed, Zig 1.74–1.92M/s versus libreactor 4.30–13.63M/s at depths16–128. Prior profile/EPP remain unknown; no controlled profile speedup is established. Completed pinned Linux baseline/client-sensitivity, inline/gather, batch1/16, one-core, deeper-pipeline32/64/128 and old/current control sweeps. Preserve gains, the fixed-batch plateau and unresolved host/code variation. Remaining: preloaded HTML comparisons, macOS contenders, dedicated-host/NIC saturation and qualified request tails. |
 | M4-005 | queued | Implement Windows HTTP IOCP adapter and hosted native runtime gates; current server intentionally rejects Windows compilation. Separate from postponed M3-006 deployment qualification. |
 | M4-006 | queued | Implemented/measured inline default, gather and bounded response cells with flush barriers, deferred compaction and multi-cell cancellation/deep-pipeline gates. Independent max-reasoning review is complete: next isolate token-addressed Linux operation cells, then batch16/64 × callback64/256, output representation and sharding. Offload, dynamic release and fault/combined-limit qualification remain. |
 

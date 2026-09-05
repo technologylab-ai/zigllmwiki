@@ -3,9 +3,44 @@
 This is the durable entry point for a fresh session. ROADMAP.md owns scope and
 status; historical log entries and reports retain narrower and failed runs.
 
-## Latest comparison and execution experiment
+Shared host coordination: the user reports another agent taking Mac measurements.
+Use `/tmp/zig-http-measurement.lock` on each host as documented in the runbook;
+acquire atomically before load/build/runtime work and release only after all
+owned children finish. Keep the Mac free while its measurement owner is active.
 
-The current standalone publication is
+Current user steering: focus the HTTP performance loop on macOS and Linux;
+further Windows measurements/publication gates are deferred while tuning this
+Linux/macOS-only server. Windows run33983581660 passed at1afb4e4 before this
+decision; no Windows runner remains active and no new dispatch is planned.
+The user then selected omarx1's performance power profile. The completed
+24-trial depth16/32/64/128 sweep at bda5404 measured Zig medians
+1.746/1.742/1.919/1.923M/s and libreactor4.298/7.263/10.938/13.627M/s.
+All 643,222,112 timed responses and2,880 exact preflights passed. Startup
+batch/callback limits remain16/64; all final owners/late allocations were zero.
+All profile/EPP endpoints were performance, governor powersave, driver
+intel_pstate; untimed current-frequency observations are not average clocks.
+Prior profile/EPP were not captured, so no causal profile speedup is established.
+[[zig-http-performance-profile-2026-09-05]] pins the packet at HTTP publication
+c0f87766efa310d517d262781a33ce189c4f9f0d. The preparation agent and timed
+runner finished, all owned comparison processes/containers drained, and the
+validated temporary preparation root was removed. Initial trials predated the
+new cooperative lock. The remaining architecture experiments are queued.
+The [new publication receipt](reports/2026-09-05-http-power-profile-publication.md)
+records the clean c0f8776 Mac/Linux gates:52 unit executions in each mode,
+69 wire cases,5 comparator tests and30,000 ReleaseSafe smoke bodies per host.
+The other agent's separate HTTP worktree is preserved; all statements about this
+team's completed work exclude that external agent's ongoing activity.
+
+The new wiki content passed the full local verifier (87 steps;73/82 tests and
+9 platform skips),28 command tests and25-query retrieval MRR1.0/hit@3=1.0/
+recall@5=0.96 before publication. Existing source records and prior log bytes
+are unchanged. Final clean-commit verification follows the Mac/Linux cadence.
+The HTTP main checkout also contains another agent's untracked worktree under
+.claude/worktrees; preserve it. Publication gates used an isolated clean checkout.
+
+## Preceding batching publication and execution experiment
+
+The preceding standalone batching publication is
 `e07766e4f1a3bf1cd5dc772e8da48f63d085e5ad`, pinned with its evidence by
 [[zig-http-response-batching-2026-09-05]]. Defaults: inline/zero application
 workers, gathered output, 16 startup response cells per connection, global
@@ -295,8 +330,10 @@ validated hosts. Installed Mac Zig is under
 
 Canonical private origin is `technologylab-ai/zigllmwiki`, branch main. Match
 hosted run headSha with the intended pushed commit. Publication gates require
-a clean tree, complete local verification/retrieval, Linux through
-`tools/verify_linux_ssh.sh omarx1`, and the manual Windows matrix on that commit.
+a clean tree, complete local verification/retrieval and Linux through
+`tools/verify_linux_ssh.sh omarx1`. During current M4 tuning, Windows dispatches
+are deferred by the user decision above; resume them when the Windows scope
+is reopened or new Windows evidence is needed.
 Record actual active agents/runners at handoff; queued or timer-waiting work is
 not running. Never claim the whole roadmap complete while actionable rows remain.
 

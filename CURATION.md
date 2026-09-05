@@ -217,3 +217,17 @@ M4-005 Windows HTTP remains queued and M3-006 remains postponed.
 3. The selected TigerBeetle storage/recovery/operations slice is synthesized
    in [[durable-storage-and-recovery]]. New sources require a new named design
    question; source synthesis does not prove an engine or storage deployment.
+
+
+## Current performance follow-up
+
+The user switched omarx1 to the performance power profile and requested focusing
+on Mac/Linux while tuning. Windows runs are now deferred for this HTTP-only
+loop; existing receipts are preserved. The preparation agent and timed sweep
+finished at bda54040bb0b809c82824b87a782e96826f05dff. A new immutable record,
+[[zig-http-performance-profile-2026-09-05]], pins all 24 passing trials and their
+power/EPP/frequency endpoints before updating the existing HTTP/microbenchmark
+pages and index. No controlled profile A/B is claimed. The runbook and both
+agent contracts now require cooperative host-local measurement reservations;
+initial trials predated the new lock. Remaining M4 architecture/HTML/Mac/NIC/tail
+work is queued; Windows gates remain deferred for this tuning loop.

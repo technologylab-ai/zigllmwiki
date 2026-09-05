@@ -121,6 +121,13 @@ on `omarx1` with parallelism suited to its resources. Follow the runbook's host
 selection and checkout rules. Native platform gates still require their OS;
 record unavailable gates as pending rather than substituting cross-compilation.
 
+During the user-directed M4 performance-tuning phase (2026-09-05), use macOS
+and Linux gates and defer repeated Windows measurements/publication runs for
+HTTP-only changes. The current HTTP server has no Windows adapter. Preserve
+existing Windows receipts; resume Windows verification for explicitly resumed
+Windows work or new Windows evidence, following the runbook. Never relabel a
+pending Windows claim as tested because older unrelated proofs passed.
+
 Do not turn plan output into unattended content mutation. A wrapper can check
 structure and state, but cannot establish that a synthesis follows its primary
 evidence or that a platform behavior was runtime-verified.
@@ -167,6 +174,14 @@ and proof carrying the prior version, compile all proofs with the new compiler,
 and remove `*-verified` status wherever evidence no longer holds. Migrate useful
 examples, update cross-links and the index, then append one upgrade entry to the
 log with the exact compiler version and remaining gaps.
+
+### Shared measurement hosts
+
+Before benchmarks, heavy builds or runtime suites on maxross or omarx1, acquire
+the host-local `/tmp/zig-http-measurement.lock` directory atomically. Hold off
+when another agent owns it or measurement processes predate the protocol.
+Record owner metadata, retain the lock through child cleanup, and release only
+your own reservation. See `docs/platform-testing.md` for the full protocol.
 
 ## TigerStyle integration
 
