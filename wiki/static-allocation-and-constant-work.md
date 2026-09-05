@@ -5,7 +5,7 @@ kind: principle
 status: source-verified
 zig: "0.16.0"
 summary: Size capacity at startup, reject excess load explicitly, and consider conserved fixed-slot state when predictable maximum-load work matters.
-updated: 2026-09-04
+updated: 2026-09-05
 sources:
   - "[[source-tigerstyle]]"
   - "[[tigerbeetle-architecture]]"
@@ -135,3 +135,7 @@ Related: [[tigerstyle]], [[newtype-indexes]],
 [[integer-widths-and-boundaries]], [[cancellation]],
 [[select-and-batch]], [[io-synchronization-primitives]],
 [[evented-io-backends]], [[durable-storage-and-recovery]].
+
+Design application: [[bounded-http-server-design]] explores a Linux-first
+HTTP/1.1 framework with borrowed buffers and a bounded response writer; its
+API and backend choices remain proposals without HTTP runtime evidence.

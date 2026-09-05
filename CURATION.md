@@ -157,6 +157,18 @@ checks a state invariant before encoding and after validation/decoding;
 layout, wire encoding, and stale representation handles; and all four selected
 bounded-memory/layout essays have decision-level synthesis.
 
+## M4 design sources — initial synthesis
+
+| Source | Status | Wiki effect |
+| --- | --- | --- |
+| RFC 9110 / 9112 / 6585 published sections | captured + draft synthesis | [[bounded-http-server-design]] separates HTTP framing from configured request limits and incremental response writing. |
+| Linux network zero-copy docs at `8cd9520d35a6c38db6567e97dd93b1f11f185dc6` | captured + draft synthesis | Framework borrowing versus kernel copy avoidance, send reuse notification and hardware-dependent receive path; no NIC experiment. |
+| TechEmpower wiki at `3be9618978e68b1a953f0c1a9cb642440c064fd8` | captured + draft synthesis | Plaintext/pipelining and JSON workload requirements; no leaderboard or performance claim. |
+
+M4-001 initial ideas are captured. Further architecture decisions and server
+implementation are queued under M4-002 through M4-004; no agent is running
+those items. M3-006 remains postponed.
+
 ## Immediate curation order
 
 1. M3-006 is postponed by user decision; do not select further Windows

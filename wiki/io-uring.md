@@ -5,7 +5,7 @@ kind: platform
 status: runtime-verified
 zig: "0.16.0"
 summary: io_uring is a Linux-specific batched asynchronous syscall interface whose out-of-order completions, retained resources, finite rings, and cancellation races must shape the owner model.
-updated: 2026-09-04
+updated: 2026-09-05
 sources:
   - "[[liburing-interface-and-cancellation]]"
   - "[[liburing-registered-resources]]"
@@ -202,3 +202,7 @@ gaps for any concrete server design.
 Related: [[evented-io-backends]], [[task-lifetimes-and-structured-concurrency]],
 [[cancellation]], [[tigerbeetle-io]],
 [[tigerbeetle-engineering-corpus]].
+
+Design application: [[bounded-http-server-design]] explores a Linux-first
+HTTP/1.1 framework with borrowed buffers and a bounded response writer; its
+API and backend choices remain proposals without HTTP runtime evidence.

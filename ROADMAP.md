@@ -37,8 +37,10 @@ produce Zig 0.16.0 code that:
   deployment hardware is available and further qualification is not a current
   priority; existing GitHub-hosted runtime evidence remains valid within its limits.
   The curator service is inactive, with its weekly timer enabled and waiting.
-- **Session scope:** finish actionable wiki work; M4 is reserved by the user
-  for a separate in-depth session. External evidence gaps remain explicit.
+- **Current scope:** the user opened M4 design exploration on 2026-09-05.
+  Initial HTTP framework and reader/writer ownership ideas are captured in
+  [[bounded-http-server-design]]; implementation remains queued. M3-006 stays
+  postponed. External evidence gaps remain explicit.
 - **Backend:** intentionally deferred; the Obsidian-first ADR remains in force.
 
 Source status is tracked as `discovered → selected → captured → synthesized →
@@ -143,10 +145,22 @@ the named OS. Never generalize a networking result to regular files.
 Exit condition: a decision table can select a backend for file and network I/O
 with explicit guarantees, limits, unsupported cases, and measured evidence.
 
-## M4: synthesis project — TigerStyle evented HTTP server (reserved)
+## M4: synthesis project — TigerStyle evented HTTP server (design opened)
 
-Reserved by the user on 2026-09-04 for its own in-depth session; outside the
-current wiki-completion session.
+The user opened the separate design discussion on 2026-09-05. Initial ideas
+are captured in [[bounded-http-server-design]]: Linux production first,
+macOS/Windows support, HTTP/1.1, startup limits, borrowed request views,
+and a bounded response writer with incremental writes and flush. Event-loop
+workers must avoid blocking work and bound each turn; ownership transitions
+require extensive invariant-based assertions. No server
+implementation or performance result is claimed; M3-006 remains postponed.
+
+| ID | Status | Deliverable / exit condition |
+| --- | --- | --- |
+| M4-001 | done | Capture the initial requirements, pinned HTTP/copy-avoidance/benchmark evidence, candidate reader/writer ownership model and unresolved design choices. This is an initial draft, not an accepted final architecture. |
+| M4-002 | queued | Settle callback phases, buffer representation, async handler execution, writer flush/finish lifetimes, startup budgets and TLS boundary; derive parser/ownership/failure proof cases. |
+| M4-003 | queued | Implement the first bounded HTTP/1.1 server slice in a dedicated project, with Linux production and macOS/Windows portability gates. |
+| M4-004 | queued | Measure correct request/response behavior, allocation/copy counts, saturation and tail latency; compare equivalent local workloads before any external benchmark claim. |
 
 Use the wiki to design, implement, and critique a bounded HTTP server:
 
@@ -185,7 +199,7 @@ a second content store. A mutable service and database come only after that.
 | L-008 | done | Weekly/manual GitHub workflow installs the exact checksum-verified Zig baseline, verifies proofs, checks sources/releases and retrieval, proves the checkout stayed unchanged, and uploads a 30-day review packet. |
 | L-009 | done | Installed weekly omarx1 consumer prefers maxross with Linux fallback, validates a current read-only packet, runs bounded semantic curation and independent gates, and opens a draft PR. Real PR #1, idle and idempotent fallback passed; root reviewed/merged separately. See the operational receipt. |
 | L-010 | done | Read-only `review` reports coarse upstream-head differences and newer stable Zig releases while preserving source records and requiring an explicit upgrade workflow. |
-| L-011 | done | A versioned 25-query benchmark scores the deterministic index/lexical layer; MRR 1.0, hit@3 1.0, and recall@5 0.98 do not justify hybrid search yet. |
+| L-011 | done | A versioned 25-query benchmark scores the deterministic index/lexical layer; MRR 1.0, hit@3 1.0, and recall@5 0.96 after adding the M4 draft meet policy; the earlier corpus scored 0.98 recall. |
 
 The benchmark is a curated regression set, not production telemetry. Revisit
 hybrid search when thresholds fail or real agent queries demonstrate misses.

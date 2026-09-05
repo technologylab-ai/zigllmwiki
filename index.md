@@ -75,6 +75,9 @@ Read this page first, then follow only the pages needed for the task.
 - [[tigerbeetle-io]] — source-verified comparison of TigerBeetle's Linux
   `io_uring`, Darwin `kqueue`, and Windows IOCP backend choices.
 
+- [[bounded-http-server-design]] — M4 design draft: Linux-first HTTP/1.1,
+  startup limits, borrowed requests, response writer and async buffer ownership.
+
 ## Engineering system
 
 - [[tigerstyle]] — safety-first design principles and their integration seams
@@ -159,4 +162,4 @@ Read this page first, then follow only the pages needed for the task.
 [Publication verification](reports/2026-09-04-publication-verification.md)
 records the completed four-environment gate, proof identities and remaining
 external deployment limits; [ROADMAP.md](ROADMAP.md) marks M3-006 postponed
-by user decision and keeps M4 reserved.
+by user decision and tracks the opened M4 design discussion.

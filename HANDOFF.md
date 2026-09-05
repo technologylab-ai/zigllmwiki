@@ -3,10 +3,28 @@
 This is the durable entry point for a fresh session. ROADMAP.md owns scope and
 status; historical log entries and reports retain narrower and failed runs.
 
-## Scope and completed work
+## Current M4 design discussion
 
-The user requested completion of actionable wiki work, reserving M4 for a
-separate in-depth session. M0, M1, M2, and M3-001 through M3-005 are complete.
+On 2026-09-05 the user opened M4 design exploration. The initial draft is
+[[bounded-http-server-design]]: Linux-first HTTP/1.1 framework, macOS/Windows
+support, startup resource limits, borrowed request views and a bounded writer
+for incremental responses and flush. Proper evented progress, bounded loop
+turns and extensive ownership/state assertions are explicit requirements.
+It separates framework copy avoidance
+from kernel zero-copy and records the large-upload policy tradeoff. HTTP RFCs,
+Linux documentation and TechEmpower test requirements were pinned first.
+
+M4-001 captures initial ideas only; M4-002 through M4-004 are queued. No server
+implementation, new HTTP runtime proof or performance measurement exists.
+Next discussion should settle callback phases, buffer layout, asynchronous
+handler execution and writer lifetime/backpressure, plus the HTTPS boundary.
+M3-006 stays postponed; this discussion does not resume Windows deployment
+qualification. No subagent or remote runner was started for these design notes.
+
+## Prior completed wiki work
+
+The user requested completion of actionable wiki work, initially reserving M4 for a
+separate in-depth session, now opened above. M0, M1, M2, and M3-001 through M3-005 are complete.
 The wiki covers the targeted public `std.Io` surface, all 71 pinned TigerStyle
 principles, the selected matklad corpus, and platform backend selection.
 Selected TigerBeetle storage/recovery/operations documents and focused source
@@ -45,7 +63,8 @@ Historical curator reports preserve their sandbox failures and earlier gaps.
 All subagents and the curator finished. The service is inactive; its enabled
 weekly timer is waiting. No queued item is described as running. M3-006 is
 postponed by user decision, with the external evidence gaps above preserved;
-M4 remains reserved. All other selected actionable work is complete.
+M4 design work is tracked above. All other previously selected actionable
+work is complete.
 
 ## Exact baseline and editing contract
 
@@ -67,7 +86,8 @@ Useful read-only entry points are `python3 tools/wiki.py query TERMS --format
 json`, `lint --format json`, and `review --format json`. Ingest and upgrade are
 plan-only wrappers; source-head differences are inspection prompts, not proof
 that pinned guidance is stale. The 25-case retrieval regression remains MRR
-1.0, hit@3 1.0 and recall@5 0.98; this is not production telemetry.
+1.0, hit@3 1.0 and recall@5 0.96 after adding the M4 draft (previously
+0.98). The policy still passes; this is not production telemetry.
 
 ## Hosts and automation
 
@@ -175,7 +195,8 @@ validated hosts. Installed Mac Zig is under
   a product kqueue reactor or physical durability.
 - M3-006 is postponed by user decision. If explicitly resumed, it needs
   deployment hardware/storage/driver/error and durability evidence with
-  workload-specific tail-latency criteria. M4 remains reserved. Future
+  workload-specific tail-latency criteria. M4 design is open; implementation
+  remains queued. Future
   source selection is question-driven. Backend work stays deferred until an
   Obsidian-first ADR trigger is real.
 

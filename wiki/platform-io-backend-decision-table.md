@@ -5,7 +5,7 @@ kind: map
 status: source-verified
 zig: "0.16.0"
 summary: Choose Zig 0.16 file and network I/O from the required guarantee and evidence level, not from a shared label such as async or evented.
-updated: 2026-09-04
+updated: 2026-09-05
 sources:
   - "[[zig-0.16.0-release-notes]]"
   - "[[zig-0.16.0-stdlib]]"
@@ -163,3 +163,7 @@ crashes are a distinct recorded toolchain limit. See
 [[windows-iocp-and-overlapped-io]] for the failed diagnostic workflow's successful
 runtime phases, exact images and unobserved storage paths. Architecture breadth
 does not discharge deployment durability, device/error or production-SLO gates.
+
+Design application: [[bounded-http-server-design]] explores a Linux-first
+HTTP/1.1 framework with borrowed buffers and a bounded response writer; its
+API and backend choices remain proposals without HTTP runtime evidence.

@@ -723,3 +723,32 @@ M4 remains reserved for its own session.
 Local exact Zig 0.16.0 verification passed 87/87 steps, 73/82 tests with
 9 platform skips. The 25-query retrieval policy passed (MRR 1.0, hit@3 1.0,
 recall@5 0.98). This documentation-only scope update adds no runtime evidence.
+
+## [2026-09-05] M4 design | bounded HTTP framework and response writer ideas
+
+The user opened the reserved M4 design discussion and requested a Linux-first
+HTTP/1.1 framework with macOS/Windows support, TigerStyle startup limits, borrowed
+request access and an asynchronous response writer supporting incremental writes
+and flush. Pinned HTTP RFCs, Linux network copy-avoidance docs and TechEmpower
+HTTP test requirements before writing [[bounded-http-server-design]]. Inspected
+exact Zig 0.16 Reader and HTTP Server ownership comments.
+
+The draft distinguishes framework copies from kernel copies, finite request
+policy from finite streaming memory, application upload parts from HTTP chunks,
+and writer submission from safe buffer reuse. It records explicit backpressure,
+partial sends, deferred handlers, lifetime and shutdown questions. Refreshed
+reciprocal links, index, curation, roadmap and handoff. M4-001 records an initial
+draft; remaining design/implementation/measurement items are queued. M3-006 stays
+postponed. No new executable API, server benchmark, subagent or remote run was
+created for this design discussion.
+
+Follow-up requirements make evented progress and extensive TigerStyle assertions
+explicit. The draft bounds work per loop turn, rejects blocking on an event-loop
+worker, distinguishes callback budgets from preemption, and derives assertions
+for pool conservation, generations, parsing, partial writes and shutdown.
+Adversarial request validation remains ordinary error handling.
+
+Local exact Zig 0.16.0 verification passed: 87/87 steps, 73/82 tests and
+9 platform skips, with 51 navigable pages and 62 source records. All 25
+retrieval cases passed policy: MRR 1.0, hit@3 1.0 and recall@5 0.96, down from
+0.98 after adding the draft. Historical measurements remain unchanged.
