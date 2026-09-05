@@ -7,6 +7,7 @@ zig: "0.16.0"
 summary: A benchmark needs runtime-variable inputs, an externally consumed correctness witness, explicit build mode, and one maintained test/build entry point before its timing means anything.
 updated: 2026-09-05
 sources:
+  - "[[zig-http-arena-adoption-2026-09-05]]"
   - "[[matklad-do-not-optimize-away]]"
   - "[[matklad-mechanical-habits]]"
   - "[[source-tigerstyle]]"
@@ -136,3 +137,18 @@ Related: [[tigerstyle]], [[code-reading-and-mechanical-checks]],
 [[static-allocation-and-constant-work]],
 [[performance-sketches-and-batching]],
 [[build-diagnostics-and-generated-code]].
+
+
+The adopted arena/shard comparison in [[zig-http-arena-adoption-2026-09-05]]
+adds36 passing trials: three shuffled repetitions per contender/depth on one
+and three allowed server CPUs,128active connections and depths1/16/128. It
+checks actual shard counts, batch/callback bounds, raw RESULT/STATS/SHARDS,
+source/binary/config hashes and clean native ownership gates. Full ranges and
+sample order remain reproducible without launching load. The three-core
+headline ratio is0.909 at depth16; the one-core depth128 ratio is0.596 with
+wide Zig variation. Comparing aggregate CPU to its allowance does not identify
+which client/kernel/scheduler/server resource limits throughput; attributing
+the remaining gap solely to parsing needs profiling or controlled ablation.
+The original reference pairs and Mac ladder remain preliminary, separate
+sessions. No corrected wrk percentile is promoted to a request-tail guarantee.
+See [[bounded-http-server-design]] for the adopted API/resource contract.

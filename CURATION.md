@@ -253,12 +253,21 @@ Remaining M4 API/reliability/output-layout/sharding/comparison work is queued;
 Windows tuning gates are deferred and M3-006 remains postponed.
 
 
-## Arena/shard adoption checkpoint
+## Completed arena/shard adoption
 
-The external `wiki/arena-shards-proposal` is being integrated after the user
-selected its HTTP implementation as the new main base. Its source record and
-snapshot are preserved byte-for-byte; preliminary measurements are separated
-from the forthcoming qualified integrated packet. Index sections accidentally
-removed by that proposal are restored. Synthesis narrows unsupported causal
-claims and distinguishes old defaults from the adopted implementation. New
-HTTP source evidence and final publication gates remain pending at this checkpoint.
+[[zig-http-arena-adoption-2026-09-05]] captures the full HTTP publication SHA,
+source/archive/binary identities and reproducible raw packet before synthesis.
+The external proposal is merged, with all Engineering/Project index navigation
+restored. Its original source/snapshot remain byte-identical; legacy short
+revisions, summary ratio and clock discrepancy are recorded in the new source,
+while causal client/parser/kernel claims are narrowed in synthesis.
+
+The HTTP, batching, benchmark, io_uring and kqueue pages link reciprocally.
+Current defaults and concurrent application ownership are separated from the
+historical fixed-cell design. Both final HTTP native gates passed at 4b3cd55;
+36 qualified Linux trials passed with the full ranges and explicit one-core
+efficiency gap. No runtime claim is inferred from cross compilation or from
+std.Io's interface. All implementation/review/evidence agents and timed runners
+finished their selected work; remaining M4 work is queued. Windows tuning gates
+remain deferred, and M3-006 postponed. The wiki's complete local/retrieval and
+clean pushed Mac/Linux gates govern this publication.

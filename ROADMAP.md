@@ -42,8 +42,8 @@ produce Zig 0.16.0 code that:
   and macOS kqueue pass native ownership/wire gates with exact Zig 0.16.0.
   Inline/gather/batching and Linux contender/deeper-pipeline experiments are
   implemented and pinned; remaining Windows HTTP, API/reliability and broader
-  comparison work continues. The user selected the arena/shard integration as
-  the new base; qualified comparison and adoption are active. M3-006 stays
+  comparison work remains queued. The arena/shard integration is the new main
+  base with native ownership gates and 36 qualified trials complete. M3-006 stays
   postponed; the roadmap is not entirely complete.
 - **Current measurement cadence:** user-directed Mac/Linux focus while HTTP
   performance is still being tuned. Repeated Windows measurements/publication
@@ -163,7 +163,8 @@ startup slots and optional workers, bounded complete-body parsing and lazy heade
 response path, explicit flush/resume/finish, finite refusal/deadlines and
 cancellation drain. The original checkpoint passed 44 Debug and 44 ReleaseSafe test
 executions plus 26 integration cases; current inline/gather/batch evidence below
-passes 59 per mode and 26 generic + 10 inline + 11 gather + 30 batch cases. Finite smoke validated 30k exact responses
+passes 67/69 per mode on Mac (2 Linux-only skips), 69/69 on Linux,
+plus 26 generic + 10 inline + 11 gather + 29 batch + 8 arena lifecycle cases. Finite smoke validated 30k exact responses
 per host; these are client-bound experiments, not capacity or TechEmpower rank.
 
 For the accepted first-iteration scope, M4-003 now owns the working Linux/macOS
@@ -172,8 +173,8 @@ M3-006 physical Windows deployment qualification remains postponed. The MVP's
 pending/resume API is deliberately replaceable, with dynamic release and broader
 reliability work retained under M4-006. All implementation subagents finished;
 queued items have no assigned running agent. Current performance/ownership evidence
-is pinned by [[zig-http-operation-cells-2026-09-05]] and
-[[zig-http-batch-quantum-2026-09-05]]; its measurements do not
+is pinned by [[zig-http-arena-adoption-2026-09-05]], preserving the earlier
+[[zig-http-operation-cells-2026-09-05]] and [[zig-http-batch-quantum-2026-09-05]]; its measurements do not
 claim production capacity or trustworthy tail latency.
 
 | ID | Status | Deliverable / exit condition |
@@ -181,9 +182,9 @@ claim production capacity or trustworthy tail latency.
 | M4-001 | done | Capture the initial requirements, pinned HTTP/copy-avoidance/benchmark evidence, candidate reader/writer ownership model and unresolved design choices. This is an initial draft, not an accepted final architecture. |
 | M4-002 | done | Establish the first experimental contract: fixed workers and per-slot mailboxes, complete bounded requests, lazy optional headers, explicit flush/resume/finish, requested-byte heap cap and plain loopback HTTP boundary. Implement parser/ownership/failure cases; future API revision remains M4-006. |
 | M4-003 | done | Working standalone Linux io_uring/macOS kqueue HTTP/1.1 MVP with plaintext, preloaded HTML, echo, chunked flush/resume, native gates, watchdogs and retained-borrow shutdown. Source/evidence pinned; not production qualification. Windows portability is tracked explicitly in M4-005. |
-| M4-004 | queued | Completed the recorded-performance-profile Linux depth sweep: 24 trials passed, Zig 1.74–1.92M/s versus libreactor 4.30–13.63M/s at depths16–128. Prior profile/EPP remain unknown; no controlled profile speedup is established. Completed pinned Linux baseline/client-sensitivity, inline/gather, batch1/16, one-core, deeper-pipeline32/64/128 and old/current control sweeps. Preserve gains, the fixed-batch plateau and unresolved host/code variation. Remaining: preloaded HTML comparisons, macOS contenders, dedicated-host/NIC saturation and qualified request tails. |
+| M4-004 | queued | Completed the adopted arena/shard 36-trial Linux comparison at one/three CPUs (three-core ratios 0.957/0.909/0.860; one-core 1.106/0.778/0.596 at depths 1/16/128). Historical recorded-performance-profile Linux depth sweep: 24 trials passed, Zig 1.74–1.92M/s versus libreactor 4.30–13.63M/s at depths16–128. Prior profile/EPP remain unknown; no controlled profile speedup is established. Completed pinned Linux baseline/client-sensitivity, inline/gather, batch1/16, one-core, deeper-pipeline32/64/128 and old/current control sweeps. Preserve gains, the fixed-batch plateau and unresolved host/code variation. Remaining: preloaded HTML comparisons, macOS contenders, dedicated-host/NIC saturation and qualified request tails. |
 | M4-005 | queued | Implement Windows HTTP IOCP adapter and hosted native runtime gates; current server intentionally rejects Windows compilation. Separate from postponed M3-006 deployment qualification. |
-| M4-006 | running | Adopting the external arena/shard branch as the new main base, with worker-cache, EOF/interim, startup/failure and budget fixes. New native gates passed; qualified comparison and source-pinned wiki integration are active. Earlier work: direct Linux operation cells and configurable startup B1–64/Q1–256 bounds, retaining defaults16/64: both native gates,48 paired operation-cell trials and24 same-binary batch/callback trials passed. Exact ranges, memory growth, cancellation races and time-order limits are pinned. No runner is assigned to the remaining work: output representation/input layout, sharding, optional offload, dynamic release and fault/combined-limit qualification. The independent architecture agent owns its separate worktree. |
+| M4-006 | queued | Adopted the arena/shard base on HTTP main, with worker-cache snapshots, EOF/interim ordering, gated partial startup, secondary failure propagation and exact coordinator/stack budgets. Native gates and 36 qualified Linux trials passed; defaults are 128 descriptors and up to 8192 callbacks per shard. Historical operation-cell/batch experiments remain pinned. Remaining: profiled one-core efficiency, optional offload, dynamic lease release and broader fault/combined-limit qualification; no runner assigned. |
 
 Use the wiki to design, implement, and critique a bounded HTTP server:
 

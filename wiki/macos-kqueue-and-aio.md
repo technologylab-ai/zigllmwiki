@@ -7,6 +7,7 @@ zig: "0.16.0"
 summary: On macOS, separate kqueue readiness, Apple Dispatch I/O completion, POSIX AIO, and Zig 0.16's unfinished Dispatch backend before choosing a bounded file or network design.
 updated: 2026-09-05
 sources:
+  - "[[zig-http-arena-adoption-2026-09-05]]"
   - "[[apple-xnu-kqueue-aio]]"
   - "[[zig-http-arena-shards-2026-09-05]]"
   - "[[apple-libdispatch-io]]"
@@ -225,3 +226,9 @@ measurements before it can be selected for a server.
 Related: [[tigerbeetle-io]], [[evented-io-backends]], [[cancellation]],
 [[static-allocation-and-constant-work]], [[trustworthy-microbenchmarks]], and
 [[invariants-and-assertions]]. HTTP application: [[bounded-http-server-design]].
+
+
+The subsequent adopted HTTP source and repeated Linux comparison have their
+own immutable pin, [[zig-http-arena-adoption-2026-09-05]], with Mac/Linux native
+completion/startup witnesses. This does not repeat or strengthen the earlier
+prearm or Mac listener-distribution experiment; their preliminary scope remains.

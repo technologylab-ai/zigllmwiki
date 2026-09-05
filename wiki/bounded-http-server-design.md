@@ -7,6 +7,7 @@ zig: "0.16.0"
 summary: Experimental Linux/macOS HTTP with bounded ownership and flush barriers, historical performance checkpoints, a preliminary output-arena/shard reference and explicit Windows gaps.
 updated: 2026-09-05
 sources:
+  - "[[zig-http-arena-adoption-2026-09-05]]"
   - "[[http11-framing-and-limits]]"
   - "[[http-overload-refusal]]"
   - "[[linux-network-zero-copy]]"
@@ -39,16 +40,52 @@ platforms:
 
 ## Remember
 
-M4 now has a working experimental slice in the private
-[zig-http project](https://github.com/technologylab-ai/zig-http). The original
-implementation is identified by [[zig-http-mvp-2026-09-05]], with subsequent
-performance checkpoints below, the earlier batching contract in
-[[zig-http-batch-quantum-2026-09-05]], and the captured arena/shard reference in
-[[zig-http-arena-shards-2026-09-05]]. Each checkpoint describes its own source,
-defaults and evidence; the integrated arena adoption needs its separate
-publication pin. This page remains
-a draft: implemented Linux/macOS behavior below is separate from candidate
-architecture, Windows support and production qualification still to come.
+M4 now has a working experimental Linux/macOS implementation in the private
+[zig-http project](https://github.com/technologylab-ai/zig-http). Its current
+main adopts the arena/shard base with reviewed ownership/startup fixes and
+qualified local comparisons: [[zig-http-arena-adoption-2026-09-05]]. Earlier
+checkpoints and the independent proposal remain below as historical evidence.
+This page stays draft: Windows HTTP, production qualification and further API
+work remain pending.
+
+## Adopted arena/shard contract
+
+The source and complete packet in [[zig-http-arena-adoption-2026-09-05]] pin
+HTTP publication4b3cd55 and measured sourcebbcec8a. The default is inline with
+zero application workers, one64KiB arena per connection,128response descriptors
+(range1–511), and a FIFO-ready per-shard callback budget capped8192 by default.
+Headers are generated at begin; borrows up to256bytes may be copied into the
+arena and counted, while larger spans remain borrowed through terminal send.
+Ordinary socket/kernel copies remain. Flush drains every committed byte and
+prior finished response before resume; it is local acceptance, not peer receipt.
+
+Each Linux shard reserves full slot/transport/arena storage and shares one
+admission ceiling. Operation records are4C+2 per shard; overflow descriptors
+may exist transiently per listener outside admitted state. Mac supports one
+shard; inline Linux auto-selection is capped16. Multiple owners can invoke the
+same application concurrently, so shared state must be immutable or synchronized.
+Fixed workers require one shard. These custom io_uring/kqueue choices are not
+std.Io interface or Threaded guarantees.
+
+Worker dispatch now snapshots the mutable owner header cache into exclusive
+slot storage. Prearmed body bytes wait for interim output to complete; a peer
+write-half EOF drains valid buffered requests/output and orders400 after an
+incomplete suffix. Prepared owners wait behind a startup gate until allocation
+is sealed. Partial spawn unwinds safely; secondary failure stops the cluster.
+Exact requested heap includes coordinator/arrays and requested startup stacks.
+Watchdog-bounded exit acknowledgements precede joins; unreconciled owners cause
+process exit70. A violating primary inline callback cannot be preempted here.
+
+Clean native gates passed67/69 Mac tests per mode (2Linux-only skips),69/69
+Linux tests per mode,84wire cases,8comparator tests and30,000exact smoke bodies
+per host. Source records preserve exact0.16.0, host builds and finite witnesses.
+No Windows HTTP evidence is added. The36-trial three-repetition comparison
+measured three-core Zig/libreactor medians5.631/6.196M/s at depth16 and
+11.937/13.875M/s at128. One-core depth128 remains8.653/14.518M/s, with Zig
+samples6.887–8.707M/s. Ratios support adopting the improvement while retaining
+an efficiency gap; they do not isolate parser, client or kernel cost. See
+[[trustworthy-microbenchmarks]] for methodology and [[performance-sketches-and-batching]]
+for the multiplied shard-memory budget.
 
 ## Historical inline/gather execution checkpoint
 
@@ -239,7 +276,8 @@ its Mac workload; both options stayed off by default. These are preliminary
 workload observations, not kernel-path proofs. Its reported native gates are
 finite Linux/macOS witnesses for that reference and merge checkpoint. They do
 not validate later ownership changes or supply Windows HTTP evidence. The
-integrated publication pin and controlled comparison remain separate work.
+integrated publication and controlled comparison are recorded separately in
+[[zig-http-arena-adoption-2026-09-05]].
 
 ## Original implemented MVP boundary
 

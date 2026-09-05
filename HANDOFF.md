@@ -1,24 +1,50 @@
 # Project handoff — 2026-09-05
 
-Active adoption checkpoint: the user selected the external arena/shard HTTP
-implementation as the new main base. Integration worktrees are the sibling
-`zig-http-arena-integration` (`integrate/arena-shards`, pushed bbcec8a) and
-`zigllmwiki-arena-integration` (`integrate/arena-shards-wiki`, proposal merge in
-progress). Preserve original `perf/arena-shards` / `perf/arena-shards-plus-main`
-and `wiki/arena-shards-proposal` plus their external `.claude` worktrees.
+The arena/shard implementation is now the HTTP main base, committed and pushed
+at **4b3cd5551d80b422ec6ef763627d019e6f1dfb83**. The user selected the external agent's version;
+this adoption adds reviewed worker-cache, EOF/interim, startup/failure and exact
+budget fixes. Measured source bbcec8aa9516efc470238b9edeea4f01b1f4a6d7 is
+unchanged by the report publication. [[zig-http-arena-adoption-2026-09-05]] pins
+the source, complete raw evidence and independently reproducible summary.
 
-Both hardened HTTP native gates passed: Mac67/69 with2Linux-only skips and
-Linux69/69 per mode,84 wire cases,8 comparator tests and30k smoke bodies.
-The clean pushed Linux candidate gate also passed. Qualified one-/three-core
-comparison is running under the Linux host lock; source/tests stay frozen.
-The wiki review restores index sections and narrows unsupported causal claims
-while preserving the proposal source and snapshot exactly. Final evidence
-packaging, main publication and clean pushed wiki gates remain pending. These
-lines are a checkpoint, not a promise that a runner survives interruption.
-Inspect locks and actual agent/process state before resuming.
+All 36 qualified Linux trials passed: 1,053,649,993 timed responses and 3,840
+exact header/body preflights. Three-core Zig/libreactor ratios of medians are
+0.957/0.909/0.860 at depths 1/16/128; one-core ratios are 1.106/0.778/0.596.
+The one-core deep-pipeline gap remains; its cause needs profiling or controlled
+ablation. Do not infer a client bottleneck or parser-only cost from CPU totals.
 
-The preceding completed-iteration handoff follows; its queued-sharding and
-current-default statements are historical.
+Final clean pushed HTTP gates passed on both hosts at 4b3cd55:
+Mac 67/69 tests per mode (2 Linux-only skips), Linux 69/69, 84 wire cases,
+8 comparator tests and 30,000 exact smoke bodies per host. The [publication
+receipt](reports/2026-09-05-http-arena-publication.md) preserves both packets,
+environments and released reservations. Windows HTTP is absent; its tuning
+runs remain deferred and M3-006 remains postponed. No timed runner remains.
+
+The original reference branches `perf/arena-shards` (122e903),
+`perf/arena-shards-plus-main` (d5b6d9b) and `wiki/arena-shards-proposal` (cd916aa)
+are pushed unchanged. Both external `.claude` worktrees remain intact. Our
+integration worktrees are `zig-http-arena-integration` and
+`zigllmwiki-arena-integration`; their named branches and main preserve the work.
+The proposal source/snapshot and all earlier sources/log bytes are unchanged;
+its index deletion was repaired and unsupported causal claims narrowed.
+
+Preserve shared `/tmp/zig-http-compare.PIwh35` and its retained candidate/tools.
+Reacquire each host's `/tmp/zig-http-measurement.lock` before future load.
+The extraction compatibility failure was recovered from its saved download,
+without repeating measurements; original failure/recovery records remain.
+
+The reviewed wiki content passed 87/87 local verification steps (73/82 Mac
+tests, 9 platform skips), all 28 command tests and 25-query retrieval policy:
+MRR 0.98, hit@3 1.0, recall@5 0.96. Lint reports zero issues across 77 sources
+and 51 wiki pages. The clean pushed commit is checked again before completion.
+
+Remaining M4 work is queued: profiled one-core efficiency, dynamic lease
+release/optional offload, broader fault/combined-limit qualification, HTML/Mac/
+NIC comparisons, trustworthy request tails and Windows HTTP. Adoption completes
+this integration, not the entire roadmap. Exact wiki publication gates follow
+the Mac/Linux runbook at the pushed revision; this does not extend prior
+Windows evidence. The older handoff below is historical, including old defaults
+and references to sharding as queued.
 
 Completed HTTP iteration: two performance experiments are integrated and pushed
 from the sibling `zig-http-batchq` worktree,

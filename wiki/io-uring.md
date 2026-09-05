@@ -7,6 +7,7 @@ zig: "0.16.0"
 summary: io_uring is a Linux-specific batched asynchronous syscall interface whose out-of-order completions, retained resources, finite rings, and cancellation races must shape the owner model.
 updated: 2026-09-05
 sources:
+  - "[[zig-http-arena-adoption-2026-09-05]]"
   - "[[liburing-interface-and-cancellation]]"
   - "[[zig-http-arena-shards-2026-09-05]]"
   - "[[liburing-registered-resources]]"
@@ -225,3 +226,9 @@ Design application: [[bounded-http-server-design]] records the experimental
 Linux/macOS HTTP implementation, its native evidence and historical performance
 checkpoints. Its API remains experimental; the preliminary arena/shard reference
 and any integrated adoption require their own source and runtime receipts.
+
+
+The subsequent adopted HTTP source and repeated Linux comparison have their
+own immutable pin, [[zig-http-arena-adoption-2026-09-05]], with Mac/Linux native
+completion/startup witnesses. This does not repeat or strengthen the earlier
+prearm or Mac listener-distribution experiment; their preliminary scope remains.

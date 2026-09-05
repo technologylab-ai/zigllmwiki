@@ -7,6 +7,7 @@ zig: "0.16.0"
 summary: Quantify resource demand before coding, weight costs by frequency, and use bounded control-plane batches to feed regular data-plane work without hiding latency or overload.
 updated: 2026-09-05
 sources:
+  - "[[zig-http-arena-adoption-2026-09-05]]"
   - "[[source-tigerstyle]]"
   - "[[tigerbeetle-performance]]"
   - "[[matklad-do-not-optimize-away]]"
@@ -213,3 +214,15 @@ callback-count budget for preemption. [[zig-http-batch-quantum-2026-09-05]]
 Related: [[tigerstyle]], [[static-allocation-and-constant-work]],
 [[io-uring]], [[evented-io-backends]], [[trustworthy-microbenchmarks]], and
 [[tigerstyle-coverage]].
+
+
+The adopted HTTP arena/shard implementation changes that allocation model:
+[[zig-http-arena-adoption-2026-09-05]] records one64KiB arena per connection,
+128response descriptors and up to256-byte borrowed-span copies to merge small
+responses into a contiguous send. Every shard reserves full connection storage,
+while admission is process-wide: measured requested heap29,635,986bytes with
+one shard versus88,907,590bytes with three, plus two requested1MiB owner stacks.
+Coordinator arrays are included; kernel/libc/app/actual stack overhead is not.
+Configured callbacks are bounded per shard, and multiple handlers can access
+shared application state concurrently. Use [[bounded-http-server-design]] for
+that ownership boundary; the earlier16/64-cell defaults are historical.

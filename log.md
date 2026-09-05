@@ -1047,3 +1047,26 @@ io_uring task-work/interrupt path. The last-bound reuse-port result remains a
 named Mac fixture observation. No source was silently corrected or repointed,
 no Windows evidence was added, and verification of these integration edits is
 pending the parent-coordinated exact Zig 0.16.0 gate.
+
+
+## 2026-09-05 — Adopt arena/shard main with qualified evidence
+
+Pinned [[zig-http-arena-adoption-2026-09-05]] at HTTP publication 4b3cd5551d80b422ec6ef763627d019e6f1dfb83,
+with unchanged measured source bbcec8aa and the independently checked 36-trial
+packet: 1,053,649,993 timed responses, 3,840 exact preflights, all limits/owners/
+errors checked. Final HTTP Mac/Linux gates passed at that clean pushed commit:
+67/69 Mac tests per mode (2 Linux-only skips), 69/69 Linux, 84 wire cases,
+8 comparator tests and 30,000 exact smoke bodies per host. Both locks released.
+
+Integrated the external proposal while preserving its original source/snapshot
+and all earlier log bytes. Added current ownership/startup/EOF semantics and
+bounded arena/shard accounting to existing pages; retained preliminary kernel/
+Mac observations separately. Updated reciprocal links, index, curation, roadmap
+and handoff. Original references/worktrees remain preserved and pushed. Nested
+agent worktrees are ignored and excluded from Linux source archives so main
+stays clean without removing them. Complete wiki publication gates follow at
+the clean pushed revision; Windows tuning remains deferred and M3-006 postponed.
+
+The complete reviewed wiki gate passed87/87 local steps,73/82 Mac tests with
+9platform skips,28command tests, zero lint issues across77sources/51pages,
+and25-query retrieval policy (MRR0.98, hit@3=1.0, recall@5=0.96).

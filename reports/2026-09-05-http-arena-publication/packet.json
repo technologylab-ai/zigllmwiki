@@ -1,0 +1,259 @@
+{
+  "archive_member_sha256": {
+    "linux/controller.py": "3c9c5281b5e97742a868a0a6de38148665bdd51265b6ffec80dd50d51556a7a0",
+    "linux/environment.log": "672e1d4f95a2338100a4b713688d7d0277e76785850c1d1327640fdc8a0ef9a9",
+    "linux/gates.log": "b617464d0b0a9f3a8aa70e8e3eede6c83259bef1db91550a4c9d25250081a0d7",
+    "linux/lock.json": "6277460d6a900b0360159149d6115f4bd5733d457bd12a0a20a3f1349f2fd200",
+    "linux/receipt.json": "97294e665e79f8fc380264482b05e769072d2a5965105e75de4eae46105aa685",
+    "linux/summary.json": "792a22aeb955ccf52ef3053f3a1e822ab7ab17e66eea9d3faec91556d14ae5cc",
+    "linux/temporary-cleanup.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "linux/zig-http-arena-lifecycle-integration.json": "f39162c607d6864623a0e5d4e21c74b88c957d094366f66fdf15695e06360f29",
+    "linux/zig-http-batch-integration.json": "659c3a4335cecd6fcc3fd4744f073dc661ce1b00872736af33902e7485fc9b4b",
+    "linux/zig-http-gather-integration.json": "1b9e6b4c3fe6508a600b8a69c0d8e0eee2e18cf897fc0bac864336ade8b2ca50",
+    "linux/zig-http-inline-integration.json": "6f4a2c0a429206751997427fd4effacedec396fe0e984ba513f59011c8c05716",
+    "linux/zig-http-integration.json": "a2dc6448059f6f3a65697794932bd5eb00f228ad01ed9442c305ddc4f61aca77",
+    "linux/zig-http-smoke-suite.json": "c62c107a4b3c6a797fb359c6faa0a8ee7bc5c22ae2102270eeb9926f269b0d73",
+    "macos/arena_lifecycle.json": "f3fe1fd491f810b13c750b94f995170137e846c08f2d00d466ca493f6e64ce39",
+    "macos/arena_lifecycle.log": "8500ff307f8402d2f45868192dcee44a620997867b5978290ceaffa371dc7a1f",
+    "macos/batch.json": "c6056838ffb172158e0ee7f6d191a72788881f5db1fcf5890302ec34ff0ed7fc",
+    "macos/batch.log": "42bbdd885c00e37714c8ada0bc065a8d4d350ce9a8f9eaa2da28bd642e28ce88",
+    "macos/build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "macos/comparator.log": "7e0886136241ec17088a426e72f0138bd0c8134f33770a03b24f4e6926c36151",
+    "macos/debug.log": "bbcde700248d39ec07a2ea8d79480d2bf5310ff914b7c21526b304c62d656615",
+    "macos/gather.json": "24bd2d186986919639b1f33fbdf0fde7fd0b395622b84704541b86199f99f9e0",
+    "macos/gather.log": "6c1c0adf857eb4cdedca3053b8003b595484def180bcc652902642485f2cefa5",
+    "macos/generic.json": "9d5dd7d2f7fae8bcd15d6cdd8b393748c9355db55215c3fc0250c54501df75c9",
+    "macos/generic.log": "9e6fd19aab91f5f55d329445db495e78d1e5ae39df7a89dcca13dff84e17efad",
+    "macos/inline.json": "17387d422f39a31f01006b1e8b93032891105850c9963b02be1868976096dad6",
+    "macos/inline.log": "34623bae575af40b90fb4672a824a00d373097301bcd5320fe503bd45bddd7e4",
+    "macos/lock.json": "fbbc1b25de4d262577df2309ec8b56146fab33efaeffce196bd4f736b61b5569",
+    "macos/receipt.json": "59d6457c1f0ff50572cb09e948a156aa8653b7298b2c2fedc9aa37019c83b6c4",
+    "macos/release-safe.log": "d1edf7b4015f25b0386abba21a0c8d43e6cbcb30a319f082c8ad17c4df1325de",
+    "macos/smoke.json": "5b7882f411107f6e27d1a913c08da374527d5c6dc58e5803fc68b69cfd879f26",
+    "macos/smoke.log": "2ddd563d2a61613500189e1c22d58da9ad64a2c8f8185c5c4fa01bf8621ceed2"
+  },
+  "http_publication": "4b3cd5551d80b422ec6ef763627d019e6f1dfb83",
+  "linux": {
+    "commands": [
+      {
+        "argv": [
+          "ssh",
+          "-o",
+          "BatchMode=yes",
+          "-o",
+          "ConnectTimeout=5",
+          "omarx1",
+          "uname -a; lscpu; zig version; zig env; powerprofilesctl get; cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor /sys/devices/system/cpu/cpu0/cpufreq/energy_performance_preference"
+        ],
+        "log": "environment.log",
+        "returncode": 0,
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "sh",
+          "tools/verify_linux_ssh.sh",
+          "omarx1"
+        ],
+        "log": "gates.log",
+        "returncode": 0,
+        "timeout_seconds": 1200
+      },
+      {
+        "argv": [
+          "ssh",
+          "omarx1",
+          "test '!' -e /tmp/zig-http.vhaV9M"
+        ],
+        "log": "temporary-cleanup.log",
+        "returncode": 0,
+        "timeout_seconds": 30
+      }
+    ],
+    "commit": "4b3cd5551d80b422ec6ef763627d019e6f1dfb83",
+    "finished_utc": "2026-09-05T20:51:18.891179+00:00",
+    "input_status": "",
+    "ok": true,
+    "origin_main_after": "4b3cd5551d80b422ec6ef763627d019e6f1dfb83",
+    "origin_main_before": "4b3cd5551d80b422ec6ef763627d019e6f1dfb83",
+    "output_commit": "4b3cd5551d80b422ec6ef763627d019e6f1dfb83",
+    "output_status": "",
+    "publication_gate": true,
+    "release": {
+      "owned_processes_remaining": [],
+      "released_utc": "2026-09-05T20:51:18.959259+00:00",
+      "status": "released"
+    },
+    "reservation": {
+      "owner": {
+        "created_utc": "2026-09-05T20:50:45.100753+00:00",
+        "host": "omarx1",
+        "owner": "Codex /root/arena_parser_review",
+        "owner_pid": 1074990,
+        "owner_start_ticks": "48537808",
+        "purpose": "Exact Zig0.16.0 final pushed HTTP main4b3cd555 Linux publication gate; no timed comparison",
+        "schema": 1,
+        "token": "4f4b495644384b45948b4f658fd376db",
+        "work_root": "/Users/rs/code/github.com/technologylab.ai/zig-http-arena-integration streamed to validated remote /tmp/zig-http.*"
+      },
+      "status": "acquired"
+    },
+    "root": "maintained-wrapper temporary /tmp/zig-http.*",
+    "schema_version": 1,
+    "source_hashes": {
+      "src/api.zig": "df1dad67eeb5969a59eed57a06c7ff0ac7b5ccae313bc688e0f8015eed8ab4e3",
+      "src/budget.zig": "1a1f2dc2ac3418289590ed8868e588df6039e9fe69ff52412bec368ebfb4dcc9",
+      "src/http.zig": "9f54c8bc607da60294ac042ec90f93642e67f5acbef7b5e1dceebba6e41f6a4f",
+      "src/main.zig": "2fa95737fb4424f5ea5ead9eccbd34125a4eb58b3aa7d3ca41ffb61b45690a12",
+      "src/server.zig": "9644b0b2bf167ff6edc43ccf0968a41d521e5813b4faac4cecefde99675a8bf4",
+      "src/transport.zig": "324245cbdbe8810591985807b4d737d21fa48699695374ace1c8fe800287d8a2",
+      "src/transport_linux.zig": "5dfe71c3cb3fd3fd275dae1c729e5cfc175ce4b6ee4f8d5f3ec6ec8bee1ce2c9",
+      "src/transport_macos.zig": "2a1b2ad432a143079c0cfc7bf860e50fb2cbb0f56dd9a4ac571bb7512b45578a",
+      "tools/verify_linux_ssh.sh": "c054490bf9eafd506986faa95e29e3963844eb868c40dcf7c9ae2f95f956c3e0"
+    },
+    "started_utc": "2026-09-05T20:50:43.168316+00:00",
+    "timed_loads": false,
+    "token": "4f4b495644384b45948b4f658fd376db",
+    "validated_temporary_tree_removed": "/tmp/zig-http.vhaV9M"
+  },
+  "macos": {
+    "commands": [
+      {
+        "command": [
+          "/Users/rs/bin/zig",
+          "build",
+          "verify",
+          "--summary",
+          "all"
+        ],
+        "exit_code": 0,
+        "name": "debug",
+        "seconds": 0.374358125
+      },
+      {
+        "command": [
+          "/Users/rs/bin/zig",
+          "build",
+          "verify",
+          "-Doptimize=ReleaseSafe",
+          "--summary",
+          "all"
+        ],
+        "exit_code": 0,
+        "name": "release-safe",
+        "seconds": 0.26498049999999995
+      },
+      {
+        "command": [
+          "/Users/rs/bin/zig",
+          "build",
+          "-Doptimize=ReleaseSafe"
+        ],
+        "exit_code": 0,
+        "name": "build",
+        "seconds": 0.149847791
+      },
+      {
+        "command": [
+          "python3",
+          "tests/test_compare.py",
+          "-v"
+        ],
+        "exit_code": 0,
+        "name": "comparator",
+        "seconds": 0.08397970799999999
+      },
+      {
+        "command": [
+          "python3",
+          "tests/arena_lifecycle_integration.py",
+          "--json",
+          "/Users/rs/code/github.com/technologylab.ai/zig-http-arena-integration/.zig-cache/arena-publication-macos/arena_lifecycle.json"
+        ],
+        "exit_code": 0,
+        "name": "arena_lifecycle",
+        "seconds": 0.14128908299999998
+      },
+      {
+        "command": [
+          "python3",
+          "tests/batch_integration.py",
+          "--json",
+          "/Users/rs/code/github.com/technologylab.ai/zig-http-arena-integration/.zig-cache/arena-publication-macos/batch.json"
+        ],
+        "exit_code": 0,
+        "name": "batch",
+        "seconds": 4.283362666
+      },
+      {
+        "command": [
+          "python3",
+          "tests/gather_integration.py",
+          "--json",
+          "/Users/rs/code/github.com/technologylab.ai/zig-http-arena-integration/.zig-cache/arena-publication-macos/gather.json"
+        ],
+        "exit_code": 0,
+        "name": "gather",
+        "seconds": 1.5480956250000002
+      },
+      {
+        "command": [
+          "python3",
+          "tests/inline_integration.py",
+          "--json",
+          "/Users/rs/code/github.com/technologylab.ai/zig-http-arena-integration/.zig-cache/arena-publication-macos/inline.json"
+        ],
+        "exit_code": 0,
+        "name": "inline",
+        "seconds": 0.4794960830000008
+      },
+      {
+        "command": [
+          "python3",
+          "tests/integration.py",
+          "--json",
+          "/Users/rs/code/github.com/technologylab.ai/zig-http-arena-integration/.zig-cache/arena-publication-macos/generic.json"
+        ],
+        "exit_code": 0,
+        "name": "generic",
+        "seconds": 4.399243332999999
+      },
+      {
+        "command": [
+          "python3",
+          "tools/smoke.py",
+          "--json",
+          "/Users/rs/code/github.com/technologylab.ai/zig-http-arena-integration/.zig-cache/arena-publication-macos/smoke.json"
+        ],
+        "exit_code": 0,
+        "name": "smoke",
+        "seconds": 0.7839095409999999
+      }
+    ],
+    "commit": "4b3cd5551d80b422ec6ef763627d019e6f1dfb83",
+    "host": "renerocksai-M3-Max-5.local"
+  },
+  "measured_source": "bbcec8aa9516efc470238b9edeea4f01b1f4a6d7",
+  "native_archive_sha256": "f588fb66983d7efa009e18968f061eb4ff80cc2c58fba6fea16e905768abaf04",
+  "native_results": {
+    "linux": {
+      "comparator": 8,
+      "skips": 0,
+      "smoke": 30000,
+      "tests_per_mode": 69,
+      "total_per_mode": 69,
+      "wire": 84
+    },
+    "macos": {
+      "comparator": 8,
+      "linux_only_skips": 2,
+      "smoke": 30000,
+      "tests_per_mode": 67,
+      "total_per_mode": 69,
+      "wire": 84
+    }
+  },
+  "schema_version": 1,
+  "source_scope": "No source/tests/build/harness diff from measured candidate; publication adds report/docs/archive exclusions.",
+  "windows": "Deferred for this Linux/macOS-only HTTP scope by user decision; no Windows HTTP adapter."
+}
