@@ -76,8 +76,8 @@ Read this page first, then follow only the pages needed for the task.
   `io_uring`, Darwin `kqueue`, and Windows IOCP backend choices.
 
 - [[bounded-http-server-design]] — M4 Linux/macOS HTTP/1.1 MVP and design:
-  inline callbacks, bounded gathered response batches, lazy headers, borrowed
-  buffers, flush barriers, direct operation cells and measured batch/callback limits.
+  inline callbacks, lazy headers, borrowed buffers, flush barriers, measured
+  batch limits and the preliminary output-arena/shard reference under adoption.
 
 ## Engineering system
 

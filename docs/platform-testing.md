@@ -365,7 +365,7 @@ The private sibling `zig-http` is the runnable HTTP application; its modules are
 registered by its own `zig build verify`. Its first source-hashed packet is
 [[zig-http-mvp-2026-09-05]], separate from this wiki's registered lifecycle proofs.
 Run its Debug and ReleaseSafe verifiers, build ReleaseSafe, then its Python
-generic, inline, gather and batch integration suites, the comparator receipt
+generic, inline, gather, batch and arena lifecycle integration suites, the comparator receipt
 tests, and `tools/smoke.py`. The smoke orchestrator rejects a binary
 whose READY marker does not report ReleaseSafe. Its Linux SSH wrapper follows
 this runbook's validated temporary-directory, exact compiler and clean-input

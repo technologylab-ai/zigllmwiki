@@ -8,6 +8,7 @@ summary: io_uring is a Linux-specific batched asynchronous syscall interface who
 updated: 2026-09-05
 sources:
   - "[[liburing-interface-and-cancellation]]"
+  - "[[zig-http-arena-shards-2026-09-05]]"
   - "[[liburing-registered-resources]]"
   - "[[linux-io-uring-uapi-history]]"
   - "[[matklad-what-is-io-uring]]"
@@ -146,6 +147,23 @@ acknowledgement]].
 - Measure batching and polling modes for the actual device and workload; they
   are not automatic wins.
 
+The preliminary HTTP reference reports no throughput gain and more CPU from
+arming the next receive early, and no gain from submitting sends after each
+drain instead of once per loop turn. Its closed-loop `omarx1` observations cover
+pipeline depths 1, 16 and 128 with Zig 0.16.0 ReleaseSafe on kernel 7.1.9.
+[[zig-http-arena-shards-2026-09-05]] preserves this reference report/design;
+the integrated source and publication receipt need a separate pin.
+
+That packet does not establish which requests took an inline completion, poll,
+task-work, interrupt or wake path. Data-arrival timing is a hypothesis for the
+observed cost, not a deterministic completion-path contract. The design reports
+requesting `IORING_SETUP_COOP_TASKRUN`; it does not prove that every run used
+the flag or measure interrupt suppression. Derive `COOP_TASKRUN`,
+`SINGLE_ISSUER` and `DEFER_TASKRUN` requirements from pinned kernel/liburing
+evidence before applying them to a different owner/startup arrangement. The
+registered lifecycle proof below does not test those HTTP configuration choices.
+See [[bounded-http-server-design]] and [[trustworthy-microbenchmarks]].
+
 ## TigerBeetle implementation evidence
 
 At the pinned TigerBeetle revision, each Linux operation uses a caller-owned
@@ -203,6 +221,7 @@ Related: [[evented-io-backends]], [[task-lifetimes-and-structured-concurrency]],
 [[cancellation]], [[tigerbeetle-io]],
 [[tigerbeetle-engineering-corpus]].
 
-Design application: [[bounded-http-server-design]] explores a Linux-first
-HTTP/1.1 framework with borrowed buffers and a bounded response writer; its
-API and backend choices remain proposals without HTTP runtime evidence.
+Design application: [[bounded-http-server-design]] records the experimental
+Linux/macOS HTTP implementation, its native evidence and historical performance
+checkpoints. Its API remains experimental; the preliminary arena/shard reference
+and any integrated adoption require their own source and runtime receipts.

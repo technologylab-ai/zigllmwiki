@@ -5,9 +5,10 @@ kind: platform
 status: source-verified
 zig: "0.16.0"
 summary: On macOS, separate kqueue readiness, Apple Dispatch I/O completion, POSIX AIO, and Zig 0.16's unfinished Dispatch backend before choosing a bounded file or network design.
-updated: 2026-09-04
+updated: 2026-09-05
 sources:
   - "[[apple-xnu-kqueue-aio]]"
+  - "[[zig-http-arena-shards-2026-09-05]]"
   - "[[apple-libdispatch-io]]"
   - "[[zig-0.16-dispatch-kqueue-source]]"
   - "[[zig-0.16.0-release-notes]]"
@@ -191,6 +192,24 @@ durability on the deployment hardware.
 | File metadata change | `EVFILT_VNODE` | Notification only; it is not data-operation completion. |
 | Timers/process events | `EVFILT_TIMER` / `EVFILT_PROC`, Dispatch sources, or explicit deadlines | Match the facility's guarantee to the loop; do not treat all event records as I/O completion. |
 
+The preliminary HTTP reference ([[zig-http-arena-shards-2026-09-05]]) reports
+two loopback observations on the user's M3 Max. With several TCP listeners
+bound through `SO_REUSEPORT`, its per-shard counters assigned every connection
+to the last-bound listener. That fixture motivated a one-shard macOS default;
+it does not establish a universal XNU guarantee across OS versions, socket
+options, addresses or connection patterns. An acceptor handing descriptors to
+bounded owners is a candidate if a deployment needs different distribution,
+not a requirement proved by this single fixture.
+
+The same report records 6–16% lower throughput with early receive submission
+in its custom `kqueue` adapter. An unsuccessful nonblocking read followed by
+readiness registration is a possible additional path, not evidence of exactly
+two extra syscalls for every pipeline or a result for Apple Dispatch I/O or
+`std.Io`. The captured design/report lacks a qualified shuffled comparison and
+an integrated publication receipt. Preserve this preliminary observation and
+its scope when consulting [[bounded-http-server-design]]; neither observation
+changes the regular-file proof or its evidence level above.
+
 TigerBeetle currently chooses `kqueue` for readiness and synchronous
 regular-file operations in its callback dispatcher. That is a concrete product
 choice, not proof that synchronous storage work is suitable for every server.
@@ -205,4 +224,4 @@ measurements before it can be selected for a server.
 
 Related: [[tigerbeetle-io]], [[evented-io-backends]], [[cancellation]],
 [[static-allocation-and-constant-work]], [[trustworthy-microbenchmarks]], and
-[[invariants-and-assertions]].
+[[invariants-and-assertions]]. HTTP application: [[bounded-http-server-design]].

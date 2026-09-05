@@ -11,6 +11,8 @@ COPYFILE_DISABLE=1 tar \
     --no-xattrs \
     --exclude=.git \
     --exclude=.zig-cache \
+    --exclude=zig-out \
+    --exclude=.claude/worktrees \
     --exclude='__pycache__' \
     -C "$repository_root" \
     -czf - \

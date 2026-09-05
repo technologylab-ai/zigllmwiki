@@ -4,7 +4,7 @@ title: Bounded HTTP/1.1 framework MVP and design
 kind: pattern
 status: draft
 zig: "0.16.0"
-summary: Experimental Linux/macOS HTTP with inline callbacks, bounded gathered response batches, borrowed buffers, flush barriers, measured pipeline limits and explicit Windows gaps.
+summary: Experimental Linux/macOS HTTP with bounded ownership and flush barriers, historical performance checkpoints, a preliminary output-arena/shard reference and explicit Windows gaps.
 updated: 2026-09-05
 sources:
   - "[[http11-framing-and-limits]]"
@@ -27,6 +27,7 @@ sources:
   - "[[zig-http-performance-profile-2026-09-05]]"
   - "[[zig-http-operation-cells-2026-09-05]]"
   - "[[zig-http-batch-quantum-2026-09-05]]"
+  - "[[zig-http-arena-shards-2026-09-05]]"
 proofs: []
 platforms:
   - linux
@@ -41,12 +42,15 @@ platforms:
 M4 now has a working experimental slice in the private
 [zig-http project](https://github.com/technologylab-ai/zig-http). The original
 implementation is identified by [[zig-http-mvp-2026-09-05]], with subsequent
-performance checkpoints below and the current batching contract in
-[[zig-http-batch-quantum-2026-09-05]]. This page remains
+performance checkpoints below, the earlier batching contract in
+[[zig-http-batch-quantum-2026-09-05]], and the captured arena/shard reference in
+[[zig-http-arena-shards-2026-09-05]]. Each checkpoint describes its own source,
+defaults and evidence; the integrated arena adoption needs its separate
+publication pin. This page remains
 a draft: implemented Linux/macOS behavior below is separate from candidate
 architecture, Windows support and production qualification still to come.
 
-## Performance-directed execution and output
+## Historical inline/gather execution checkpoint
 
 The user rejected mandatory worker dispatch for bounded, nonblocking handlers.
 The measured inline step removed all application workers but improved the
@@ -57,10 +61,11 @@ The exact commits, full ranges and native ownership cases are in
 [[zig-http-inline-gather-2026-09-05]]. The contender gap remains; neither step
 establishes that assertions or borrowing must be sacrificed for performance.
 
-Inline plus gather is the new default; worker execution is explicit. The same
-handler/writer API runs on the I/O owner, so application callbacks must be
+At this checkpoint inline plus gather became the default; worker execution was
+explicit. The same handler/writer API runs on the I/O owner, so application callbacks must be
 bounded and nonblocking. Sleeping or waiting there stalls progress; the server
-cannot preempt it. No per-request offload API or multiple I/O owners exist yet.
+cannot preempt it. This checkpoint had one I/O owner and no per-request offload
+API; the later arena/shard reference below adds multiple Linux owners.
 
 The header was buffered in memory; submitting each span separately imposed an
 avoidable header/body completion dependency. Stable startup iovecs/msghdr now
@@ -70,10 +75,10 @@ still means all committed bytes, not peer receipt. A cancel acknowledgement
 alone cannot release that storage. That checkpoint gathered one response; the subsequent bounded batching
 implementation below retains several finished responses. [[zig-http-inline-gather-2026-09-05]]
 
-## Direct Linux operation cells
+## Historical direct Linux operation cells
 
-Established Linux receive/send admission and CQE lookup now use token-addressed
-cells with full slot/kind/generation/fd checks. First socket binding and close
+At this checkpoint established Linux receive/send admission and CQE lookup use
+token-addressed cells with full slot/kind/generation/fd checks. First socket binding and close
 still scan. Target completion and cancellation acknowledgement must both drain
 before reuse, including the fixed accept identity; descriptor close waits for
 both owners. Mac retains pooled scans under the same identity contract.
@@ -89,10 +94,10 @@ connections or a profiled decomposition of the remaining contender gap.
 Full ranges and exact native identity/cancellation gates are in the pinned
 packet. The experimental std.Io/Windows boundaries remain unchanged.
 
-## Current bounded response batches
+## Historical bounded response-cell batches
 
-The default now combines inline callbacks, zero application workers, gathered
-header/body output and up to 16 response cells per connection. The cell limit
+This checkpoint's default combines inline callbacks, zero application workers,
+gathered header/body output and up to 16 response cells per connection. The cell limit
 is configured at startup (1–64, default16); explicit worker mode uses one cell. Generated
 output and borrowed request bodies use the ordinary handler/writer for every
 request. Each finished response freezes separate output/header/chunk storage,
@@ -144,10 +149,12 @@ zero retained owners/late allocations. A separate pending-cancel witness held
 16 frozen cells: Mac observed a canceled terminal, Linux a normal terminal
 race; both drained target and cancel owners. Both hosts also passed 30,000
 ReleaseSafe smoke bodies. These finite witnesses are not production load or
-Windows HTTP evidence. Remaining work includes output/input layout, sharding, dynamic release/offload
-and sustained fault/combined-limit qualification.
+Windows HTTP evidence. Output/input layout and sharding were still pending at
+that checkpoint; the later arena/shard reference below records subsequent work.
+Dynamic release/offload and sustained fault/combined-limit qualification remain
+separate from these finite gates.
 
-## Configurable batch and callback limits
+## Historical configurable batch and callback limits
 
 The next same-binary Linux matrix tested response cells16/64 × global
 callbacks64/256 while retaining defaults16/64. At client depth128, median
@@ -171,7 +178,68 @@ Three shuffled samples per matrix configuration leave time-order uncertainty:
 several depth16 Q64 samples occurred later than Q256 samples. Keep the full
 ranges/sample positions and avoid attributing all of that difference to Q.
 The native cold-service watchdog is a finite witness, not a tail SLO. Corrected
-wrk tails remain rejected; defaults stay16/64 pending further qualification.
+wrk tails remain rejected. This historical checkpoint retained defaults16/64;
+the arena reference below uses a different default and scheduling model.
+
+## Preliminary output-arena and shard reference
+
+[[zig-http-arena-shards-2026-09-05]] preserves the independent
+`perf/arena-shards` report and design as captured. It describes a reference
+under adoption, not an integrated publication receipt. Its local short commit
+identifiers and branch URL are historical metadata; the snapshot hash is the
+durable captured artifact. The revised source and verification need a new pin.
+
+The reference replaces separate response output buffers with one contiguous
+64 KiB arena per connection. `begin()` writes the response head from a cached
+prefix; generated bodies follow it. Borrowed spans up to the configured
+256-byte threshold are copied and counted so small responses can share one
+span and SEND, while larger borrows remain vectors. Response descriptors name
+arena ranges and optional borrows. The reference defaults to 128 descriptors;
+this is a different allocation model from the historical 16/64-cell experiment,
+not a claim that increasing limits or shard count costs no storage.
+
+The report describes FIFO ready scheduling, amortized clock reads, a 100 ms
+deadline sweep, and a callback budget per owner that defaults to connections
+times batch limit, capped at 8192. It also describes lane-based line scanning
+and field classification, and fixed
+transport cells with caller-owned vectors. Each Linux shard has its own
+listener, ring, full connection-slot reserve and output arenas. Shared atomic
+admission limits admitted connections across shards; multiplying owners also
+multiplies per-shard reservations. These are custom implementation choices,
+not `std.Io` guarantees or proof that all work per request is constant. The
+reference keeps macOS at one shard after its named fixture observed all
+connections going to the last-bound reuse-port listener; see
+[[macos-kqueue-and-aio]] for the scope of that observation.
+
+The captured Linux pairs used exact Zig 0.16.0 ReleaseSafe on `omarx1`, kernel
+7.1.9, a recorded performance profile, 128 active connections and wrk threads
+on CPUs 3–7. The host remained in desktop use. The report records one or two
+successive Zig/libreactor pairs per configuration, not a qualified shuffled
+three-repetition comparison:
+
+| Server CPU mask / client depth | Zig responses/s | libreactor responses/s |
+| --- | ---: | ---: |
+| CPUs 0–2 / 16, three Zig shards | 7.0–7.2M | 7.6–7.7M |
+| CPU 0 / 16, one Zig shard | 3.5–3.7M | 3.3–4.4M |
+| CPU 0 / 128, one Zig shard | 6.6–6.9M | about 10.0M |
+| CPUs 0–2 / 128, three Zig shards | 11.1–11.5M | about 13.2M |
+| CPUs 0–2 / 1, three Zig shards | 549–588k | 558–568k |
+
+These pairs suggest a substantial improvement over the earlier design, but do
+not establish a stable capacity, TechEmpower rank or cross-session speedup.
+CPU use below the allowed total leaves client, scheduler, server and other
+serialization limits unresolved; it does not prove the client is the bottleneck.
+The one-core deep-pipeline gap likewise does not isolate parsing as its sole
+cause or establish that architecture adds no remaining cost. Preserve the
+paired ranges and use [[trustworthy-microbenchmarks]] for follow-up controls.
+
+The reference reports no throughput gain from prearmed receives/eager
+submission on its Linux workload and 6–16% lower throughput with prearming in
+its Mac workload; both options stayed off by default. These are preliminary
+workload observations, not kernel-path proofs. Its reported native gates are
+finite Linux/macOS witnesses for that reference and merge checkpoint. They do
+not validate later ownership changes or supply Windows HTTP evidence. The
+integrated publication pin and controlled comparison remain separate work.
 
 ## Original implemented MVP boundary
 
@@ -682,8 +750,8 @@ The wiki's older platform proofs remain narrower lifecycle examples; the HTTP
 packet does not upgrade their scope or establish Windows HTTP behavior.
 
 Next experiments: dynamic finish/cancel lease release, alternative continuation
-APIs, segmented/ring input to remove compaction, scheduling/sharding, deterministic
-fault/interleaving tests and long combined saturation. Plain loopback HTTP is
+APIs, segmented/ring input to remove compaction, further scheduler/shard
+qualification, deterministic fault/interleaving tests and long combined saturation. Plain loopback HTTP is
 the current TLS boundary; public browser deployments still need a planned HTTPS
 path. TLS/compression transform bytes and require their own ownership/copy audit.
 

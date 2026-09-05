@@ -4,3 +4,6 @@ __pycache__/
 .zig-cache/
 zig-out/
 .obsidian/
+
+# Agent worktrees are independent Git checkouts, not wiki input.
+.claude/worktrees/

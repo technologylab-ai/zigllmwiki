@@ -1020,3 +1020,30 @@ Final wiki publication181f4f3 passed87/87 steps on Mac/Linux,73/82+9 Mac skips
 and74/82+8 Linux skips,28 command tests and25-query retrieval policy. Both locks
 were released. Refreshed the roadmap overview's stale52/22 test counts to59/30
 and recorded the completed gates in the durable handoff; no proof/source changed.
+
+## 2026-09-05 — Ingest: HTTP output arena, constant-work path and shards (proposal)
+
+Pinned [[zig-http-arena-shards-2026-09-05]] from the user's local `zig-http`
+branch `perf/arena-shards` (measured `ad424c7`, unpublished at capture; the
+snapshot carries the report and design with their SHA-256). Added the arena/
+ready-ring/parser/cell/shard section and the interleaved Linux pairs to
+[[bounded-http-server-design]], an early-receive and task-run observation to
+[[io-uring]], and the XNU reuse-port and readiness pre-arm observations to
+[[macos-kqueue-and-aio]]. Updated the index entry. Prepared on wiki branch
+`wiki/arena-shards-proposal` for review; `zig build verify` run before
+proposing.
+
+## 2026-09-05 — Audit: arena/shard proposal integration
+
+Preserved the proposal's cited source record and compressed snapshot byte for
+byte while integrating its synthesis. Restored the Engineering system and
+Project operation index sections; preserved all earlier main log bytes and
+the proposal's appended entry. Marked earlier HTTP execution/batch defaults as
+historical and the arena/shard comparisons as a preliminary reference awaiting
+the integrated publication pin. Narrowed the CPU and kernel-path claims:
+unsaturated CPU does not establish a client bottleneck, the deep-pipeline gap
+does not isolate parser cost, and the captured report does not prove a fixed
+io_uring task-work/interrupt path. The last-bound reuse-port result remains a
+named Mac fixture observation. No source was silently corrected or repointed,
+no Windows evidence was added, and verification of these integration edits is
+pending the parent-coordinated exact Zig 0.16.0 gate.

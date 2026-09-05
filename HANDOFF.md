@@ -1,5 +1,25 @@
 # Project handoff — 2026-09-05
 
+Active adoption checkpoint: the user selected the external arena/shard HTTP
+implementation as the new main base. Integration worktrees are the sibling
+`zig-http-arena-integration` (`integrate/arena-shards`, pushed bbcec8a) and
+`zigllmwiki-arena-integration` (`integrate/arena-shards-wiki`, proposal merge in
+progress). Preserve original `perf/arena-shards` / `perf/arena-shards-plus-main`
+and `wiki/arena-shards-proposal` plus their external `.claude` worktrees.
+
+Both hardened HTTP native gates passed: Mac67/69 with2Linux-only skips and
+Linux69/69 per mode,84 wire cases,8 comparator tests and30k smoke bodies.
+The clean pushed Linux candidate gate also passed. Qualified one-/three-core
+comparison is running under the Linux host lock; source/tests stay frozen.
+The wiki review restores index sections and narrows unsupported causal claims
+while preserving the proposal source and snapshot exactly. Final evidence
+packaging, main publication and clean pushed wiki gates remain pending. These
+lines are a checkpoint, not a promise that a runner survives interruption.
+Inspect locks and actual agent/process state before resuming.
+
+The preceding completed-iteration handoff follows; its queued-sharding and
+current-default statements are historical.
+
 Completed HTTP iteration: two performance experiments are integrated and pushed
 from the sibling `zig-http-batchq` worktree,
 branch `perf/batch-quantum`, consolidated publication62c05de875e9917fc0d7bff36f1c51c83d2a7a60 (measured source dbb6398). Direct operation-cell

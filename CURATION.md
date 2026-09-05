@@ -251,3 +251,14 @@ pushed branches and consolidated HTTP publication62c05de. The independent
 architecture agent's worktree and borrowed remote tools remain untouched.
 Remaining M4 API/reliability/output-layout/sharding/comparison work is queued;
 Windows tuning gates are deferred and M3-006 remains postponed.
+
+
+## Arena/shard adoption checkpoint
+
+The external `wiki/arena-shards-proposal` is being integrated after the user
+selected its HTTP implementation as the new main base. Its source record and
+snapshot are preserved byte-for-byte; preliminary measurements are separated
+from the forthcoming qualified integrated packet. Index sections accidentally
+removed by that proposal are restored. Synthesis narrows unsupported causal
+claims and distinguishes old defaults from the adopted implementation. New
+HTTP source evidence and final publication gates remain pending at this checkpoint.
