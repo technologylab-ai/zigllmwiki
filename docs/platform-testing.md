@@ -316,7 +316,8 @@ The private sibling `zig-http` is the runnable HTTP application; its modules are
 registered by its own `zig build verify`. Its first source-hashed packet is
 [[zig-http-mvp-2026-09-05]], separate from this wiki's registered lifecycle proofs.
 Run its Debug and ReleaseSafe verifiers, build ReleaseSafe, then its Python
-integration suite and `tools/smoke.py`. The smoke orchestrator rejects a binary
+generic, inline, gather and batch integration suites, the comparator receipt
+tests, and `tools/smoke.py`. The smoke orchestrator rejects a binary
 whose READY marker does not report ReleaseSafe. Its Linux SSH wrapper follows
 this runbook's validated temporary-directory, exact compiler and clean-input
 rules, and adds finite build/integration/process watchdogs.
@@ -331,3 +332,14 @@ The HTTP server currently has Linux/macOS runtime gates only. Dispatching this
 wiki's Windows workflow still validates the existing wiki proofs; it does not
 supply Windows runtime or even compile evidence for the HTTP server. That
 adapter remains queued under M4-005, while M3-006 stays postponed.
+
+Performance experiments belong in the sibling project's maintained comparison
+harness. Keep assertion-enabled ReleaseSafe, pinned contender/source/binary
+identities and exact CPU assignments; finish builds before timed runs. Separate
+client pipeline depth from the startup server batch limit. A deeper client
+pipeline must not silently enlarge response storage. Check distinct-body wire
+ordering and retained-cell cancellation separately from wrk throughput counts.
+One I/O thread and three contender processes may share an allowed CPU budget
+without using equal parallelism; compare actual one-core runs before making
+per-core claims. Raw corrected wrk percentiles have a pinned validity defect
+and do not establish request tail latency. [[techempower-r23-comparison-inputs]]

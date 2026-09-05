@@ -5,11 +5,12 @@ kind: pattern
 status: source-verified
 zig: "0.16.0"
 summary: Quantify resource demand before coding, weight costs by frequency, and use bounded control-plane batches to feed regular data-plane work without hiding latency or overload.
-updated: 2026-09-04
+updated: 2026-09-05
 sources:
   - "[[source-tigerstyle]]"
   - "[[tigerbeetle-performance]]"
   - "[[matklad-do-not-optimize-away]]"
+  - "[[zig-http-response-batching-2026-09-05]]"
 proofs:
   - proofs/performance_sketch.zig
 platforms:
@@ -169,6 +170,23 @@ This harness can compare revisions on a controlled runner; its output is not a
 portable throughput claim. Record CPU, power mode, OS, target, Zig revision,
 repository revision, affinity/contention policy, and the complete invocation
 before treating a distribution as evidence. See [[trustworthy-microbenchmarks]].
+
+## Applied HTTP experiment
+
+[[bounded-http-server-design]] separates buffering bytes from amortizing I/O:
+the original header already occupied memory, yet separate header/body sends
+created avoidable completion dependencies. Gather-send joined those spans;
+bounded response cells then joined multiple ordinary callback results without
+reusing live output. Lack of ready input and flush force a partial batch, so
+light traffic does not wait for a batch to fill. Cancellation retains all cells
+until target ownership ends. [[zig-http-response-batching-2026-09-05]]
+
+The Linux batch1/16 comparison improved pipelined throughput, but larger client
+pipelines did not improve the fixed-16 server proportionally. Distinguish client
+queue depth, server storage and dispatch budgets. More queued input increased
+compaction; measuring that copy count does not establish its share of elapsed
+time. The next experiment must isolate batch size, input layout or operation
+lookup rather than assume that using io_uring makes every surrounding cost cheap.
 
 Related: [[tigerstyle]], [[static-allocation-and-constant-work]],
 [[io-uring]], [[evented-io-backends]], [[trustworthy-microbenchmarks]], and

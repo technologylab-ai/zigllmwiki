@@ -76,8 +76,8 @@ Read this page first, then follow only the pages needed for the task.
   `io_uring`, Darwin `kqueue`, and Windows IOCP backend choices.
 
 - [[bounded-http-server-design]] — M4 Linux/macOS HTTP/1.1 MVP and design:
-  fixed workers, finite admission, lazy headers, borrowed buffers, flush/resume
-  ownership and explicit Windows/performance gaps.
+  inline callbacks, bounded gathered response batches, lazy headers, borrowed
+  buffers, flush barriers, Linux contender/deep-pipeline evidence and remaining gaps.
 
 ## Engineering system
 
@@ -165,3 +165,7 @@ Read this page first, then follow only the pages needed for the task.
 records the completed four-environment gate, proof identities and remaining
 external deployment limits; [ROADMAP.md](ROADMAP.md) marks M3-006 postponed
 by user decision and tracks the working M4 MVP and remaining experiments.
+
+[HTTP performance publication](reports/2026-09-05-http-performance-publication.md)
+records the standalone final native gates, cleanup and the boundary between
+measured Linux/macOS HTTP behavior and this wiki's Windows lifecycle proofs.

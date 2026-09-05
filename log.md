@@ -843,3 +843,63 @@ recall@5 0.96 (preceding design draft: MRR 1.0, recall 0.94). Policy remains met
 no ranking weights or reviewed cases were changed. Updated current roadmap and
 handoff metrics to the measured result. Full local gate 87/87, 73 passed/9 skips,
 28 Python tests and deterministic lint (51 pages/68 sources, zero issues) passed.
+
+## 2026-09-05 — pinned Linux plaintext contender comparison
+
+Pinned TechEmpower R23 result bytes and exact mrhttp/libreactor/wrk primary
+inputs before synthesis. The unchanged Zig 0.16.0 ReleaseSafe MVP completed
+54 shuffled five-second Linux trials and 18 two-client-thread sensitivity
+trials; all load/warmup error counters zero and 2,304 exact preflight bodies.
+At 128 connections/pipeline16, four-client-thread medians were 113,342 /
+3,204,940 / 4,035,781 responses/s. Preserved compiler, container, affinity,
+wire/body, callback/resource-policy and desktop/thermal differences; no capacity
+or official-ranking claim. Rejected impossible wrk corrected percentiles after
+pinning the correction/minimum source defect. Baseline standalone checkpoint
+b8a3afe1bcfd7dd933060e1064cab55c4f7a41c3 contains all receipts/failed pilots.
+The user then rejected mandatory worker handoff; a separately pinned inline
+experiment follows rather than silently optimizing or rewriting this baseline.
+
+
+## 2026-09-05 — performance architecture and deeper-pipeline evidence
+
+Preserved separate immutable inline, gather and bounded-response-batch checkpoints
+in the standalone HTTP project. Inline removes mandatory worker dispatch; gather
+submits buffered header/body together; startup response cells retain multiple
+ordinary callback results through terminal sends. Flush drains preceding cells
+before resume, compaction waits for all borrows, and a global64-callback budget
+plus rotating scan bounds dispatch. Assertions, exact0.16.0 and ReleaseSafe
+measurement remain. No kernel zero-copy, arbitrary callback preemption or Windows
+HTTP claim is added.
+
+Pinned the published e07766e4f1a3bf1cd5dc772e8da48f63d085e5ad packet before
+synthesis. The batch1/16 sweep measured234k→1.22M/s; a separate one-core run
+measured1.83M versus libreactor2.62M. The user's deeper-depth follow-up tested
+32/64/128 with the server cap still16: correctness passed, but Zig plateaued
+near1.06–1.19M while libreactor reached7.41M at128. Same-binary control samples
+varied1.02–1.81M, leaving code/host attribution unresolved. All24+12+24+6
+trials/warmups passed and4,224 exact preflight bodies were checked. Raw ranges,
+CPU budgets, compaction, resource peaks and rejected wrk percentiles are retained.
+
+Both native hosts passed52 tests per Debug/ReleaseSafe mode,26 generic +10 inline
++11 gather +22 batch cases and30,000 ReleaseSafe smoke bodies. A separate witness
+held16 frozen response cells at pending cancellation; Mac observed a canceled
+target and Linux a normal-completion race, with every owner drained. The exclusive
+65,535-byte asset limit and initial larger-fixture failure remain documented.
+Updated existing HTTP, batching and microbenchmark pages, reciprocal links,
+index, curation, runbook, roadmap and durable handoff. Remaining M4 comparison,
+operation-lookup/batch tuning/sharding, dynamic API and qualification work is
+explicit; M3-006 stays postponed. All timed runners and implementation agents
+finished; the user's max-reasoning performance review runs independently.
+
+
+## 2026-09-05 — independent performance review completed
+
+The user-authorized max-reasoning subagent finished its read-only review without
+starting builds or loads. Recorded a source/counter-based experiment order:
+explicit token-addressed operation cells, then batch16/64 × callback64/256 with
+fairness/ownership gates, followed by output representation and sharding. Copy
+counts cannot explain the zero-compaction depth16 plateau; CQE lookup stops at
+its match rather than always scanning the entire array. The review preserves
+unmeasured attribution and current opaque-token API constraints. All agents and
+timed runners are finished; remaining M4 items are queued. Final local retrieval
+scores are MRR1.0/hit@3=1.0/recall@5=0.96 over25 cases, with policy met.

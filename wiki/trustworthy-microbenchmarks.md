@@ -5,12 +5,15 @@ kind: pattern
 status: source-verified
 zig: "0.16.0"
 summary: A benchmark needs runtime-variable inputs, an externally consumed correctness witness, explicit build mode, and one maintained test/build entry point before its timing means anything.
-updated: 2026-09-04
+updated: 2026-09-05
 sources:
   - "[[matklad-do-not-optimize-away]]"
   - "[[matklad-mechanical-habits]]"
   - "[[source-tigerstyle]]"
   - "[[tigerbeetle-performance]]"
+  - "[[techempower-r23-comparison-inputs]]"
+  - "[[zig-http-plaintext-comparison-2026-09-05]]"
+  - "[[zig-http-response-batching-2026-09-05]]"
 proofs:
   - proofs/performance_sketch.zig
 platforms:
@@ -69,6 +72,30 @@ The harness in [[performance-sketches-and-batching]] now proves these mechanics
 with Zig 0.16: runtime parameters, an untimed warm-up, separately reported
 samples, a consumed digest, and deterministic CI witnesses. Its local timings
 are deliberately not promoted to portable performance evidence.
+
+## HTTP comparison lesson
+
+[[bounded-http-server-design]] now has a repeated native Linux comparison of
+pinned plaintext leaders and the unchanged ReleaseSafe MVP. Preserve callback,
+resource-policy, toolchain, client-CPU and wire differences alongside rates;
+shared hardware alone does not equate contracts. Its two/four-client-thread
+sweeps expose sensitivity; they do not establish unconstrained capacity.
+[[zig-http-plaintext-comparison-2026-09-05]]
+
+wrk 4.2.0 counts completed responses directly, but timestamps pipeline-batch
+completion and corrects the histogram. The pinned correction can add samples
+below an unchanged minimum, yielding impossible zero percentiles. A load tool's
+plausible throughput does not validate its latency distribution. Retain raw
+values, identify the source defect, and withhold tail claims until independently
+qualified. [[techempower-r23-comparison-inputs]]
+
+The HTTP batch experiments separate client pipeline depth, server batch cap
+and actual parallelism. Deeper pipelines (32/64/128) keep the server cap at 16;
+exact preflight depth and distinct-body wire tests prevent a throughput counter
+from hiding ordering or buffer reuse mistakes. A repeated control varied even
+with an unchanged binary. Preserve that uncertainty and compare revisions in
+the same controlled sweep; sequential groups can still confound time and code.
+[[zig-http-response-batching-2026-09-05]]
 
 Related: [[tigerstyle]], [[code-reading-and-mechanical-checks]],
 [[static-allocation-and-constant-work]],

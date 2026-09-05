@@ -179,9 +179,33 @@ into wiki proofs. [[zig-0.16-linux-crt-linker-workaround]] preserves the user's
 ReleaseSafe workaround, reproduced with an independent exact-source native probe
 and integrated into build diagnostics.
 
-M4-001/002/003 are done for the first experiment. M4-004 comparisons, M4-005
-Windows HTTP and M4-006 further API/reliability work are queued. All assigned
-subagents finished. M3-006 remains postponed; no Windows HTTP runtime is claimed.
+[[techempower-r23-comparison-inputs]] pins the published result bytes and
+selected primary implementations/load generator. The measured packet
+[[zig-http-plaintext-comparison-2026-09-05]] adds 54 repeated Linux plaintext
+trials and 18 client-sensitivity trials, with exact resource/callback differences,
+zero reported load errors and explicitly rejected wrk latency percentiles.
+The existing HTTP and microbenchmark pages carry reciprocal guidance.
+
+[[zig-http-inline-gather-2026-09-05]] captures and synthesizes the separate
+inline and gathered-output checkpoints. The latter makes inline/zero-workers
+the default and preserves native partial-send/cancellation ownership. These are
+custom raw io_uring/kqueue results, independent of std.Io implementation claims.
+
+[[zig-http-response-batching-2026-09-05]] captures and synthesizes the next
+source-hashed standalone packet: bounded response cells/flush barriers, exact
+startup heap arithmetic, native multi-cell cancellation and distinct deeper
+pipelines. It preserves24 batch-limit,12 one-core,24 deeper-pipeline and6
+code-control trials, including the plateau and unresolved variation. The HTTP,
+batching and microbenchmark pages now link reciprocally. The final22-case batch
+suite passed on Mac/Linux; no Windows HTTP evidence or std.Io guarantee is added.
+All implementation, native platform and max-reasoning review agents finished.
+The [independent review](reports/2026-09-05-http-performance-review.md) prioritizes
+operation cells and a batch/quantum matrix; those experiments remain queued.
+
+M4-001/002/003 are done for the first experiment. M4-004 has an initial Linux
+plaintext comparison; remaining HTML/Mac/NIC/qualified-tail work stays explicit.
+The user's follow-up opened inline/gather/batch execution experiments under M4-006;
+M4-005 Windows HTTP remains queued and M3-006 remains postponed.
 
 ## Immediate curation order
 

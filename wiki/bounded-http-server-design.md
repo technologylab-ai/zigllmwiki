@@ -4,7 +4,7 @@ title: Bounded HTTP/1.1 framework MVP and design
 kind: pattern
 status: draft
 zig: "0.16.0"
-summary: Experimental Linux/macOS HTTP MVP with fixed workers, startup limits, borrowed request views, flush/resume ownership and explicit Windows and performance gaps.
+summary: Experimental Linux/macOS HTTP with inline callbacks, bounded gathered response batches, borrowed buffers, flush barriers, measured pipeline limits and explicit Windows gaps.
 updated: 2026-09-05
 sources:
   - "[[http11-framing-and-limits]]"
@@ -20,6 +20,10 @@ sources:
   - "[[microsoft-windows-winsock-batched-file-io]]"
   - "[[rfc3986-uri-syntax]]"
   - "[[zig-http-mvp-2026-09-05]]"
+  - "[[techempower-r23-comparison-inputs]]"
+  - "[[zig-http-plaintext-comparison-2026-09-05]]"
+  - "[[zig-http-inline-gather-2026-09-05]]"
+  - "[[zig-http-response-batching-2026-09-05]]"
 proofs: []
 platforms:
   - linux
@@ -32,12 +36,86 @@ platforms:
 ## Remember
 
 M4 now has a working experimental slice in the private
-[zig-http project](https://github.com/technologylab-ai/zig-http). The current
-implementation is identified by [[zig-http-mvp-2026-09-05]]. This page remains
+[zig-http project](https://github.com/technologylab-ai/zig-http). The original
+implementation is identified by [[zig-http-mvp-2026-09-05]], with subsequent
+performance checkpoints below and the current batching contract in
+[[zig-http-response-batching-2026-09-05]]. This page remains
 a draft: implemented Linux/macOS behavior below is separate from candidate
 architecture, Windows support and production qualification still to come.
 
-## Implemented MVP boundary
+## Performance-directed execution and output
+
+The user rejected mandatory worker dispatch for bounded, nonblocking handlers.
+The measured inline step removed all application workers but improved the
+pipeline-16 median only about 14%, from 117k to 134k responses/s in that sweep.
+A separate gathered-output step improved inline scalar 125k to 344k responses/s,
+about 2.77 times, under the same three allowed server CPUs/four client threads.
+The exact commits, full ranges and native ownership cases are in
+[[zig-http-inline-gather-2026-09-05]]. The contender gap remains; neither step
+establishes that assertions or borrowing must be sacrificed for performance.
+
+Inline plus gather is the new default; worker execution is explicit. The same
+handler/writer API runs on the I/O owner, so application callbacks must be
+bounded and nonblocking. Sleeping or waiting there stalls progress; the server
+cannot preempt it. No per-request offload API or multiple I/O owners exist yet.
+
+The header was buffered in memory; submitting each span separately imposed an
+avoidable header/body completion dependency. Stable startup iovecs/msghdr now
+submit the whole buffered snapshot as bounded spans, retaining their payloads
+until terminal completion. A short send advances across span boundaries; flush
+still means all committed bytes, not peer receipt. A cancel acknowledgement
+alone cannot release that storage. That checkpoint gathered one response; the subsequent bounded batching
+implementation below retains several finished responses. [[zig-http-inline-gather-2026-09-05]]
+
+## Current bounded response batches
+
+The default now combines inline callbacks, zero application workers, gathered
+header/body output and up to 16 response cells per connection. The cell limit
+is configured at startup (1–16); explicit worker mode uses one cell. Generated
+output and borrowed request bodies use the ordinary handler/writer for every
+request. Each finished response freezes separate output/header/chunk storage,
+while parser/writer metadata can advance through already-buffered requests.
+Input stays immutable until all response borrows end. At most 80 spans feed
+stable transport metadata; partial sends advance an aggregate bounded cursor.
+[[zig-http-response-batching-2026-09-05]]
+
+Drain on cell exhaustion, lack of ready input, flush/close or exhausted callback
+budget. Never wait to fill a batch. `flush()` drains all preceding finished
+responses and the active snapshot, then resumes that request with empty output.
+Compact an input suffix once after complete batch drain. A global 64-callback
+turn budget, per-connection limit and rotating scan start bound dispatch work;
+oldest-unsent deadlines remain. These cannot preempt violating application code.
+A parser rejection/Connection: close response preserves prior wire order, while
+application close, invalid output or timeout can discard earlier unsent cells.
+
+Startup accounting includes exact requested response-cell and gather storage,
+plus separately requested stacks; it is still not a process/kernel memory cap.
+Completion counts and cycle maxima occur at whole-batch drain, so sent prefixes
+of a subsequently canceled batch may be omitted. No individual-request timing
+or dynamic lease-release event follows from these counters.
+
+The same-binary Linux comparison measured 234k/s with batch 1 versus 1.22M/s
+with batch 16 at client pipeline 16. A separate one-core run measured 1.83M/s
+versus libreactor 2.62M/s. Deeper client pipelines then exposed a plateau near
+1.06–1.19M/s at depths 16/32/64/128, while libreactor reached 7.41M/s at 128.
+The server cap stayed 16, but retained-input compaction increased. A follow-up
+old/current binary control also varied widely; do not attribute the lower
+repeated control to code or select only the faster earlier result. Full ranges,
+CPU masks, exact revisions, errors and client/desktop/latency limits are pinned.
+[[zig-http-response-batching-2026-09-05]]
+
+Mac/Linux each passed 52 tests in Debug and ReleaseSafe, 26 generic, 10 inline,
+11 gather cases, and the expanded 22-case batch suite. Distinct generated and
+borrowed-body pipelines at 32/64/128 preserve order and connection reuse with
+zero retained owners/late allocations. A separate pending-cancel witness held
+16 frozen cells: Mac observed a canceled terminal, Linux a normal terminal
+race; both drained target and cancel owners. Both hosts also passed 30,000
+ReleaseSafe smoke bodies. These finite witnesses are not production load or
+Windows HTTP evidence. Remaining work includes token-addressed operation cells,
+independent server-batch/input-layout tuning, sharding, dynamic release and
+sustained fault/combined-limit qualification.
+
+## Original implemented MVP boundary
 
 Exact Zig 0.16.0; one I/O owner uses raw `std.os.linux.IoUring` on Linux or
 nonblocking sockets/kqueue on macOS. Fixed startup application workers use
@@ -90,8 +168,8 @@ connections/operations and zero late framework allocation attempts.
 Three finite 10k-response smoke workloads on each host validated exact plaintext
 and preloaded HTML; these are Python/client-bound loopback measurements, not
 TechEmpower rank or capacity evidence. Windows HTTP, NIC zero-copy, long mixed
-saturation, fault/schedule exploration, dynamic release and competitor runs are
-queued. Use ReleaseSafe for timing and see
+saturation, fault/schedule exploration and dynamic release remain queued.
+The initial Linux plaintext competitor comparison is recorded below. Use ReleaseSafe for timing and see
 [[build-diagnostics-and-generated-code]] for the reproduced Linux Debug linker
 failure. The broader requirements and candidates below remain design guidance.
 
@@ -315,7 +393,7 @@ waiting. Neither is made evented by naming a function async.
 
 ## Separate application execution from network ownership
 
-Broader candidate architecture; the implemented first slice is scoped above:
+Explicit worker-mode architecture; default inline execution is scoped above:
 
 `I/O owner → bounded request-handle queue → application worker`
 
@@ -391,12 +469,11 @@ process isolation still needs bounded IPC, resource controls, termination/join
 and an audit of shared-memory permissions. [[microsoft-thread-termination]],
 [[child-process-lifecycles]], [[cancellation]]
 
-An optional trusted inline handler could later avoid worker handoff for
-controlled bounded code, but weakens callback isolation. It must be explicit
-and measured separately. A declared static response can instead be a bounded
-framework operation with no user callback on the loop. The initial application
-benchmark should exercise the ordinary callback/writer path, so a fast static
-route does not hide the execution model's cost.
+Bounded inline execution now avoids worker handoff by default, with its
+nonblocking callback obligation stated above. The measured path invokes the
+ordinary handler/writer for each request. A future declared-static operation
+would be a separate execution contract and benchmark, since it would omit that
+callback cost. [[zig-http-inline-gather-2026-09-05]]
 
 ## Lazy header interpretation, complete framing validation
 
@@ -583,13 +660,32 @@ Date representation can be refreshed once a second. JSON later requires actual
 per-request serialization. [[techempower-plaintext-validator]],
 [[techempower-http-test-requirements]]
 
-Select a few leading implementations for the relevant TechEmpower test when
-the comparison is ready; pin the result round, category, framework commits and
-configurations then. Run those implementations on our hardware, using the same
-OS/architecture, response bytes, clients, concurrency/pipeline depth, transport,
-CPU budget and build policy. Linux-only candidates need a common Linux
-environment; do not compare native macOS with a competitor in a Linux VM as
-though only the framework differs. No competitor selection or build is running.
+The initial comparison is now measured and pinned by
+[[zig-http-plaintext-comparison-2026-09-05]], with Round 23 inputs in
+[[techempower-r23-comparison-inputs]]. On omarx1, with server CPUs 0–2 and
+client 3–7, four wrk threads,128 connections and pipeline 16, median of three
+five-second trials was 113,342 responses/s for the unchanged ReleaseSafe MVP,
+3,204,940 for mrhttp and4,035,781 for libreactor. Without pipelining the
+medians were107,752,334,860 and352,742. Full ranges, all54 trials,18client
+sensitivity trials and environment hashes are retained; client settings and
+uncontrolled desktop/thermal state affect exact rates. These are experimental
+same-host observations, not official ranking or production capacity.
+
+mrhttp caches the Python route result during startup. libreactor calls handlers
+inline and flushes accumulated pipelined responses. Our baseline uses the
+ordinary worker callback and sequential header/body sends. Borrowing and
+io_uring do not automatically remove dispatch or batching costs; these
+source-visible differences are candidates for controlled experiments, not
+profiled attribution or a measured price of safety. Competitors do not enforce
+our configured resource/ownership policy. mrhttp's original lowercase w is
+preserved and validated; equal body length is not identical wire bytes.
+
+All measured phases reported zero wrk transport/status errors; separate
+preflights checked exact bodies and generated headers. Some wrk corrected
+percentiles are impossible zeros: correction adds samples below an unchanged
+histogram minimum. Reject those tails rather than treating zero as fast service;
+throughput counters are separate. Even consistent wrk pipeline latency derives
+from batch completion, not individual-request or open-loop SLO timing.
 
 Use maxross for portable work and macOS comparisons, omarx1 for native Linux
 `io_uring` evidence; disclose any common VM experiment separately. Record client

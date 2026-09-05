@@ -40,8 +40,9 @@ produce Zig 0.16.0 code that:
 - **Current scope:** the first M4 HTTP MVP is implemented in the private
   [zig-http project](https://github.com/technologylab-ai/zig-http). Linux io_uring
   and macOS kqueue pass native ownership/wire gates with exact Zig 0.16.0.
-  Windows HTTP, further pending/resume work and controlled comparisons remain
-  queued. M3-006 stays postponed; the roadmap is not entirely complete.
+  Inline/gather/batching and Linux contender/deeper-pipeline experiments are
+  implemented and pinned; remaining Windows HTTP, API/reliability and broader
+  comparison work is queued. M3-006 stays postponed; the roadmap is not entirely complete.
 - **Backend:** intentionally deferred; the Obsidian-first ADR remains in force.
 
 Source status is tracked as `discovered → selected → captured → synthesized →
@@ -152,10 +153,11 @@ The user authorized the initial implementation on 2026-09-05 after the design
 session. [[bounded-http-server-design]] separates the implemented contract from
 broader proposals. Runnable code is in the dedicated private zig-http project;
 [[zig-http-mvp-2026-09-05]] pins its source and native evidence. It has fixed
-startup workers/slots, bounded complete-body parsing and lazy headers, a borrowed
+startup slots and optional workers, bounded complete-body parsing and lazy headers, a borrowed
 response path, explicit flush/resume/finish, finite refusal/deadlines and
-cancellation drain. Mac/Linux each pass 44 Debug and 44 ReleaseSafe test
-executions plus 26 integration cases. Finite smoke validated 30k exact responses
+cancellation drain. The original checkpoint passed 44 Debug and 44 ReleaseSafe test
+executions plus 26 integration cases; current inline/gather/batch evidence below
+passes 52 per mode and 26 generic + 10 inline + 11 gather + 22 batch cases. Finite smoke validated 30k exact responses
 per host; these are client-bound experiments, not capacity or TechEmpower rank.
 
 For the accepted first-iteration scope, M4-003 now owns the working Linux/macOS
@@ -163,16 +165,18 @@ slice; the remaining Windows HTTP adapter is explicitly split into M4-005.
 M3-006 physical Windows deployment qualification remains postponed. The MVP's
 pending/resume API is deliberately replaceable, with dynamic release and broader
 reliability work retained under M4-006. All implementation subagents finished;
-queued items have no assigned running agent.
+queued items have no assigned running agent. Current performance/ownership evidence
+is pinned by [[zig-http-response-batching-2026-09-05]]; its measurements do not
+claim production capacity or trustworthy tail latency.
 
 | ID | Status | Deliverable / exit condition |
 | --- | --- | --- |
 | M4-001 | done | Capture the initial requirements, pinned HTTP/copy-avoidance/benchmark evidence, candidate reader/writer ownership model and unresolved design choices. This is an initial draft, not an accepted final architecture. |
 | M4-002 | done | Establish the first experimental contract: fixed workers and per-slot mailboxes, complete bounded requests, lazy optional headers, explicit flush/resume/finish, requested-byte heap cap and plain loopback HTTP boundary. Implement parser/ownership/failure cases; future API revision remains M4-006. |
 | M4-003 | done | Working standalone Linux io_uring/macOS kqueue HTTP/1.1 MVP with plaintext, preloaded HTML, echo, chunked flush/resume, native gates, watchdogs and retained-borrow shutdown. Source/evidence pinned; not production qualification. Windows portability is tracked explicitly in M4-005. |
-| M4-004 | queued | Initial ReleaseSafe exact-body smoke and allocation/copy metrics exist. Remaining: repeatable saturation/tail measurements and pinned leading implementations on identical hardware/OS with exact plaintext/preloaded HTML; no external benchmark claim yet. |
+| M4-004 | queued | Completed pinned Linux baseline/client-sensitivity, inline/gather, batch1/16, one-core, deeper-pipeline32/64/128 and old/current control sweeps. Preserve gains, the fixed-batch plateau and unresolved host/code variation. Remaining: preloaded HTML comparisons, macOS contenders, dedicated-host/NIC saturation and qualified request tails. |
 | M4-005 | queued | Implement Windows HTTP IOCP adapter and hosted native runtime gates; current server intentionally rejects Windows compilation. Separate from postponed M3-006 deployment qualification. |
-| M4-006 | queued | Experiment with pending/resume and finish/cancel lease release, remove pipeline compaction, assess worker scheduling/sharding, and add deterministic fault/schedule exploration plus sustained combined-limit workloads and broader resource accounting. |
+| M4-006 | queued | Implemented/measured inline default, gather and bounded response cells with flush barriers, deferred compaction and multi-cell cancellation/deep-pipeline gates. Independent max-reasoning review is complete: next isolate token-addressed Linux operation cells, then batch16/64 × callback64/256, output representation and sharding. Offload, dynamic release and fault/combined-limit qualification remain. |
 
 Use the wiki to design, implement, and critique a bounded HTTP server:
 
@@ -211,7 +215,7 @@ a second content store. A mutable service and database come only after that.
 | L-008 | done | Weekly/manual GitHub workflow installs the exact checksum-verified Zig baseline, verifies proofs, checks sources/releases and retrieval, proves the checkout stayed unchanged, and uploads a 30-day review packet. |
 | L-009 | done | Installed weekly omarx1 consumer prefers maxross with Linux fallback, validates a current read-only packet, runs bounded semantic curation and independent gates, and opens a draft PR. Real PR #1, idle and idempotent fallback passed; root reviewed/merged separately. See the operational receipt. |
 | L-010 | done | Read-only `review` reports coarse upstream-head differences and newer stable Zig releases while preserving source records and requiring an explicit upgrade workflow. |
-| L-011 | done | A versioned 25-query benchmark scores the deterministic index/lexical layer; MRR 0.98, hit@3 1.0, and recall@5 0.96 after the M4 MVP update meet policy; the preceding design draft scored MRR 1.0 and recall 0.94. |
+| L-011 | done | A versioned 25-query benchmark scores the deterministic index/lexical layer; MRR 1.0, hit@3 1.0, and recall@5 0.96 after the performance/batching update meet policy; the preceding MVP had MRR 0.98, and the earlier design draft recall 0.94. |
 
 The benchmark is a curated regression set, not production telemetry. Revisit
 hybrid search when thresholds fail or real agent queries demonstrate misses.

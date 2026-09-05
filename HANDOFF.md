@@ -3,7 +3,71 @@
 This is the durable entry point for a fresh session. ROADMAP.md owns scope and
 status; historical log entries and reports retain narrower and failed runs.
 
-## Current M4 MVP
+## Latest comparison and execution experiment
+
+The current standalone publication is
+`e07766e4f1a3bf1cd5dc772e8da48f63d085e5ad`, pinned with its evidence by
+[[zig-http-response-batching-2026-09-05]]. Defaults: inline/zero application
+workers, gathered output, 16 startup response cells per connection, global
+64-callback turn budget, flush barriers and compaction after batch drain.
+The batch API still calls the ordinary handler for every request; no cached
+plaintext route or kernel zero-copy send is claimed. Read the sibling README,
+HANDOFF and ownership contract before changing retained input/output lifetimes.
+
+Completed measurements: 24 batch1/16 trials, 12 one-core trials, 24 deeper-client
+pipeline trials and 6 old/current controls. The same-binary batch comparison
+improved pipeline16 from 234k to 1.22M responses/s. The first one-core run reached
+1.83M versus libreactor2.62M; the later depth16/32/64/128 sweep plateaued at
+1.06–1.19M while libreactor reached7.41M at128. Both are preserved. An unchanged
+current binary varied1.02–1.81M in the control; code/host/frequency attribution
+remains unresolved. All66 measured trials/warmups passed, with4,224 exact
+preflight responses. Do not report a chosen best run as production capacity or
+use broken wrk corrected percentiles for request-tail claims.
+
+Exact Zig0.16.0 on Mac/Linux passed52 unit executions in both Debug and
+ReleaseSafe,26 generic +10 inline +11 gather cases and the expanded22 batch
+cases. Both passed30,000 ReleaseSafe smoke bodies. A new multi-cell cancellation
+witness retained16 frozen cells and drained all target/cancel owners on both OSes;
+Mac observed a canceled target, Linux a normal terminal race. Deep distinct-body
+pipelines32/64/128 preserved order/reuse without enlarging the server batch cap.
+Earlier checkpoints below retain their original narrower test counts.
+
+The [max-reasoning review](reports/2026-09-05-http-performance-review.md) finished.
+Next M4 work is queued: token-addressed Linux operation cells, a batch16/64 ×
+callback64/256 matrix, output representation and I/O sharding, then leases/offload and
+fault/combined-limit qualification. Mac/HTML contender comparisons and trustworthy
+tail measurements remain M4-004. Windows HTTP remains M4-005; M3-006 remains
+postponed by user decision. All implementation/review agents and timed runners finished.
+The [HTTP publication receipt](reports/2026-09-05-http-performance-publication.md)
+records the completed clean e07766e native gates and benchmark cleanup.
+Wiki publication gates use the final clean pushed documentation revision; match their
+headSha to that revision using the runbook, not an older receipt.
+
+
+The initial Linux plaintext comparison is preserved by
+[[zig-http-plaintext-comparison-2026-09-05]] at standalone checkpoint
+`b8a3afe1bcfd7dd933060e1064cab55c4f7a41c3`. Unchanged worker MVP: at 128
+connections/pipeline16, median 113k responses/s versus mrhttp 3.20M and
+libreactor 4.04M. All 54 primary + 18 client-sensitivity trials passed;
+throughput is experimental, and broken wrk corrected percentiles were rejected.
+This is not a production capacity/SLO or official TechEmpower result.
+
+The user rejected mandatory worker handoff and sequential header/body sends.
+The separate inline checkpoint `a164d42badb05e3d5cb11d3ea3789f06ffcd196d`
+measured a roughly 14% pipeline gain. Gather checkpoint
+`ca2eccf262632eda943615b119573c23e0f6e4fc` made inline/zero-workers/gather the
+default and measured 344k/s versus 125k scalar-inline in the same sweep.
+[[zig-http-inline-gather-2026-09-05]] preserves both checkpoints independently.
+Inline application callbacks must be bounded/nonblocking; the server cannot
+preempt a violation. Workers remain an explicit mode. Per-request offload and
+I/O sharding are not implemented. The demo /stall returns 501 inline.
+
+The generalized pinned contender preparation completed all 67 commands from
+a fresh isolated Linux directory at b8a3afe; no installed system packages or
+user checkout was changed. Preserve its source/artifact/compiler/image differences.
+
+
+## Original M4 MVP checkpoint
 
 The user authorized implementation after the design discussion. A working
 experimental framework is now in the private
@@ -41,9 +105,9 @@ a correctness gate. Exact compiler and CRT/source hashes are pinned in
 [[zig-0.16-linux-crt-linker-workaround]]. Do not upgrade Zig as a workaround.
 
 M4-001/002/003 are complete for the initial experiment. M4-004 comparative
-performance, M4-005 Windows HTTP and M4-006 API/scheduling/copy/fault experiments
-remain queued; M3-006 remains postponed. All implementation/review subagents
-finished. No competitor or Windows HTTP runner has been started. Wiki Windows
+performance and M4-006 architecture have subsequent results above. Their remaining
+experiments and M4-005 Windows HTTP remain queued; M3-006 remains postponed. All implementation/review subagents
+finished. Linux competitor runs now have separate pinned receipts. No Windows HTTP runner exists. Wiki Windows
 publication gates continue to verify existing wiki proofs, not this HTTP server.
 Use gh run view HEAD-associated runs to inspect hosted publication status;
 queued is never equivalent to executed or passed.
@@ -112,8 +176,8 @@ Threaded, APC, IOCP and experimental backend behavior.
 Useful read-only entry points are `python3 tools/wiki.py query TERMS --format
 json`, `lint --format json`, and `review --format json`. Ingest and upgrade are
 plan-only wrappers; source-head differences are inspection prompts, not proof
-that pinned guidance is stale. The 25-case retrieval regression is MRR 0.98, hit@3 1.0 and recall@5 0.96
-after the M4 MVP title/summary update. The preceding design draft scored MRR 1.0
+that pinned guidance is stale. The current 25-case retrieval regression is MRR 1.0, hit@3 1.0 and recall@5 0.96
+after the performance/batching update. The preceding M4 MVP scored MRR 0.98. The preceding design draft scored MRR 1.0
 and recall 0.94; the earlier corpus had recall 0.98. The policy passes; this is
 not production telemetry.
 
@@ -219,12 +283,11 @@ validated hosts. Installed Mac Zig is under
   installed release is not patched to hide either seam.
 - Linux io_uring evidence is limited to the named kernel, feature probes,
   registered resources and target/cancel CQE tests, not older kernels or a
-  production load matrix. macOS evidence covers Dispatch/Threaded proofs, not
-  a product kqueue reactor or physical durability.
+  production load matrix. macOS wiki proofs cover Dispatch/Threaded; the separate M4 application now has
+  a tested kqueue slice, still without production or physical durability qualification.
 - M3-006 is postponed by user decision. If explicitly resumed, it needs
   deployment hardware/storage/driver/error and durability evidence with
-  workload-specific tail-latency criteria. M4 design is open; implementation
-  remains queued. Future
+  workload-specific tail-latency criteria. M4 has an implemented Linux/macOS experiment with further work recorded above. Future
   source selection is question-driven. Backend work stays deferred until an
   Obsidian-first ADR trigger is real.
 
@@ -238,7 +301,7 @@ Record actual active agents/runners at handoff; queued or timer-waiting work is
 not running. Never claim the whole roadmap complete while actionable rows remain.
 
 
-## M4 publication checkpoint
+## Original M4 publication checkpoint
 
 HTTP project publication c41e0a3919794431b1222a93655945699386b17e was rerun
 from clean pushed source on maxross and omarx1: 14/14 steps and 44/44 test
@@ -246,7 +309,7 @@ executions in each mode, 26/26 ReleaseSafe integration and 30k exact-body smoke
 responses per host. The earlier unchanged implementation packet is pinned by
 [[zig-http-mvp-2026-09-05]]. All native HTTP publication runs finished.
 
-The wiki content update has 51 navigable pages and 68 sources. Local full
+That original wiki content update had 51 navigable pages and 68 sources. Local full
 verification passes 87/87 steps (73 tests, 9 platform skips), all 28 Python tests
 pass, and 25 retrieval cases score MRR 0.98/hit@3 1.0/recall@5 0.96 with policy
 met. This wiki's exact-revision Linux and manual Windows publication gates use
