@@ -112,9 +112,10 @@ Threaded, APC, IOCP and experimental backend behavior.
 Useful read-only entry points are `python3 tools/wiki.py query TERMS --format
 json`, `lint --format json`, and `review --format json`. Ingest and upgrade are
 plan-only wrappers; source-head differences are inspection prompts, not proof
-that pinned guidance is stale. The 25-case retrieval regression remains MRR
-1.0, hit@3 1.0 and recall@5 0.94 after expanding the M4 draft (previously
-0.98 before M4 and 0.96 after its initial notes). The policy still passes; this is not production telemetry.
+that pinned guidance is stale. The 25-case retrieval regression is MRR 0.98, hit@3 1.0 and recall@5 0.96
+after the M4 MVP title/summary update. The preceding design draft scored MRR 1.0
+and recall 0.94; the earlier corpus had recall 0.98. The policy passes; this is
+not production telemetry.
 
 ## Hosts and automation
 
@@ -247,7 +248,7 @@ responses per host. The earlier unchanged implementation packet is pinned by
 
 The wiki content update has 51 navigable pages and 68 sources. Local full
 verification passes 87/87 steps (73 tests, 9 platform skips), all 28 Python tests
-pass, and 25 retrieval cases retain MRR 1.0/hit@3 1.0/recall@5 0.94 with policy
+pass, and 25 retrieval cases score MRR 0.98/hit@3 1.0/recall@5 0.96 with policy
 met. This wiki's exact-revision Linux and manual Windows publication gates use
 [the platform runbook](docs/platform-testing.md); inspect the commit-associated
 [Windows run history](https://github.com/technologylab-ai/zigllmwiki/actions/workflows/windows-runtime-verify.yml)

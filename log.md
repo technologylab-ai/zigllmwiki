@@ -834,3 +834,12 @@ comparisons, Windows HTTP and API/reliability follow-ups remain queued under
 M4-004/005/006. M3-006 remains postponed. All assigned agents and the isolated
 linker probe finished; no queued item is represented as active. Existing Windows
 wiki publication checks remain distinct from future Windows HTTP evidence.
+
+
+## 2026-09-05 — M4 retrieval publication receipt
+
+The final MVP title/summary changes yielded 25-case MRR 0.98, hit@3 1.0 and
+recall@5 0.96 (preceding design draft: MRR 1.0, recall 0.94). Policy remains met;
+no ranking weights or reviewed cases were changed. Updated current roadmap and
+handoff metrics to the measured result. Full local gate 87/87, 73 passed/9 skips,
+28 Python tests and deterministic lint (51 pages/68 sources, zero issues) passed.
