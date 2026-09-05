@@ -165,6 +165,12 @@ bounded-memory/layout essays have decision-level synthesis.
 | Linux network zero-copy docs at `8cd9520d35a6c38db6567e97dd93b1f11f185dc6` | captured + draft synthesis | Framework borrowing versus kernel copy avoidance, send reuse notification and hardware-dependent receive path; no NIC experiment. |
 | TechEmpower wiki at `3be9618978e68b1a953f0c1a9cb642440c064fd8` | captured + draft synthesis | Plaintext/pipelining and JSON workload requirements; no leaderboard or performance claim. |
 
+Additional pinned slices: [[techempower-plaintext-validator]] establishes the
+actual plaintext body/driver configuration, and [[microsoft-thread-termination]]
+records one concrete unsafe thread-termination boundary. Together with [[http-overload-refusal]] for 503/refused connections, these are
+captured and synthesized into the draft, without new runtime claims. Exact Zig 0.16 Thread
+startup/join and existing deterministic-simulation evidence inform the proposal.
+
 M4-001 initial ideas are captured. Further architecture decisions and server
 implementation are queued under M4-002 through M4-004; no agent is running
 those items. M3-006 remains postponed.

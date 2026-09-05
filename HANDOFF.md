@@ -14,10 +14,21 @@ It separates framework copy avoidance
 from kernel zero-copy and records the large-upload policy tradeoff. HTTP RFCs,
 Linux documentation and TechEmpower test requirements were pinned first.
 
+Follow-up requirements and proposals are recorded: fixed startup I/O and
+application threads with bounded handle/response queues; input/output borrow
+retention after callback timeout; lazy optional-header interpretation with a
+complete syntax/framing scan; and finite admission/backpressure that refuses
+new work until real credits return. Compare leading implementations on our
+hardware/OS. First workloads are exact TechEmpower plaintext (`Hello, World!`,
+13 bytes, driver pipeline depth 16) and a bounded preloaded small index.html.
+A deterministic event model and worker-stall/overload scenarios are proposed;
+no hard scheduling or arbitrary-callback isolation guarantee is claimed.
+
 M4-001 captures initial ideas only; M4-002 through M4-004 are queued. No server
 implementation, new HTTP runtime proof or performance measurement exists.
-Next discussion should settle callback phases, buffer layout, asynchronous
-handler execution and writer lifetime/backpressure, plus the HTTPS boundary.
+Next discussion should refine callback phases, buffer layout, fixed-worker
+pending/resume and terminal-credit ownership, admission recovery and the HTTPS
+boundary. Current design choices are proposals, not a finalized architecture.
 M3-006 stays postponed; this discussion does not resume Windows deployment
 qualification. No subagent or remote runner was started for these design notes.
 

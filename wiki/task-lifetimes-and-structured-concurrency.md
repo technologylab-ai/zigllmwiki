@@ -5,7 +5,7 @@ kind: pattern
 status: source-verified
 zig: "0.16.0"
 summary: Bind every task, operation, snapshot, and child process to an owner whose scope cannot finish before its dependents have completed or acknowledged cancellation.
-updated: 2026-09-04
+updated: 2026-09-05
 sources:
   - "[[zig-0.16.0-stdlib]]"
   - "[[matklad-cancelation-terminology]]"
@@ -114,3 +114,7 @@ added to the platform matrix.
 
 Related: [[cancellation]], [[select-and-batch]], [[io-threaded]], [[io-uring]],
 [[static-allocation-and-constant-work]], [[deterministic-simulation-testing]].
+
+Design application: [[bounded-http-server-design]] proposes fixed worker
+execution, explicit buffer borrows and replayable HTTP state transitions;
+these remain design notes without an implemented HTTP simulation or server.

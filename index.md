@@ -76,7 +76,8 @@ Read this page first, then follow only the pages needed for the task.
   `io_uring`, Darwin `kqueue`, and Windows IOCP backend choices.
 
 - [[bounded-http-server-design]] — M4 design draft: Linux-first HTTP/1.1,
-  startup limits, borrowed requests, response writer and async buffer ownership.
+  fixed startup workers, finite admission, lazy headers, borrowed buffers and
+  response-writer ownership.
 
 ## Engineering system
 

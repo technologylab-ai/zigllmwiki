@@ -752,3 +752,33 @@ Local exact Zig 0.16.0 verification passed: 87/87 steps, 73/82 tests and
 9 platform skips, with 51 navigable pages and 62 source records. All 25
 retrieval cases passed policy: MRR 1.0, hit@3 1.0 and recall@5 0.96, down from
 0.98 after adding the draft. Historical measurements remain unchanged.
+
+## [2026-09-05] M4 execution design | startup workers, lazy headers and finite admission
+
+Collected the user's follow-ups into the existing HTTP draft: compare leading
+TechEmpower implementations on our hardware; demonstrate a constant response
+and small index.html; decouple arbitrary callbacks; create threads at startup;
+interpret optional headers lazily; and refuse new requests when bounded
+backpressure reaches capacity/deadline limits.
+
+Pinned the actual plaintext driver at 57d92fbec6f8fd7431bc77326dd0484e60c96e20
+(13-byte Hello, World! body, pipeline depth 16) and Microsoft TerminateThread
+source before synthesis. Inspected exact Zig 0.16 Thread spawn/join contracts
+and existing ownership/DST guidance. The draft proposes fixed I/O/application
+workers, bounded handle/response/terminal credits, and retained memory when
+timed-out callbacks still run. Generation IDs do not invalidate pointers.
+Lazy interpretation preserves full framing/Host/length validation. Preloaded
+HTML is explicitly memory-resident serving, not per-request storage evidence.
+
+Refreshed reciprocal links, retrieval index, curation, roadmap and handoff.
+M4 execution choices remain proposed and its final design/implementation gates
+remain queued; M3-006 remains postponed. No subagent, remote runner, server or
+competitor benchmark was started for this discussion.
+
+Pinned RFC 9110 section 15.6.4 separately for overload refusal. Benchmark
+notes retain production assertions/safety checks and distinguish callback
+isolation from the optional trusted/static path.
+
+Local exact Zig 0.16.0 verification passed 87/87 steps, 73/82 tests with
+9 platform skips (51 pages, 65 sources). The 25-query retrieval policy passed
+with MRR 1.0, hit@3 1.0 and recall@5 0.96. No new runtime evidence is claimed.

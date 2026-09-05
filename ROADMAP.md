@@ -152,15 +152,19 @@ are captured in [[bounded-http-server-design]]: Linux production first,
 macOS/Windows support, HTTP/1.1, startup limits, borrowed request views,
 and a bounded response writer with incremental writes and flush. Event-loop
 workers must avoid blocking work and bound each turn; ownership transitions
-require extensive invariant-based assertions. No server
+require extensive invariant-based assertions. Follow-up notes propose fixed
+startup I/O/application workers, bounded handle queues, lazy header semantics
+with complete framing validation, finite backpressure with refusal/recovery,
+and exact plaintext plus a preloaded small HTML workload. Callback timeout
+cannot reclaim memory still borrowed by a running handler. No server
 implementation or performance result is claimed; M3-006 remains postponed.
 
 | ID | Status | Deliverable / exit condition |
 | --- | --- | --- |
 | M4-001 | done | Capture the initial requirements, pinned HTTP/copy-avoidance/benchmark evidence, candidate reader/writer ownership model and unresolved design choices. This is an initial draft, not an accepted final architecture. |
-| M4-002 | queued | Settle callback phases, buffer representation, async handler execution, writer flush/finish lifetimes, startup budgets and TLS boundary; derive parser/ownership/failure proof cases. |
+| M4-002 | queued | Refine the proposed fixed startup worker/ownership model, finite admission/backpressure and lazy-header contract; settle callback phases, buffers, pending/resume writer, startup budgets and TLS boundary; derive parser/ownership/failure proof cases. |
 | M4-003 | queued | Implement the first bounded HTTP/1.1 server slice in a dedicated project, with Linux production and macOS/Windows portability gates. |
-| M4-004 | queued | Measure correct request/response behavior, allocation/copy counts, saturation and tail latency; compare equivalent local workloads before any external benchmark claim. |
+| M4-004 | queued | Measure correct request/response behavior, allocation/copy counts, saturation and tail latency; run selected leading implementations on the same hardware/OS with exact plaintext and preloaded HTML workloads before any external benchmark claim. |
 
 Use the wiki to design, implement, and critique a bounded HTTP server:
 

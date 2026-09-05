@@ -5,7 +5,7 @@ kind: principle
 status: source-verified
 zig: "0.16.0"
 summary: Put production logic behind deterministic clock, network, disk, and scheduler boundaries so seeded fault campaigns are fast, replayable, and assertion-rich.
-updated: 2026-09-04
+updated: 2026-09-05
 sources:
   - "[[tigerbeetle-vopr]]"
   - "[[tigerbeetle-architecture]]"
@@ -88,3 +88,7 @@ with the separate M4 synthesis project.
 Related: [[tigerbeetle-engineering-corpus]], [[tigerstyle]], [[std-io]],
 [[cancellation]], [[durable-storage-and-recovery]],
 [[testing-io-and-single-threaded-builds]].
+
+Design application: [[bounded-http-server-design]] proposes fixed worker
+execution, explicit buffer borrows and replayable HTTP state transitions;
+these remain design notes without an implemented HTTP simulation or server.

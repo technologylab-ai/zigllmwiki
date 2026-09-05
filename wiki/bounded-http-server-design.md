@@ -8,8 +8,11 @@ summary: Linux-first HTTP framework proposal with startup limits, borrowed reque
 updated: 2026-09-05
 sources:
   - "[[http11-framing-and-limits]]"
+  - "[[http-overload-refusal]]"
   - "[[linux-network-zero-copy]]"
   - "[[techempower-http-test-requirements]]"
+  - "[[techempower-plaintext-validator]]"
+  - "[[microsoft-thread-termination]]"
   - "[[zig-0.16.0-stdlib]]"
   - "[[source-tigerstyle]]"
   - "[[liburing-interface-and-cancellation]]"
@@ -38,6 +41,11 @@ implementation or dependencies is not decided. Higher-level framework features
 follow a sound HTTP/1.1 core. M3-006 deployment qualification stays postponed.
 The user additionally requires proper evented progress and extensive
 TigerStyle assertions; these are core acceptance criteria.
+Further requirements: create all framework threads at startup, interpret
+nonessential headers lazily, and compare leading benchmark implementations on
+the same hardware using fixed plaintext and a small index.html as first workloads.
+Backpressure must be finite: refuse new work before resource exhaustion and
+resume admission only after real capacity returns.
 
 ## Which layer can promise what?
 
@@ -99,6 +107,39 @@ Finite slots circulate through states; hidden growable collections and
 per-dispatch allocation are outside the proposed strict core.
 [[static-allocation-and-constant-work]], [[performance-sketches-and-batching]]
 
+## Admission and finite backpressure
+
+The user requires refusal at the capacity boundary. Backpressure is a bounded
+pause, not a promise to keep every request waiting. Derive admission from actual
+free credits for connections, parsing/input, handler jobs, output and terminal
+completion records. Reserve the next stage's working budget before committing
+to it. All waiting states need a capacity and an absolute deadline; do not hide
+an unbounded queue in futures, kernel backlog, suspended handlers or logging.
+
+| Pressure point | Proposed bounded policy |
+| --- | --- |
+| Connection slots exhausted | Limit pending accepts/backlog and suspend further accepts or close an already accepted excess connection; no new connection state outside the pool. |
+| Request/handler credits unavailable | Reject a framed request with 503 when a bounded response is feasible; otherwise close. Never queue unlimited work behind busy handlers. |
+| Response credits exhausted | Pause the current producer using its existing continuation slot; retain only the configured output bytes and expire at the response deadline. Reduce further admission as required. |
+| Paused/queued deadline expires | Stop that request's progress and close or emit the configured bounded error if framing still permits it. Keep application/kernel borrows until their actual release. |
+| Capacity returns | Resume only when all required credits and healthy execution capacity are available; optional startup-configured high/low watermarks prevent repeated admission toggling. |
+
+Reserve finite error/control capacity, but do not promise every rejected client
+a delivered response. A client that does not read must not consume a permanent
+503 slot. Early rejection with an unread request body normally closes the
+connection; no unlimited drain to recover keep-alive. 413 is a request-size
+policy result, while 503 reports temporary overload. A response already started
+cannot be replaced with a fresh 503; close on an unrecoverable output failure.
+[[http11-framing-and-limits]], [[http-overload-refusal]]
+
+Timers do not return credits held by running callbacks or outstanding kernel
+operations. Paused, expired and quarantined work remains included in the
+resource accounting. A connection deadline alone does not restore a stuck
+application-worker pool. Assert limits and credit conservation at admission,
+transfer, timeout and terminal release. Optional per-route/client partitions
+must themselves use bounded tables. [[static-allocation-and-constant-work]],
+[[cancellation]]
+
 ## Request views and callback lifetime
 
 Candidate first API: invoke `on_request` when a bounded request is fully framed,
@@ -128,14 +169,132 @@ are invalidated when body streaming is initialized. An adapter must state
 whether it borrows, copies or suspends; the stdlib cannot silently provide a
 stronger lifetime guarantee. [[zig-0.16.0-stdlib]]
 
-Proposed callback rule: short synchronous work returns promptly. Deferred work
-requires a bounded request handle and explicit terminal completion; callback
-return alone is not permission to recycle buffers used by pending sends.
-Foreign blocking calls or unbounded CPU work cannot run on the I/O loop.
-An ordinary pull Reader/Writer cannot suspend an arbitrary Zig callback without
-an execution mechanism. Explicit pending/resume operations versus bounded
-stackful tasks is an open API decision, not solved by naming a function async.
+Proposed callback rule after the execution discussion: general application
+callbacks run on a fixed application-worker pool, separate from I/O loops.
+Deferred work requires a bounded request handle and explicit terminal
+completion; callback return alone is not permission to recycle buffers used
+by pending sends. Foreign blocking calls or unbounded CPU work cannot run on
+the I/O loop. An ordinary pull Reader/Writer cannot suspend an arbitrary Zig
+callback without an execution mechanism. Explicit pending/resume is the current
+candidate; a synchronous compatibility API would consume a worker while
+waiting. Neither is made evented by naming a function async.
 [[async-vs-concurrent]], [[task-lifetimes-and-structured-concurrency]]
+
+## Separate application execution from network ownership
+
+Candidate architecture, not an accepted or measured implementation:
+
+`I/O owner → bounded request-handle queue → application worker`
+
+`application worker → bounded response-command queue → same I/O owner`
+
+Each connection belongs to one I/O shard. Its owner alone mutates parser,
+socket, deadline and send state. It never directly invokes arbitrary user
+code or waits for a worker, application lock or worker join. Workers receive
+immutable request borrows and exclusive writable output reservations. Queue
+messages carry handles, lengths and buffer identities rather than copying
+payloads. Cross-thread publication needs a proved synchronization protocol;
+logical ownership alone does not establish memory visibility.
+
+The application writer transfers committed output to the I/O owner; partial
+sends and completions stay there. Completion releases capacity and schedules
+an explicit continuation on the worker side. At most one callback/continuation
+owns a request context at a time. A full output pool must release execution
+through pending/resume instead of occupying a worker until the client reads.
+A queued continuation consumes a preallocated context, not a new thread or
+unbounded suspended stack. [[task-lifetimes-and-structured-concurrency]]
+
+Reserve queue/terminal-result credit when admitting work. Separate response
+data capacity from cancellation/return capacity so a full data queue cannot
+prevent an expired worker from returning its ownership. Never hold a framework
+mutex while invoking application code. Per-route or per-worker partitions can
+contain overload; their counts and fairness policy must be explicit. Fewer
+threads and batched handle transfers are candidates to measure, not reasons
+to introduce a second hidden queue. [[static-allocation-and-constant-work]]
+
+### Threads are startup resources
+
+The user requires all framework threads to be created during startup. Configure
+I/O and application thread counts, stack sizes, queue entries, handler contexts,
+output credits and any blocking-work lanes as one resource budget. Allocate and
+initialize their state, start workers, wait for an initialization barrier, then
+admit traffic. If setup fails, stop and join the threads actually started and
+release their resources. No request-path spawn, elastic growth or per-request
+thread/future allocation belongs in this proposed strict core.
+
+Exact Zig 0.16 `std.Thread.SpawnConfig` exposes stack size and allocator;
+`join` waits for completion and frees spawn resources. Stack sizes are subject
+to platform implementation behavior, and spawning at startup is not a proof
+of resident pages or real-time scheduling. Shipped `Io.Threaded` task dispatch
+can allocate per operation even with warm threads, so it must not silently
+implement this promise. Application libraries that create hidden threads or
+allocations require an explicit integration exception. [[zig-0.16.0-stdlib]],
+[[io-threaded]], [[static-allocation-and-constant-work]]
+
+### What a worker pool can and cannot isolate
+
+The proposal removes application execution from the network owner's call stack.
+A slow handler consumes finite application capacity; healthy network owners
+can still process completions, expire requests and reject overload, subject to
+OS scheduling and shared resource availability. It does not guarantee useful
+application throughput if every worker is stuck. It also does not isolate
+process-wide memory corruption, crashes, allocator/global-lock failures, or
+CPU/memory-bandwidth contention. Leave CPU headroom and measure this boundary.
+
+Timeout stops accepting results; it does not stop arbitrary machine code.
+A running handler's input and output reservations remain charged until the
+handler acknowledges return and every kernel borrow is released. Generation
+checks reject stale messages but cannot prevent use of a retained pointer.
+Quarantined slots count against the configured capacity. Never recycle them
+at a timer tick or replace stuck workers indefinitely. A queued job can release
+ownership only after dispatch/cancellation arbitration proves it never started.
+
+Forcibly terminating an arbitrary thread is not the proposed recovery policy:
+Microsoft documents skipped cleanup and shared-lock/state damage for
+TerminateThread. If a handler never returns, an in-process server cannot promise
+both bounded graceful shutdown and safe reclamation of its borrows. A supervisor
+restart or a separately designed process/sandbox boundary is a future option;
+process isolation still needs bounded IPC, resource controls, termination/join
+and an audit of shared-memory permissions. [[microsoft-thread-termination]],
+[[child-process-lifecycles]], [[cancellation]]
+
+An optional trusted inline handler could later avoid worker handoff for
+controlled bounded code, but weakens callback isolation. It must be explicit
+and measured separately. A declared static response can instead be a bounded
+framework operation with no user callback on the loop. The initial application
+benchmark should exercise the ordinary callback/writer path, so a fast static
+route does not hide the execution model's cost.
+
+## Lazy header interpretation, complete framing validation
+
+The user wants the few required headers interpreted eagerly and the rest
+available on demand. Proposed design: one bounded incremental pass validates
+the entire header block and identifies the fields needed for framing and
+connection policy. Preserve borrowed bytes for everything else. RFC 9112
+separates generic field-line parsing from interpreting individual values;
+eagerly building a hash map is not required. [[http11-framing-and-limits]]
+
+Eager work includes request-line/target handling, field-name and line syntax,
+header byte/count limits, Host validity/duplicates, Content-Length values and
+overflow, Transfer-Encoding/framing conflicts, Connection policy and Expect.
+Unsupported upgrades or encodings must be recognized according to the supported
+protocol policy. Interpret other fields eagerly only when an enabled feature
+needs them. Do not stop scanning after the first Content-Length: a conflicting
+field or malformed line may occur at the end of the block.
+
+Cookies, user-agent structure, Accept negotiation, query decoding and other
+application semantics can remain lazy. Avoid automatic lowercase copies,
+string allocation, eager cookie maps and unconditional value normalization.
+A first accessor can scan the bounded validated raw block and return borrowed
+matches; repeated lookups trade CPU work against a fixed-capacity offset index.
+Benchmark both. Preserve duplicate-field semantics instead of blindly combining
+all values. Accessor results inherit request-buffer lifetimes and never outlive
+their borrow. [[lower-dimensional-api-contracts]]
+
+Assertions check scan cursors, initialized ranges, field counts and parsed-length
+state. Malformed syntax and excessive headers remain ordinary rejection paths.
+Measure no optional lookups, a few and many; equal framing checks must remain
+enabled in all throughput comparisons.
 
 ## Evented progress and assertion discipline
 
@@ -253,8 +412,8 @@ No M4 code, HTTP proof, NIC zero-copy test or server benchmark exists yet.
 Existing platform proofs establish narrower lifecycle examples only.
 
 Next design choices: complete-body versus headers-first callback, contiguous
-versus segmented request storage, explicit pending/resume versus another bounded
-execution model, and TLS termination. A plaintext first prototype is plausible;
+versus segmented request storage, the fixed-worker queue/credit and explicit
+pending/resume API, and TLS termination. A plaintext first prototype is plausible;
 public browser deployments still need a planned HTTPS path. TLS/compression
 transform bytes and need their own buffers/ownership/copy audit.
 
@@ -264,14 +423,56 @@ partial writes, output exhaustion, request-to-response borrowing, cancellation
 and stale handles. First server slice should then add keep-alive and an actual
 incremental response writer before routing/upload conveniences.
 
-Use maxross for parser/writer microbenchmarks and macOS HTTP measurements, and
-omarx1 for the Linux `io_uring` path. Run equivalent competitors on the same
-hardware/configuration; Mac requests/sec cannot determine a TechEmpower rank.
-Plaintext includes pipelining and required response headers; JSON requires
-real per-request serialization. Preserve correctness, allocation/copy counters,
-CPU, memory and tail latency, and disclose loopback/client bottlenecks.
-[[techempower-http-test-requirements]], [[trustworthy-microbenchmarks]]
+### Predictable workload and deterministic model
+
+Separate repeatable logical behavior from wall-clock latency. Put protocol and
+ownership transitions behind injected receive fragments, send completions,
+worker-result events and virtual time. Replay the same event trace with the
+same outputs and state changes. Explore alternate bounded interleavings and
+failures with recorded seeds. A bounded callback body improves the workload's
+predictability but does not make OS scheduling or network timing deterministic.
+[[deterministic-simulation-testing]]
+
+First workloads requested by the user:
+
+| Workload | What it should demonstrate |
+| --- | --- |
+| Constant response | Route `/plaintext` through the ordinary callback/writer and emit `Hello, World!`: 13 ASCII bytes, no newline, `text/plain`, matching Content-Length, and generated protocol headers. Compare a borrowed static body with direct writer generation separately. |
+| Small index.html | Read and size-check a chosen file into immutable startup-owned memory, then serve its known bytes through the ordinary callback/writer. This is memory-resident asset serving; a per-request file-read/cold-storage test is a separate workload. |
+| Isolation under load | Mix the bounded baseline with deliberately blocked/CPU-heavy handlers, queue exhaustion, stalled response readers and late worker returns. Check event-loop progress, finite memory, overload responses and retained borrow accounting. |
+
+Keep the immutable asset alive through all sends. Pin the HTML bytes/hash and
+size in any published run. Preloading/touching during startup removes deliberate
+request-path file reads, not every possible later page fault.
+
+The TechEmpower plaintext driver pinned here uses pipeline depth 16. Its body
+validator is lenient about case/extra bytes; use the exact published response.
+The wiki's illustrative Content-Length of 15 does not match the bare 13-byte
+body. Static plaintext body reuse is allowed, whereas caching the entire
+response including headers is not. Date and Server headers are required; the
+Date representation can be refreshed once a second. JSON later requires actual
+per-request serialization. [[techempower-plaintext-validator]],
+[[techempower-http-test-requirements]]
+
+Select a few leading implementations for the relevant TechEmpower test when
+the comparison is ready; pin the result round, category, framework commits and
+configurations then. Run those implementations on our hardware, using the same
+OS/architecture, response bytes, clients, concurrency/pipeline depth, transport,
+CPU budget and build policy. Linux-only candidates need a common Linux
+environment; do not compare native macOS with a competitor in a Linux VM as
+though only the framework differs. No competitor selection or build is running.
+
+Use maxross for portable work and macOS comparisons, omarx1 for native Linux
+`io_uring` evidence; disclose any common VM experiment separately. Record client
+CPU saturation, loopback versus NIC traffic, memory, allocation/copy counts,
+queue occupancy, failures, event-loop lag and p50/p99/p99.9 latency across loads.
+Include warmup, repeated runs and the point where overload begins. Fixed-work
+fast-path results do not generalize to arbitrary application handlers.
+Keep the selected production assertion/safety policy enabled in our measured
+build; disabling invariant checks solely for a faster score changes the claim.
+[[trustworthy-microbenchmarks]]
 
 Related: [[platform-io-backend-decision-table]], [[io-uring]],
 [[static-allocation-and-constant-work]], [[lower-dimensional-api-contracts]],
-[[tigerstyle]], [[buffer-hygiene-and-division-intent]].
+[[tigerstyle]], [[buffer-hygiene-and-division-intent]],
+[[task-lifetimes-and-structured-concurrency]], [[deterministic-simulation-testing]].
