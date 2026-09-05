@@ -37,10 +37,11 @@ produce Zig 0.16.0 code that:
   deployment hardware is available and further qualification is not a current
   priority; existing GitHub-hosted runtime evidence remains valid within its limits.
   The curator service is inactive, with its weekly timer enabled and waiting.
-- **Current scope:** the user opened M4 design exploration on 2026-09-05.
-  Initial HTTP framework and reader/writer ownership ideas are captured in
-  [[bounded-http-server-design]]; implementation remains queued. M3-006 stays
-  postponed. External evidence gaps remain explicit.
+- **Current scope:** the first M4 HTTP MVP is implemented in the private
+  [zig-http project](https://github.com/technologylab-ai/zig-http). Linux io_uring
+  and macOS kqueue pass native ownership/wire gates with exact Zig 0.16.0.
+  Windows HTTP, further pending/resume work and controlled comparisons remain
+  queued. M3-006 stays postponed; the roadmap is not entirely complete.
 - **Backend:** intentionally deferred; the Obsidian-first ADR remains in force.
 
 Source status is tracked as `discovered → selected → captured → synthesized →
@@ -145,31 +146,33 @@ the named OS. Never generalize a networking result to regular files.
 Exit condition: a decision table can select a backend for file and network I/O
 with explicit guarantees, limits, unsupported cases, and measured evidence.
 
-## M4: synthesis project — TigerStyle evented HTTP server (design opened)
+## M4: synthesis project — TigerStyle evented HTTP server (MVP available)
 
-The user opened the separate design discussion on 2026-09-05. Initial ideas
-are captured in [[bounded-http-server-design]]: Linux production first,
-macOS/Windows support, HTTP/1.1, startup limits, borrowed request views,
-and a bounded response writer with incremental writes and flush. Event-loop
-workers must avoid blocking work and bound each turn; ownership transitions
-require extensive invariant-based assertions. Follow-up notes propose fixed
-startup I/O/application workers, bounded handle queues, lazy header semantics
-with complete framing validation, finite backpressure with refusal/recovery,
-and exact plaintext plus a preloaded small HTML workload. Provision and test
-the combined maximum supported load, derive connection capacity from resource
-budgets, and distinguish open-connection, active-request and performance
-commitments. The framework enforces its own limits and supplies bounded
-measurement tools; application developers own workload/performance guarantees.
-Callback timeout
-cannot reclaim memory still borrowed by a running handler. No server
-implementation or performance result is claimed; M3-006 remains postponed.
+The user authorized the initial implementation on 2026-09-05 after the design
+session. [[bounded-http-server-design]] separates the implemented contract from
+broader proposals. Runnable code is in the dedicated private zig-http project;
+[[zig-http-mvp-2026-09-05]] pins its source and native evidence. It has fixed
+startup workers/slots, bounded complete-body parsing and lazy headers, a borrowed
+response path, explicit flush/resume/finish, finite refusal/deadlines and
+cancellation drain. Mac/Linux each pass 44 Debug and 44 ReleaseSafe test
+executions plus 26 integration cases. Finite smoke validated 30k exact responses
+per host; these are client-bound experiments, not capacity or TechEmpower rank.
+
+For the accepted first-iteration scope, M4-003 now owns the working Linux/macOS
+slice; the remaining Windows HTTP adapter is explicitly split into M4-005.
+M3-006 physical Windows deployment qualification remains postponed. The MVP's
+pending/resume API is deliberately replaceable, with dynamic release and broader
+reliability work retained under M4-006. All implementation subagents finished;
+queued items have no assigned running agent.
 
 | ID | Status | Deliverable / exit condition |
 | --- | --- | --- |
 | M4-001 | done | Capture the initial requirements, pinned HTTP/copy-avoidance/benchmark evidence, candidate reader/writer ownership model and unresolved design choices. This is an initial draft, not an accepted final architecture. |
-| M4-002 | queued | Refine the proposed fixed startup worker/ownership model, finite admission/backpressure and lazy-header contract; settle callback phases, buffers, pending/resume writer, startup budgets and TLS boundary; derive parser/ownership/failure proof cases. |
-| M4-003 | queued | Implement the first bounded HTTP/1.1 server slice in a dedicated project, with Linux production and macOS/Windows portability gates. |
-| M4-004 | queued | Measure correct request/response behavior, allocation/copy counts, saturation and tail latency; run selected leading implementations on the same hardware/OS with exact plaintext and preloaded HTML workloads before any external benchmark claim. |
+| M4-002 | done | Establish the first experimental contract: fixed workers and per-slot mailboxes, complete bounded requests, lazy optional headers, explicit flush/resume/finish, requested-byte heap cap and plain loopback HTTP boundary. Implement parser/ownership/failure cases; future API revision remains M4-006. |
+| M4-003 | done | Working standalone Linux io_uring/macOS kqueue HTTP/1.1 MVP with plaintext, preloaded HTML, echo, chunked flush/resume, native gates, watchdogs and retained-borrow shutdown. Source/evidence pinned; not production qualification. Windows portability is tracked explicitly in M4-005. |
+| M4-004 | queued | Initial ReleaseSafe exact-body smoke and allocation/copy metrics exist. Remaining: repeatable saturation/tail measurements and pinned leading implementations on identical hardware/OS with exact plaintext/preloaded HTML; no external benchmark claim yet. |
+| M4-005 | queued | Implement Windows HTTP IOCP adapter and hosted native runtime gates; current server intentionally rejects Windows compilation. Separate from postponed M3-006 deployment qualification. |
+| M4-006 | queued | Experiment with pending/resume and finish/cancel lease release, remove pipeline compaction, assess worker scheduling/sharding, and add deterministic fault/schedule exploration plus sustained combined-limit workloads and broader resource accounting. |
 
 Use the wiki to design, implement, and critique a bounded HTTP server:
 

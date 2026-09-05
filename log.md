@@ -805,3 +805,32 @@ Verification of the expanded resource/measurement draft passed exact Zig
 0.16.0: 87/87 steps, 73/82 tests with 9 skips. The 25-query retrieval policy
 passed with MRR 1.0, hit@3 1.0 and recall@5 0.94 (previous draft 0.96).
 Updated current roadmap/handoff metrics without rewriting historical results.
+
+
+## 2026-09-05 — Working M4 HTTP MVP and Linux ReleaseSafe linker lesson
+
+Implemented the first standalone private zig-http MVP after user authorization,
+using independent parser, transport, integration and lifecycle/doc review agents.
+Pinned source 6d622009abee5807eb0829e558c3173635e077ea and the native packet in
+[[zig-http-mvp-2026-09-05]] before extending the existing design synthesis. Exact
+Zig 0.16.0 on Mac M3 Max/macOS 26.6.2 build 25G83 and omarx1/Omarchy 4.0.2/kernel
+7.1.9-arch1-2/io_uring_disabled=0 passed 44 test executions per mode and 26 wire
+integration cases each. Source/binary/asset hashes and all fixture bounds are
+preserved. The 26 include combined exact body/connection limits and recovery.
+A strengthened slow-reader witness excludes the first Linux fixture's completed
+response followed by idle timeout. Both ReleaseSafe smoke runs validated 30k
+bodies; pipeline compaction copied 7,563,688 bytes each. No capacity claim.
+
+At the user's suggestion, retried the Linux CRT relocation failure in default
+ReleaseSafe. An independent same-source probe confirmed Debug fails before
+execution, default ReleaseSafe passes 6/6 transport tests, and Debug LLVM/LLD
+passes 6/6. Pinned CRT/compiler/command evidence and added the first-workaround
+lesson to build diagnostics; all timing remains ReleaseSafe. No compiler or CRT
+was patched. RFC 3986 URI scheme/path rules are separately pinned.
+
+Updated reciprocal links, index, curation, platform runbook, roadmap and durable
+handoff. M4-001/002/003 are done for the initial Linux/macOS experiment;
+comparisons, Windows HTTP and API/reliability follow-ups remain queued under
+M4-004/005/006. M3-006 remains postponed. All assigned agents and the isolated
+linker probe finished; no queued item is represented as active. Existing Windows
+wiki publication checks remain distinct from future Windows HTTP evidence.

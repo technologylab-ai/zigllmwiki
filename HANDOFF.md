@@ -3,41 +3,50 @@
 This is the durable entry point for a fresh session. ROADMAP.md owns scope and
 status; historical log entries and reports retain narrower and failed runs.
 
-## Current M4 design discussion
+## Current M4 MVP
 
-On 2026-09-05 the user opened M4 design exploration. The initial draft is
-[[bounded-http-server-design]]: Linux-first HTTP/1.1 framework, macOS/Windows
-support, startup resource limits, borrowed request views and a bounded writer
-for incremental responses and flush. Proper evented progress, bounded loop
-turns and extensive ownership/state assertions are explicit requirements.
-It separates framework copy avoidance
-from kernel zero-copy and records the large-upload policy tradeoff. HTTP RFCs,
-Linux documentation and TechEmpower test requirements were pinned first.
+The user authorized implementation after the design discussion. A working
+experimental framework is now in the private
+[zig-http project](https://github.com/technologylab-ai/zig-http), local sibling
+`../zig-http`. Its published documentation checkpoint is
+`c41e0a3919794431b1222a93655945699386b17e`; the unchanged implementation is pinned
+at `6d622009abee5807eb0829e558c3173635e077ea` by
+[[zig-http-mvp-2026-09-05]]. Read that project's README, AGENTS, HANDOFF and
+ownership docs before coding. Do not restart it or copy runnable Zig into wiki text.
 
-Follow-up requirements and proposals are recorded: fixed startup I/O and
-application threads with bounded handle/response queues; input/output borrow
-retention after callback timeout; lazy optional-header interpretation with a
-complete syntax/framing scan; and finite admission/backpressure that refuses
-new work until real credits return. Compare leading implementations on our
-hardware/OS. First workloads are exact TechEmpower plaintext (`Hello, World!`,
-13 bytes, driver pipeline depth 16) and a bounded preloaded small index.html.
-The user assigns workload/latency guarantees to the application developer.
-The framework guarantees its own resource/admission bounds and supplies bounded
-metrics to choose and validate them; the reference server demonstrates a defined
-normal web workload. The governing capacity requirement is:
-derive/validate joint resource limits, distinguish open connections from
-simultaneous active requests, and test exact-limit/over-limit behavior and
-recovery. Performance commitments require a stated workload and environment.
-A deterministic event model and worker-stall/overload scenarios are proposed;
-no hard scheduling or arbitrary-callback isolation guarantee is claimed.
+Exact Zig 0.16.0; Linux raw io_uring and macOS nonblocking kqueue; one I/O owner
+and fixed startup application workers with per-slot atomic mailboxes. Complete
+bounded requests expose lazy headers and borrowed body spans. Returning
+writer.flush() writes the entire committed snapshot asynchronously and resumes
+with an empty writer. finish() ends framing. Borrow only request-owned or
+immutable server-lifetime bytes: dynamic finish/cancel release is still queued.
+Timeout cannot reclaim an active worker's borrow; shutdown drains or exits the
+whole process at its deadline. Pipeline suffix compaction is a measured copy.
 
-M4-001 captures initial ideas only; M4-002 through M4-004 are queued. No server
-implementation, new HTTP runtime proof or performance measurement exists.
-Next discussion should refine callback phases, buffer layout, fixed-worker
-pending/resume and terminal-credit ownership, admission recovery and the HTTPS
-boundary. Current design choices are proposals, not a finalized architecture.
-M3-006 stays postponed; this discussion does not resume Windows deployment
-qualification. No subagent or remote runner was started for these design notes.
+The pinned clean source passed 44 test executions in each of Debug/ReleaseSafe
+and 26 integration cases on both maxross and omarx1. Each host's ReleaseSafe
+smoke validated 30k bodies; no capacity or TechEmpower ranking is claimed.
+The actual response-stall test limits SO_SNDBUF and requires incomplete output,
+preventing an idle-timeout false positive observed in the first Linux fixture.
+The packet preserves environments, configurations, binary/source hashes and
+all receipts. Framework heap bounds exclude libc/pthread/kernel/application
+storage; arbitrary callback isolation and whole-process RSS bounds are unproved.
+
+The user's Linux linker lesson is now in
+[[build-diagnostics-and-generated-code]]: on omarx1 with GCC 16/glibc 2.44,
+default Debug fails on crt1.o:.sframe R_X86_64_PC64, while default ReleaseSafe
+runs the same six transport tests without overrides. Debug also passes with
+-fllvm -flld. Prefer ReleaseSafe for performance measurements; retain Debug as
+a correctness gate. Exact compiler and CRT/source hashes are pinned in
+[[zig-0.16-linux-crt-linker-workaround]]. Do not upgrade Zig as a workaround.
+
+M4-001/002/003 are complete for the initial experiment. M4-004 comparative
+performance, M4-005 Windows HTTP and M4-006 API/scheduling/copy/fault experiments
+remain queued; M3-006 remains postponed. All implementation/review subagents
+finished. No competitor or Windows HTTP runner has been started. Wiki Windows
+publication gates continue to verify existing wiki proofs, not this HTTP server.
+Use gh run view HEAD-associated runs to inspect hosted publication status;
+queued is never equivalent to executed or passed.
 
 ## Prior completed wiki work
 
@@ -81,7 +90,7 @@ Historical curator reports preserve their sandbox failures and earlier gaps.
 All subagents and the curator finished. The service is inactive; its enabled
 weekly timer is waiting. No queued item is described as running. M3-006 is
 postponed by user decision, with the external evidence gaps above preserved;
-M4 design work is tracked above. All other previously selected actionable
+M4 implementation and remaining work are tracked above. All other previously selected actionable
 work is complete.
 
 ## Exact baseline and editing contract
@@ -226,3 +235,20 @@ a clean tree, complete local verification/retrieval, Linux through
 `tools/verify_linux_ssh.sh omarx1`, and the manual Windows matrix on that commit.
 Record actual active agents/runners at handoff; queued or timer-waiting work is
 not running. Never claim the whole roadmap complete while actionable rows remain.
+
+
+## M4 publication checkpoint
+
+HTTP project publication c41e0a3919794431b1222a93655945699386b17e was rerun
+from clean pushed source on maxross and omarx1: 14/14 steps and 44/44 test
+executions in each mode, 26/26 ReleaseSafe integration and 30k exact-body smoke
+responses per host. The earlier unchanged implementation packet is pinned by
+[[zig-http-mvp-2026-09-05]]. All native HTTP publication runs finished.
+
+The wiki content update has 51 navigable pages and 68 sources. Local full
+verification passes 87/87 steps (73 tests, 9 platform skips), all 28 Python tests
+pass, and 25 retrieval cases retain MRR 1.0/hit@3 1.0/recall@5 0.94 with policy
+met. This wiki's exact-revision Linux and manual Windows publication gates use
+[the platform runbook](docs/platform-testing.md); inspect the commit-associated
+[Windows run history](https://github.com/technologylab-ai/zigllmwiki/actions/workflows/windows-runtime-verify.yml)
+for the hosted receipt. Those Windows checks cover existing wiki proofs only.

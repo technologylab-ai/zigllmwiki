@@ -308,3 +308,26 @@ review remains independent of write authority.
    or narrower run.
 7. Commit and push the complete evidence/doc change, then run the hosted gate
    against that exact commit.
+
+
+## Standalone M4 HTTP gates
+
+The private sibling `zig-http` is the runnable HTTP application; its modules are
+registered by its own `zig build verify`. Its first source-hashed packet is
+[[zig-http-mvp-2026-09-05]], separate from this wiki's registered lifecycle proofs.
+Run its Debug and ReleaseSafe verifiers, build ReleaseSafe, then its Python
+integration suite and `tools/smoke.py`. The smoke orchestrator rejects a binary
+whose READY marker does not report ReleaseSafe. Its Linux SSH wrapper follows
+this runbook's validated temporary-directory, exact compiler and clean-input
+rules, and adds finite build/integration/process watchdogs.
+
+On omarx1, the default Zig 0.16.0 x86 Debug/libc path failed on R_X86_64_PC64 in
+GCC 16's crt1.o:.sframe. The user's first workaround, ReleaseSafe without linker
+overrides, passed. Debug with explicit LLVM/LLD passed too. Preserve the target,
+CRT and compiler evidence; see [[build-diagnostics-and-generated-code]]. This
+is unrelated to Windows compiler diagnostics or a Zig version upgrade.
+
+The HTTP server currently has Linux/macOS runtime gates only. Dispatching this
+wiki's Windows workflow still validates the existing wiki proofs; it does not
+supply Windows runtime or even compile evidence for the HTTP server. That
+adapter remains queued under M4-005, while M3-006 stays postponed.

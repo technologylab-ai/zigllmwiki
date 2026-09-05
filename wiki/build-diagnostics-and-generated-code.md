@@ -5,12 +5,14 @@ kind: pattern
 status: source-verified
 zig: "0.16.0"
 summary: Zig 0.16 has no general strict-warning level for Zig source, so enforce all compile errors, safety-aware build modes, explicit foreign-source warnings, repository lint, and reproducible emitted-code review.
-updated: 2026-09-04
+updated: 2026-09-05
 sources:
   - "[[source-tigerstyle]]"
   - "[[zig-0.16.0-build-diagnostics]]"
   - "[[zig-0.16.0-language-reference]]"
   - "[[zig-0.16.0-stdlib]]"
+  - "[[zig-0.16.0-release-notes]]"
+  - "[[zig-0.16-linux-crt-linker-workaround]]"
 proofs:
   - proofs/error_path_catalog.zig
 platforms:
@@ -55,6 +57,32 @@ For C, C++, Objective-C, assembly, resource files, linkers, and code generators,
 including warnings-as-errors for first-party C-family code, and record necessary
 third-party suppressions beside the dependency boundary. Do not copy one
 frontend's flags to every target and call the result portable.
+
+## Linux Debug CRT linker failure: try ReleaseSafe first
+
+For Zig 0.16.0 on the observed x86_64 Linux host, a default Debug build linking
+libc failed with `unhandled relocation type R_X86_64_PC64` in system
+`crt1.o:.sframe`. **Try `zig build -Doptimize=ReleaseSafe` first** when the build
+exposes the standard optimization option. It keeps runtime safety enabled and
+uses a different default compiler/linker path. Use `zig test ... -OReleaseSafe`
+for a direct test invocation. Performance measurements should use the intended
+ReleaseSafe artifact; Debug remains a separate correctness gate.
+
+The user-suggested workaround was reproduced on omarx1: Zig 0.16.0, x86_64
+Omarchy 4.0.2, kernel 7.1.9-arch1-2, glibc 2.44 and GCC 16.2.1 20260810.
+Against the same pinned HTTP transport source, default Debug failed before
+execution, default ReleaseSafe ran all six tests, and Debug with
+`-fllvm -flld` also ran all six. When Debug is needed, a build can explicitly
+select `use_llvm = true` and `use_lld = true` for that target/mode. The HTTP MVP
+does this only for Linux Debug; its ReleaseSafe path has no linker overrides.
+[[zig-0.16-linux-crt-linker-workaround]]
+
+The release notes tie the default x86 self-hosted backend to Debug and describe
+the self-hosted ELF linker selection. This explains the observed distinction;
+it is not a claim that a custom linker can only ever run in Debug, nor that
+ReleaseSafe repairs every linking failure on every target. Preserve exact
+compiler, CRT, target and flags when diagnosing another environment.
+[[zig-0.16.0-release-notes]]
 
 ## Project strictness profile
 
@@ -120,5 +148,6 @@ principles. The generated-code workflow is inspection evidence only; executable
 behavior remains the responsibility of registered proofs and runtime tests.
 
 Related: [[trustworthy-microbenchmarks]],
+[[bounded-http-server-design]],
 [[performance-sketches-and-batching]], [[code-reading-and-mechanical-checks]],
 [[lower-dimensional-api-contracts]], [[tigerstyle-coverage]].

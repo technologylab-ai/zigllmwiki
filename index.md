@@ -75,9 +75,9 @@ Read this page first, then follow only the pages needed for the task.
 - [[tigerbeetle-io]] — source-verified comparison of TigerBeetle's Linux
   `io_uring`, Darwin `kqueue`, and Windows IOCP backend choices.
 
-- [[bounded-http-server-design]] — M4 design draft: Linux-first HTTP/1.1,
-  fixed startup workers, finite admission, lazy headers, borrowed buffers and
-  response-writer ownership.
+- [[bounded-http-server-design]] — M4 Linux/macOS HTTP/1.1 MVP and design:
+  fixed workers, finite admission, lazy headers, borrowed buffers, flush/resume
+  ownership and explicit Windows/performance gaps.
 
 ## Engineering system
 
@@ -90,7 +90,8 @@ Read this page first, then follow only the pages needed for the task.
 - [[design-revision-and-exception-policy]] — replaceable design sketches,
   zero-safety-debt boundaries, dependency admission, and owned exceptions.
 - [[build-diagnostics-and-generated-code]] — exact Zig safety/diagnostic
-  controls, foreign-source warnings, and reproducible machine-code review.
+  controls, Linux Debug CRT linker/ReleaseSafe workaround, foreign-source
+  warnings, and reproducible machine-code review.
 - [[error-path-catalogs-and-fault-injection]] — enumerate terminal failures,
   ownership, side effects, limits, observations, and deterministic injections.
 - [[lower-dimensional-api-contracts]] — minimize caller state space without
@@ -163,4 +164,4 @@ Read this page first, then follow only the pages needed for the task.
 [Publication verification](reports/2026-09-04-publication-verification.md)
 records the completed four-environment gate, proof identities and remaining
 external deployment limits; [ROADMAP.md](ROADMAP.md) marks M3-006 postponed
-by user decision and tracks the opened M4 design discussion.
+by user decision and tracks the working M4 MVP and remaining experiments.

@@ -1,10 +1,10 @@
 ---
 id: bounded-http-server-design
-title: Bounded HTTP/1.1 framework design exploration
+title: Bounded HTTP/1.1 framework MVP and design
 kind: pattern
 status: draft
 zig: "0.16.0"
-summary: Linux-first HTTP framework proposal with startup limits, borrowed request views, bounded response writing and explicit asynchronous buffer ownership.
+summary: Experimental Linux/macOS HTTP MVP with fixed workers, startup limits, borrowed request views, flush/resume ownership and explicit Windows and performance gaps.
 updated: 2026-09-05
 sources:
   - "[[http11-framing-and-limits]]"
@@ -18,6 +18,8 @@ sources:
   - "[[liburing-interface-and-cancellation]]"
   - "[[apple-xnu-kqueue-aio]]"
   - "[[microsoft-windows-winsock-batched-file-io]]"
+  - "[[rfc3986-uri-syntax]]"
+  - "[[zig-http-mvp-2026-09-05]]"
 proofs: []
 platforms:
   - linux
@@ -25,13 +27,73 @@ platforms:
   - windows
 ---
 
-# Bounded HTTP/1.1 framework design exploration
+# Bounded HTTP/1.1 framework MVP and design
 
 ## Remember
 
-M4 design discussion opened on 2026-09-05. These are requirements and candidate
-decisions, not implemented APIs or verified HTTP behavior. The server will live
-in a dedicated project; this page collects reusable design reasoning.
+M4 now has a working experimental slice in the private
+[zig-http project](https://github.com/technologylab-ai/zig-http). The current
+implementation is identified by [[zig-http-mvp-2026-09-05]]. This page remains
+a draft: implemented Linux/macOS behavior below is separate from candidate
+architecture, Windows support and production qualification still to come.
+
+## Implemented MVP boundary
+
+Exact Zig 0.16.0; one I/O owner uses raw `std.os.linux.IoUring` on Linux or
+nonblocking sockets/kqueue on macOS. Fixed startup application workers use
+atomic per-slot mailboxes and fixed slot affinity. There is one complete-body
+request at a time per connection, startup-reserved contiguous input/output,
+and separately reserved target/cancel operation capacity. No elastic worker
+pool or queue is used. This is a custom application adapter, not a `std.Io`
+interface guarantee or shipped Evented implementation.
+
+`return writer.flush()` freezes all committed output and yields the callback.
+The I/O owner handles partial sends; `.flushed` resumes the callback with an
+empty writer only after that snapshot has completed local transport sends.
+`finish()` writes the remainder and ends HTTP framing. Neither proves peer
+receipt. Eight per-request state words hold the experimental continuation.
+There is no finish/cancel release notification yet: borrowed body and content-type
+storage must be request-owned input or immutable server-lifetime assets.
+Dynamic external leases/background request tasks are not supported.
+
+Default limits: 128 admitted connection/request slots, two application workers,
+64 KiB decoded body, 16 KiB header/trailer bytes, 64 combined fields, 8192-byte
+target, 4 KiB writable output, 16 MiB cumulative response and a five-second
+absolute request-cycle deadline. Wire storage is independently bounded by
+`max_header + 2 * max_body + 4096`. A checked startup budget plus a capped,
+sealed allocator bounds requested framework heap bytes. Libc/pthread metadata,
+actual stacks, kernel socket/ring memory and application allocations need
+separate accounting; this is not a process RSS cap.
+
+An overflow accept is closed without a new slot; the kernel backlog and one
+transient accepted descriptor are outside admitted-slot count. Timeout/stop
+closes networking but retains worker and kernel borrows until they end.
+Shutdown has a five-second drain deadline; unreconciled ownership takes a
+whole-process exit instead of freeing live memory. A stuck worker still delays
+other slots assigned to it; this is not arbitrary application isolation.
+
+The parser incrementally validates syntax/framing and lazily looks up optional
+header values. Borrowed chunk-body spans avoid coalescing; pipeline suffix
+compaction is an explicit measured copy. Ordinary kernel socket copies remain.
+URI scheme case-insensitivity must not accidentally lowercase paths.
+[[rfc3986-uri-syntax]]
+
+Native evidence on 2026-09-05: Mac M3 Max arm64/macOS 26.6.2 build 25G83 and
+omarx1 x86_64/Omarchy 4.0.2/kernel 7.1.9-arch1-2/io_uring_disabled=0.
+Each passed 44 Debug and 44 ReleaseSafe test executions plus 26 ReleaseSafe
+integration cases. Cases cover simultaneous exact limits/refusal/recovery,
+chunked/Expect/pipelining, partial flush/resume, worker stalls, an actual blocked
+response deadline and shutdown ownership. All phases ended with zero owned
+connections/operations and zero late framework allocation attempts.
+[[zig-http-mvp-2026-09-05]]
+
+Three finite 10k-response smoke workloads on each host validated exact plaintext
+and preloaded HTML; these are Python/client-bound loopback measurements, not
+TechEmpower rank or capacity evidence. Windows HTTP, NIC zero-copy, long mixed
+saturation, fault/schedule exploration, dynamic release and competitor runs are
+queued. Use ReleaseSafe for timing and see
+[[build-diagnostics-and-generated-code]] for the reproduced Linux Debug linker
+failure. The broader requirements and candidates below remain design guidance.
 
 The user wants a Zig 0.16.0 framework with an `on_request` style API, Linux as
 the primary production target, macOS and Windows support, asynchronous I/O,
@@ -253,7 +315,7 @@ waiting. Neither is made evented by naming a function async.
 
 ## Separate application execution from network ownership
 
-Candidate architecture, not an accepted or measured implementation:
+Broader candidate architecture; the implemented first slice is scoped above:
 
 `I/O owner → bounded request-handle queue → application worker`
 
@@ -479,20 +541,16 @@ is checked and rejected; assertions protect internal invariants.
 
 ## Evidence and next decisions
 
-No M4 code, HTTP proof, NIC zero-copy test or server benchmark exists yet.
-Existing platform proofs establish narrower lifecycle examples only.
+The initial complete-body/contiguous-storage contract, keep-alive parser and
+flush/resume writer are implemented and tested in the dedicated project above.
+The wiki's older platform proofs remain narrower lifecycle examples; the HTTP
+packet does not upgrade their scope or establish Windows HTTP behavior.
 
-Next design choices: complete-body versus headers-first callback, contiguous
-versus segmented request storage, the fixed-worker queue/credit and explicit
-pending/resume API, and TLS termination. A plaintext first prototype is plausible;
-public browser deployments still need a planned HTTPS path. TLS/compression
-transform bytes and need their own buffers/ownership/copy audit.
-
-Next proof targets: every parser split point, multiple coalesced requests,
-size-counter overflow, framing conflicts, chunk/trailer overhead, slow clients,
-partial writes, output exhaustion, request-to-response borrowing, cancellation
-and stale handles. First server slice should then add keep-alive and an actual
-incremental response writer before routing/upload conveniences.
+Next experiments: dynamic finish/cancel lease release, alternative continuation
+APIs, segmented/ring input to remove compaction, scheduling/sharding, deterministic
+fault/interleaving tests and long combined saturation. Plain loopback HTTP is
+the current TLS boundary; public browser deployments still need a planned HTTPS
+path. TLS/compression transform bytes and require their own ownership/copy audit.
 
 ### Predictable workload and deterministic model
 

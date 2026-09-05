@@ -157,7 +157,7 @@ checks a state invariant before encoding and after validation/decoding;
 layout, wire encoding, and stale representation handles; and all four selected
 bounded-memory/layout essays have decision-level synthesis.
 
-## M4 design sources — initial synthesis
+## M4 design sources and first implementation
 
 | Source | Status | Wiki effect |
 | --- | --- | --- |
@@ -171,9 +171,17 @@ records one concrete unsafe thread-termination boundary. Together with [[http-ov
 captured and synthesized into the draft, without new runtime claims. Exact Zig 0.16 Thread
 startup/join and existing deterministic-simulation evidence inform the proposal.
 
-M4-001 initial ideas are captured. Further architecture decisions and server
-implementation are queued under M4-002 through M4-004; no agent is running
-those items. M3-006 remains postponed.
+The new [[rfc3986-uri-syntax]] source pins URI scheme/authority/path rules.
+[[zig-http-mvp-2026-09-05]] pins the standalone implementation and source-hashed
+Linux/macOS unit, wire/ownership and ReleaseSafe smoke packet. Its facts are
+integrated into the existing HTTP design page; no application code is duplicated
+into wiki proofs. [[zig-0.16-linux-crt-linker-workaround]] preserves the user's
+ReleaseSafe workaround, reproduced with an independent exact-source native probe
+and integrated into build diagnostics.
+
+M4-001/002/003 are done for the first experiment. M4-004 comparisons, M4-005
+Windows HTTP and M4-006 further API/reliability work are queued. All assigned
+subagents finished. M3-006 remains postponed; no Windows HTTP runtime is claimed.
 
 ## Immediate curation order
 
