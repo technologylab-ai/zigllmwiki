@@ -1,21 +1,33 @@
 # Project handoff — 2026-09-05
 
-Active M4-006 experiment — 2026-09-05: Codex /root owns the standalone branch
-`perf/direct-operation-cells` and worktree
-`/Users/rs/code/github.com/technologylab.ai/zig-http-opcells`, starting from
-c0f87766efa310d517d262781a33ce189c4f9f0d. Progress checkpoint6fcbcf8 is pushed;
-the worktree's HANDOFF.md owns the resumable implementation state. This experiment
-removes Linux hot operation-table searches while preserving identity, generation,
-socket binding and target/cancel ownership, then measures ABBA old/new trials at
-configured capacities128/1024 with128 active clients. No performance gain is
-established yet. Current agents: direct_operation_cells implements the bounded
-transport change; tfb_linux_build prepares pinned Linux baseline/contenders.
-The parent implements controlled comparison ordering and integrates evidence.
-The external agent's `.claude/worktrees/perf-architecture` remains untouched.
-Do not restart or duplicate either worktree after an interruption; inspect their
-actual git state and host locks first. Historical completed-agent statements
-below describe their earlier checkpoints, not this active experiment.
+Current resumable HTTP work: parent Codex /root integrates two completed
+performance experiments from the sibling `zig-http-batchq` worktree,
+branch `perf/batch-quantum`, consolidated publication62c05de875e9917fc0d7bff36f1c51c83d2a7a60 (measured source dbb6398). Direct operation-cell
+source/report is pushed atadf24f380ac56b2ae142e514a1491be1e08d4a20 on
+`perf/direct-operation-cells` in `zig-http-opcells`, pinned by
+[[zig-http-operation-cells-2026-09-05]]. Do not restart or discard these named
+worktrees after interruption; use `git worktree list` and each handoff.
 
+All48 direct-cell Linux paired trials and24 batch/callback matrix trials passed.
+Both native platforms passed the larger batch code atdbb6398:59 tests in each
+build mode,77 wire cases,8 comparator tests and30,000 smoke bodies. Both timed
+runners and implementation/platform agents finished and released their locks.
+The evidence agent finished both deterministic packet checks. Final HTTP
+publication gates passed on Mac/Linux at clean62c05de; the durable receipt is
+[here](reports/2026-09-05-http-bounded-tuning-publication.md). Wiki reviewed-tree
+gates passed87 steps,28 command tests and25-query retrieval policy; exact pushed
+Mac/Linux publication verification follows the runbook. The batch evidence is pinned by
+[[zig-http-batch-quantum-2026-09-05]]. Remaining roadmap work is queued, not assigned to a runner.
+The independent external `.claude/worktrees/perf-architecture` remains untouched.
+
+Preserve `/tmp/zig-http-compare.PIwh35`: its pinned wrk/libreactor tools are also
+borrowed by the external architecture agent. Do not delete this shared root
+merely because our experiments finished. Future host load must reacquire the
+host-local `/tmp/zig-http-measurement.lock` through child cleanup. Windows tuning
+gates remain deferred by the user's Mac/Linux focus; M3-006 remains postponed.
+
+Earlier paragraphs below retain their historical checkpoint scope; the new
+source records and final publication receipt supersede their active-work status.
 
 This is the durable entry point for a fresh session. ROADMAP.md owns scope and
 status; historical log entries and reports retain narrower and failed runs.

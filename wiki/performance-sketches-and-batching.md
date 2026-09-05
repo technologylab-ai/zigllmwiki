@@ -11,6 +11,8 @@ sources:
   - "[[tigerbeetle-performance]]"
   - "[[matklad-do-not-optimize-away]]"
   - "[[zig-http-response-batching-2026-09-05]]"
+  - "[[zig-http-operation-cells-2026-09-05]]"
+  - "[[zig-http-batch-quantum-2026-09-05]]"
 proofs:
   - proofs/performance_sketch.zig
 platforms:
@@ -185,8 +187,28 @@ The Linux batch1/16 comparison improved pipelined throughput, but larger client
 pipelines did not improve the fixed-16 server proportionally. Distinguish client
 queue depth, server storage and dispatch budgets. More queued input increased
 compaction; measuring that copy count does not establish its share of elapsed
-time. The next experiment must isolate batch size, input layout or operation
-lookup rather than assume that using io_uring makes every surrounding cost cheap.
+time. The direct-operation-cell experiment subsequently isolated Linux hot lookup:
+with128 active clients, gains grew when reserved capacity rose from128 to1024,
+while requested heap stayed identical between binaries. Full slot/generation/fd
+and independent target/cancel checks remained. Both ABBA blocks favored the
+candidate at each tested workload, but no profile attributes an exact share of
+runtime to scans. Cold bind/close scans and whole-slot scheduling remain.
+[[zig-http-operation-cells-2026-09-05]]
+
+Separate configured storage from active load when testing bounded systems:
+reservation size itself can affect a hot scan even when fewer clients are busy.
+Addressing fixed cells can make established operations independent of that scan
+without weakening identity checks. This is a custom Linux adapter example;
+using io_uring alone does not establish cheap surrounding control work.
+
+The subsequent same-binary response-cell16/64 × global-callback64/256 matrix
+shows why those are separate controls: Q alone changes no storage, while B64
+reserves almost twice B16's requested framework heap on this implementation.
+The compiled maximum also enlarges static metadata even at B16. Depth128
+throughput improves, but full ranges, sample order and finite cold-service/
+cancellation witnesses constrain the result; defaults remain16/64. Do not
+choose a larger bound without charging its startup storage or mistake a
+callback-count budget for preemption. [[zig-http-batch-quantum-2026-09-05]]
 
 Related: [[tigerstyle]], [[static-allocation-and-constant-work]],
 [[io-uring]], [[evented-io-backends]], [[trustworthy-microbenchmarks]], and

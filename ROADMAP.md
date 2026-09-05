@@ -170,7 +170,8 @@ M3-006 physical Windows deployment qualification remains postponed. The MVP's
 pending/resume API is deliberately replaceable, with dynamic release and broader
 reliability work retained under M4-006. All implementation subagents finished;
 queued items have no assigned running agent. Current performance/ownership evidence
-is pinned by [[zig-http-response-batching-2026-09-05]]; its measurements do not
+is pinned by [[zig-http-operation-cells-2026-09-05]] and
+[[zig-http-batch-quantum-2026-09-05]]; its measurements do not
 claim production capacity or trustworthy tail latency.
 
 | ID | Status | Deliverable / exit condition |
@@ -180,7 +181,7 @@ claim production capacity or trustworthy tail latency.
 | M4-003 | done | Working standalone Linux io_uring/macOS kqueue HTTP/1.1 MVP with plaintext, preloaded HTML, echo, chunked flush/resume, native gates, watchdogs and retained-borrow shutdown. Source/evidence pinned; not production qualification. Windows portability is tracked explicitly in M4-005. |
 | M4-004 | queued | Completed the recorded-performance-profile Linux depth sweep: 24 trials passed, Zig 1.74–1.92M/s versus libreactor 4.30–13.63M/s at depths16–128. Prior profile/EPP remain unknown; no controlled profile speedup is established. Completed pinned Linux baseline/client-sensitivity, inline/gather, batch1/16, one-core, deeper-pipeline32/64/128 and old/current control sweeps. Preserve gains, the fixed-batch plateau and unresolved host/code variation. Remaining: preloaded HTML comparisons, macOS contenders, dedicated-host/NIC saturation and qualified request tails. |
 | M4-005 | queued | Implement Windows HTTP IOCP adapter and hosted native runtime gates; current server intentionally rejects Windows compilation. Separate from postponed M3-006 deployment qualification. |
-| M4-006 | running | Active isolated direct-operation-cell implementation and ABBA comparison on standalone branch perf/direct-operation-cells; no measured gain yet.  Implemented/measured inline default, gather and bounded response cells with flush barriers, deferred compaction and multi-cell cancellation/deep-pipeline gates. Independent max-reasoning review is complete: next isolate token-addressed Linux operation cells, then batch16/64 × callback64/256, output representation and sharding. Offload, dynamic release and fault/combined-limit qualification remain. |
+| M4-006 | queued | Completed direct Linux operation cells and configurable startup B1–64/Q1–256 bounds, retaining defaults16/64: both native gates,48 paired operation-cell trials and24 same-binary batch/callback trials passed. Exact ranges, memory growth, cancellation races and time-order limits are pinned. No runner is assigned to the remaining work: output representation/input layout, sharding, optional offload, dynamic release and fault/combined-limit qualification. The independent architecture agent owns its separate worktree. |
 
 Use the wiki to design, implement, and critique a bounded HTTP server:
 

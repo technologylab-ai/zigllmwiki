@@ -233,12 +233,21 @@ initial trials predated the new lock. Remaining M4 architecture/HTML/Mac/NIC/tai
 work is queued; Windows gates remain deferred for this tuning loop.
 
 
-## Active isolated performance experiment
+## Completed operation-cell and batch/callback iteration
 
-M4-006 resumed on2026-09-05 in sibling worktree zig-http-opcells, branch
-perf/direct-operation-cells. The implementation agent is changing addressed
-Linux operation cells; the platform agent prepares immutable baseline inputs;
-the parent owns ABBA ordering and integration. Pin measured output before any
-new wiki synthesis. The external architecture agent has its own worktree and
-honors the same host-local measurement locks. Existing completed records remain
-historical and unchanged.
+[[zig-http-operation-cells-2026-09-05]] pins the direct-cell implementation,
+native ownership gates and48 Linux A/B/B/A trials at128/1024 reserved slots with
+128 active clients. [[zig-http-batch-quantum-2026-09-05]] pins the subsequent
+configurable B1–64/Q1–256 implementation,59 tests/mode and77 wire cases per
+native host,24 same-binary trials, static metadata growth and ordering limits.
+Defaults remain16/64; no tail, portable vector-limit or Windows claim is added.
+Existing source records remain unchanged. The HTTP, batching and benchmark
+pages now link both records and each other; index retrieval includes the new
+operation/callback questions without another overlapping concept page.
+
+The implementation, source/evidence review and timed runners finished. Parent
+owns final publication gates. All selected measured work is preserved in named
+pushed branches and consolidated HTTP publication62c05de. The independent
+architecture agent's worktree and borrowed remote tools remain untouched.
+Remaining M4 API/reliability/output-layout/sharding/comparison work is queued;
+Windows tuning gates are deferred and M3-006 remains postponed.

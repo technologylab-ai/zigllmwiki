@@ -990,3 +990,28 @@ pushed progress checkpoint6fcbcf8. Exact0.16.0 ReleaseSafe baseline passed52/52
 executions and14/14 steps under the Mac lock, then released it. Named the active
 implementation/platform tasks and ABBA plan in durable handoffs/roadmap so an
 interruption does not orphan or duplicate work. No performance gain is claimed.
+
+## 2026-09-05 — Direct operation cells and bounded batch/callback experiments
+
+Pinned [[zig-http-operation-cells-2026-09-05]] from HTTP adf24f3 and
+[[zig-http-batch-quantum-2026-09-05]] from consolidated62c05de. Linux direct
+addressing keeps identity/fd/generation and target/cancel ownership while removing
+established-operation scans;48 A/B/B/A trials passed at128/1024 reserved slots
+with128 clients. The following same-binary B16/B64 × Q64/Q256 matrix passed24
+trials. Native Linux/Mac passed59 tests/mode,77 wire cases,8 comparator tests and
+30,000 smoke bodies at measured dbb6398. Exact environments, all ranges/raw logs,
+320-span/64-retained-cell witnesses, Linux normal-terminal cancellation races,
+startup heap growth and sample-order limits remain in immutable packets.
+Defaults16/64 stay unchanged; no tail, production or Windows evidence is added.
+Updated existing HTTP/batching/benchmark pages, reciprocal links, index, curation,
+roadmap and handoff. Named pushed worktrees preserve both experiments; the
+external architecture worktree and shared remote tools are retained. Selected
+experiments are complete; M4 API/reliability/layout/sharding/comparisons remain
+queued. Windows tuning remains deferred, M3-006 postponed. Final local/retrieval
+and Linux publication gates follow the current platform runbook.
+
+The final HTTP62c05de clean-commit Mac/Linux gates also passed59 tests/mode,
+77 wire cases,8 comparator tests and30,000 smoke bodies per host. Preserved
+[the publication receipt](reports/2026-09-05-http-bounded-tuning-publication.md).
+Reviewed wiki gates passed87 steps,28 command tests and25-query retrieval policy;
+all original log bytes and previously cited sources were preserved.

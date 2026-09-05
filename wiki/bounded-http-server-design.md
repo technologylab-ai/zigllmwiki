@@ -25,6 +25,8 @@ sources:
   - "[[zig-http-inline-gather-2026-09-05]]"
   - "[[zig-http-response-batching-2026-09-05]]"
   - "[[zig-http-performance-profile-2026-09-05]]"
+  - "[[zig-http-operation-cells-2026-09-05]]"
+  - "[[zig-http-batch-quantum-2026-09-05]]"
 proofs: []
 platforms:
   - linux
@@ -40,7 +42,7 @@ M4 now has a working experimental slice in the private
 [zig-http project](https://github.com/technologylab-ai/zig-http). The original
 implementation is identified by [[zig-http-mvp-2026-09-05]], with subsequent
 performance checkpoints below and the current batching contract in
-[[zig-http-response-batching-2026-09-05]]. This page remains
+[[zig-http-batch-quantum-2026-09-05]]. This page remains
 a draft: implemented Linux/macOS behavior below is separate from candidate
 architecture, Windows support and production qualification still to come.
 
@@ -68,23 +70,42 @@ still means all committed bytes, not peer receipt. A cancel acknowledgement
 alone cannot release that storage. That checkpoint gathered one response; the subsequent bounded batching
 implementation below retains several finished responses. [[zig-http-inline-gather-2026-09-05]]
 
+## Direct Linux operation cells
+
+Established Linux receive/send admission and CQE lookup now use token-addressed
+cells with full slot/kind/generation/fd checks. First socket binding and close
+still scan. Target completion and cancellation acknowledgement must both drain
+before reuse, including the fixed accept identity; descriptor close waits for
+both owners. Mac retains pooled scans under the same identity contract.
+[[zig-http-operation-cells-2026-09-05]]
+
+The controlled Linux A/B/B/A comparison kept128 active clients and defaults16/64.
+At128 reserved connections, median gains were14%/4%/5% at depths1/16/128;
+at1024 reserved connections they were76%/29%/17%. Both blocks favored the
+candidate in every workload. All48 trials,301,290,349 timed responses and5,120
+exact preflights passed; startup heap was identical between binaries. This
+measures a capacity-sensitive lookup improvement, not throughput at1024 active
+connections or a profiled decomposition of the remaining contender gap.
+Full ranges and exact native identity/cancellation gates are in the pinned
+packet. The experimental std.Io/Windows boundaries remain unchanged.
+
 ## Current bounded response batches
 
 The default now combines inline callbacks, zero application workers, gathered
 header/body output and up to 16 response cells per connection. The cell limit
-is configured at startup (1–16); explicit worker mode uses one cell. Generated
+is configured at startup (1–64, default16); explicit worker mode uses one cell. Generated
 output and borrowed request bodies use the ordinary handler/writer for every
 request. Each finished response freezes separate output/header/chunk storage,
 while parser/writer metadata can advance through already-buffered requests.
-Input stays immutable until all response borrows end. At most 80 spans feed
+Input stays immutable until all response borrows end. At most 320 spans feed
 stable transport metadata; partial sends advance an aggregate bounded cursor.
-[[zig-http-response-batching-2026-09-05]]
+[[zig-http-batch-quantum-2026-09-05]]
 
 Drain on cell exhaustion, lack of ready input, flush/close or exhausted callback
 budget. Never wait to fill a batch. `flush()` drains all preceding finished
 responses and the active snapshot, then resumes that request with empty output.
-Compact an input suffix once after complete batch drain. A global 64-callback
-turn budget, per-connection limit and rotating scan start bound dispatch work;
+Compact an input suffix once after complete batch drain. A startup global1–256-callback
+turn budget (default64), per-connection limit and rotating scan start bound dispatch work;
 oldest-unsent deadlines remain. These cannot preempt violating application code.
 A parser rejection/Connection: close response preserves prior wire order, while
 application close, invalid output or timeout can discard earlier unsent cells.
@@ -116,16 +137,41 @@ powersave. The earlier profile/EPP were not captured; these higher rates do not
 establish a controlled power-profile speedup. Preserve both conditions, full
 ranges and the untimed nature of frequency endpoints. [[zig-http-performance-profile-2026-09-05]]
 
-Mac/Linux each passed 52 tests in Debug and ReleaseSafe, 26 generic, 10 inline,
+The preceding batch checkpoint passed 52 tests per Mac/Linux host in Debug and ReleaseSafe, 26 generic, 10 inline,
 11 gather cases, and the expanded 22-case batch suite. Distinct generated and
 borrowed-body pipelines at 32/64/128 preserve order and connection reuse with
 zero retained owners/late allocations. A separate pending-cancel witness held
 16 frozen cells: Mac observed a canceled terminal, Linux a normal terminal
 race; both drained target and cancel owners. Both hosts also passed 30,000
 ReleaseSafe smoke bodies. These finite witnesses are not production load or
-Windows HTTP evidence. Remaining work includes token-addressed operation cells,
-independent server-batch/input-layout tuning, sharding, dynamic release and
-sustained fault/combined-limit qualification.
+Windows HTTP evidence. Remaining work includes output/input layout, sharding, dynamic release/offload
+and sustained fault/combined-limit qualification.
+
+## Configurable batch and callback limits
+
+The next same-binary Linux matrix tested response cells16/64 × global
+callbacks64/256 while retaining defaults16/64. At client depth128, median
+throughput was1.951M/s for B16/Q64 and2.780M/s for B64/Q256. All24 trials and
+3,456 exact preflights passed. This opt-in tuning comes with requested framework
+heap31,100,880 bytes at B16 and59,805,648 at B64; Q alone adds no heap.
+The larger compiled metadata also adds1,482,248 bytes at B16 versus the prior
+operation-cell binary. Heap limits still exclude kernel/process/app costs.
+[[zig-http-batch-quantum-2026-09-05]]
+
+Both native platforms passed59 tests in each build mode,77 wire cases,
+8 comparator tests and30,000 smoke bodies. Generated and borrowed chunked-finish
+fixtures submitted320 spans from64 distinct cells, then exercised short sends,
+flush/close order,64-cell retained cancellation and finite cold service among
+seven backpressured depth128 pipelines. Linux cancellation permitted a normal
+target-terminal race. The320-span result is specific to these custom adapters;
+Zig0.16's conservative std.c macOS constant remains16 despite the SDK's1024
+and successful native witness. No portable std.Io limit is inferred.
+
+Three shuffled samples per matrix configuration leave time-order uncertainty:
+several depth16 Q64 samples occurred later than Q256 samples. Keep the full
+ranges/sample positions and avoid attributing all of that difference to Q.
+The native cold-service watchdog is a finite witness, not a tail SLO. Corrected
+wrk tails remain rejected; defaults stay16/64 pending further qualification.
 
 ## Original implemented MVP boundary
 

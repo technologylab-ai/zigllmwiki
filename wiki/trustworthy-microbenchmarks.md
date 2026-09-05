@@ -15,6 +15,8 @@ sources:
   - "[[zig-http-plaintext-comparison-2026-09-05]]"
   - "[[zig-http-response-batching-2026-09-05]]"
   - "[[zig-http-performance-profile-2026-09-05]]"
+  - "[[zig-http-operation-cells-2026-09-05]]"
+  - "[[zig-http-batch-quantum-2026-09-05]]"
 proofs:
   - proofs/performance_sketch.zig
 platforms:
@@ -109,6 +111,26 @@ The shared host protocol is in `docs/platform-testing.md`: reserve a host before
 benchmarks/heavy builds and keep that reservation through child cleanup. A lock
 added after a sweep starts cannot qualify its earlier trials retroactively.
 [[zig-http-performance-profile-2026-09-05]]
+
+The direct-operation-cell follow-up compares two immutable binaries in adjacent
+A/B/B/A blocks, shuffling whole equal-workload blocks and retaining both block
+ratios alongside full ranges. Two blocks per workload support the observed
+direction but do not establish confidence intervals or production capacity.
+It separately varies reserved server slots128/1024 while holding active clients
+at128, so the result must not be described as1024-client throughput. The raw
+RESULT/STATS lines, source/binary hashes, profile endpoints and every sample
+are checked by a deterministic packet summarizer. The native packet captured
+before timing remains unchanged; later timed evidence has a separate scope.
+[[zig-http-operation-cells-2026-09-05]]
+
+The four-configuration batch/callback matrix used three shuffled samples per
+configuration, but several depth16 Q64 samples still occurred later than Q256
+samples. Randomization does not guarantee balanced time order in a small run.
+Preserve sample positions and ranges instead of treating a median difference
+as a fully isolated cause. Compare startup heap too: changing a compiled vector
+maximum enlarged even the nominal B16 configuration. Throughput trials observed
+at most128 spans; separate native wire fixtures supplied the320-span evidence.
+[[zig-http-batch-quantum-2026-09-05]]
 
 Related: [[tigerstyle]], [[code-reading-and-mechanical-checks]],
 [[static-allocation-and-constant-work]],
