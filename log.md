@@ -1015,3 +1015,8 @@ The final HTTP62c05de clean-commit Mac/Linux gates also passed59 tests/mode,
 [the publication receipt](reports/2026-09-05-http-bounded-tuning-publication.md).
 Reviewed wiki gates passed87 steps,28 command tests and25-query retrieval policy;
 all original log bytes and previously cited sources were preserved.
+
+Final wiki publication181f4f3 passed87/87 steps on Mac/Linux,73/82+9 Mac skips
+and74/82+8 Linux skips,28 command tests and25-query retrieval policy. Both locks
+were released. Refreshed the roadmap overview's stale52/22 test counts to59/30
+and recorded the completed gates in the durable handoff; no proof/source changed.

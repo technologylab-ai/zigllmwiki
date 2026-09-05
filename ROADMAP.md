@@ -161,7 +161,7 @@ startup slots and optional workers, bounded complete-body parsing and lazy heade
 response path, explicit flush/resume/finish, finite refusal/deadlines and
 cancellation drain. The original checkpoint passed 44 Debug and 44 ReleaseSafe test
 executions plus 26 integration cases; current inline/gather/batch evidence below
-passes 52 per mode and 26 generic + 10 inline + 11 gather + 22 batch cases. Finite smoke validated 30k exact responses
+passes 59 per mode and 26 generic + 10 inline + 11 gather + 30 batch cases. Finite smoke validated 30k exact responses
 per host; these are client-bound experiments, not capacity or TechEmpower rank.
 
 For the accepted first-iteration scope, M4-003 now owns the working Linux/macOS

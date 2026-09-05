@@ -1,7 +1,7 @@
 # Project handoff — 2026-09-05
 
-Current resumable HTTP work: parent Codex /root integrates two completed
-performance experiments from the sibling `zig-http-batchq` worktree,
+Completed HTTP iteration: two performance experiments are integrated and pushed
+from the sibling `zig-http-batchq` worktree,
 branch `perf/batch-quantum`, consolidated publication62c05de875e9917fc0d7bff36f1c51c83d2a7a60 (measured source dbb6398). Direct operation-cell
 source/report is pushed atadf24f380ac56b2ae142e514a1491be1e08d4a20 on
 `perf/direct-operation-cells` in `zig-http-opcells`, pinned by
@@ -14,9 +14,12 @@ build mode,77 wire cases,8 comparator tests and30,000 smoke bodies. Both timed
 runners and implementation/platform agents finished and released their locks.
 The evidence agent finished both deterministic packet checks. Final HTTP
 publication gates passed on Mac/Linux at clean62c05de; the durable receipt is
-[here](reports/2026-09-05-http-bounded-tuning-publication.md). Wiki reviewed-tree
-gates passed87 steps,28 command tests and25-query retrieval policy; exact pushed
-Mac/Linux publication verification follows the runbook. The batch evidence is pinned by
+[here](reports/2026-09-05-http-bounded-tuning-publication.md). Wiki publication181f4f3b1ae827c9997d4fc1841e67c4f318b61c passed the exact
+clean-commit gates:87 steps on both hosts, Mac73/82 tests with9 skips,
+Linux74/82 with8 skips,28 command tests and25-query retrieval MRR1.0/hit@3=1.0/
+recall@5=0.96. Both reservations were released; no runner remains active for
+these experiments. This follow-up only refreshes roadmap counts and this
+completion receipt; repeat the runbook gates at its pushed commit. The batch evidence is pinned by
 [[zig-http-batch-quantum-2026-09-05]]. Remaining roadmap work is queued, not assigned to a runner.
 The independent external `.claude/worktrees/perf-architecture` remains untouched.
 
