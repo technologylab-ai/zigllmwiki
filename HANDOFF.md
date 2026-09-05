@@ -1,5 +1,22 @@
 # Project handoff — 2026-09-05
 
+Active M4-006 experiment — 2026-09-05: Codex /root owns the standalone branch
+`perf/direct-operation-cells` and worktree
+`/Users/rs/code/github.com/technologylab.ai/zig-http-opcells`, starting from
+c0f87766efa310d517d262781a33ce189c4f9f0d. Progress checkpoint6fcbcf8 is pushed;
+the worktree's HANDOFF.md owns the resumable implementation state. This experiment
+removes Linux hot operation-table searches while preserving identity, generation,
+socket binding and target/cancel ownership, then measures ABBA old/new trials at
+configured capacities128/1024 with128 active clients. No performance gain is
+established yet. Current agents: direct_operation_cells implements the bounded
+transport change; tfb_linux_build prepares pinned Linux baseline/contenders.
+The parent implements controlled comparison ordering and integrates evidence.
+The external agent's `.claude/worktrees/perf-architecture` remains untouched.
+Do not restart or duplicate either worktree after an interruption; inspect their
+actual git state and host locks first. Historical completed-agent statements
+below describe their earlier checkpoints, not this active experiment.
+
+
 This is the durable entry point for a fresh session. ROADMAP.md owns scope and
 status; historical log entries and reports retain narrower and failed runs.
 

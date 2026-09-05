@@ -231,3 +231,14 @@ pages and index. No controlled profile A/B is claimed. The runbook and both
 agent contracts now require cooperative host-local measurement reservations;
 initial trials predated the new lock. Remaining M4 architecture/HTML/Mac/NIC/tail
 work is queued; Windows gates remain deferred for this tuning loop.
+
+
+## Active isolated performance experiment
+
+M4-006 resumed on2026-09-05 in sibling worktree zig-http-opcells, branch
+perf/direct-operation-cells. The implementation agent is changing addressed
+Linux operation cells; the platform agent prepares immutable baseline inputs;
+the parent owns ABBA ordering and integration. Pin measured output before any
+new wiki synthesis. The external architecture agent has its own worktree and
+honors the same host-local measurement locks. Existing completed records remain
+historical and unchanged.

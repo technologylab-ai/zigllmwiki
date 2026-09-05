@@ -979,3 +979,14 @@ platform skips,28 command tests and25 retrieval cases atMRR1.0/hit@3=1.0/
 recall@5=0.96. Deterministic lint has no issues; prior log bytes are preserved
 and no cited source was rewritten. Final clean pushed checks use Mac/Linux;
 no Windows dispatch is required by the user-directed current tuning cadence.
+
+
+## 2026-09-05 — checkpoint independent operation-cell experiment
+
+The user authorized continuing performance fixes alongside another agent's
+separate architecture worktree. Created standalone perf/direct-operation-cells
+at /Users/rs/code/github.com/technologylab.ai/zig-http-opcells fromc0f8776 and
+pushed progress checkpoint6fcbcf8. Exact0.16.0 ReleaseSafe baseline passed52/52
+executions and14/14 steps under the Mac lock, then released it. Named the active
+implementation/platform tasks and ABBA plan in durable handoffs/roadmap so an
+interruption does not orphan or duplicate work. No performance gain is claimed.
