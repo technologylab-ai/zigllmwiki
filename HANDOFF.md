@@ -104,8 +104,8 @@ Useful read-only entry points are `python3 tools/wiki.py query TERMS --format
 json`, `lint --format json`, and `review --format json`. Ingest and upgrade are
 plan-only wrappers; source-head differences are inspection prompts, not proof
 that pinned guidance is stale. The 25-case retrieval regression remains MRR
-1.0, hit@3 1.0 and recall@5 0.96 after adding the M4 draft (previously
-0.98). The policy still passes; this is not production telemetry.
+1.0, hit@3 1.0 and recall@5 0.94 after expanding the M4 draft (previously
+0.98 before M4 and 0.96 after its initial notes). The policy still passes; this is not production telemetry.
 
 ## Hosts and automation
 

@@ -208,7 +208,7 @@ a second content store. A mutable service and database come only after that.
 | L-008 | done | Weekly/manual GitHub workflow installs the exact checksum-verified Zig baseline, verifies proofs, checks sources/releases and retrieval, proves the checkout stayed unchanged, and uploads a 30-day review packet. |
 | L-009 | done | Installed weekly omarx1 consumer prefers maxross with Linux fallback, validates a current read-only packet, runs bounded semantic curation and independent gates, and opens a draft PR. Real PR #1, idle and idempotent fallback passed; root reviewed/merged separately. See the operational receipt. |
 | L-010 | done | Read-only `review` reports coarse upstream-head differences and newer stable Zig releases while preserving source records and requiring an explicit upgrade workflow. |
-| L-011 | done | A versioned 25-query benchmark scores the deterministic index/lexical layer; MRR 1.0, hit@3 1.0, and recall@5 0.96 after adding the M4 draft meet policy; the earlier corpus scored 0.98 recall. |
+| L-011 | done | A versioned 25-query benchmark scores the deterministic index/lexical layer; MRR 1.0, hit@3 1.0, and recall@5 0.94 after expanding the M4 draft meet policy; the earlier corpus scored 0.98 recall. |
 
 The benchmark is a curated regression set, not production telemetry. Revisit
 hybrid search when thresholds fail or real agent queries demonstrate misses.

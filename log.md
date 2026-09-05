@@ -800,3 +800,8 @@ targets. Added bounded measurement tools for pool/queue usage, handler time,
 event-loop lag, output stalls, rejection causes and response latency. The
 reference server will demonstrate a recorded normal-web profile; its numeric
 limits and performance remain to be measured.
+
+Verification of the expanded resource/measurement draft passed exact Zig
+0.16.0: 87/87 steps, 73/82 tests with 9 skips. The 25-query retrieval policy
+passed with MRR 1.0, hit@3 1.0 and recall@5 0.94 (previous draft 0.96).
+Updated current roadmap/handoff metrics without rewriting historical results.
