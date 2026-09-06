@@ -78,9 +78,9 @@ Read this page first, then follow only the pages needed for the task.
 - [[tigerbeetle-io]] — source-verified comparison of TigerBeetle's Linux
   `io_uring`, Darwin `kqueue`, and Windows IOCP backend choices.
 
-- [[bounded-http-server-design]] — M4 Linux/macOS HTTP/1.1 MVP and design:
+- [[bounded-http-server-design]] — bounded/http: M4 Linux/macOS HTTP/1.1 MVP, project names, and design:
   inline callbacks, lazy headers, borrowed buffers, flush barriers, output
-  arenas, bounded batching, operation cells, shard resources and qualified comparisons.
+  arenas, bounded batching, operation cells, shard resources, qualified comparisons, and resumed Windows HTTP work.
 
 ## Engineering system
 

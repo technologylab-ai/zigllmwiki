@@ -17,13 +17,30 @@ produce Zig 0.16.0 code that:
 - applies TigerStyle as concrete engineering constraints;
 - can trace important recommendations to primary sources and runnable proofs.
 
+## HTTP naming follow-up — 2026-09-06
+
+The user approved `bounded/http` as the HTTP project's brand.
+The repository, directory, and executable use `bounded-http`.
+Zig modules and identifiers use `bounded_http`.
+[[bounded-http-naming-2026-09-06]] preserves the accepted proposal and initial wording.
+[[bounded-http-followup-2026-09-06]] replaces the byline with “for servers that stay within their bounds”.
+The project retains “Fast by design. Explicit about limits”.
+The follow-up resumes Windows HTTP implementation and verification.
+Current wiki navigation and [[bounded-http-server-design]] apply the decision.
+The rename adds no runtime evidence.
+The remaining M4 experiments retain their existing scope.
+M4-004 and M4-006 retain queued work.
+M4-005 is running, with Windows HTTP evidence pending.
+M3-006 remains postponed.
+
 ## Documentation follow-up — 2026-09-06
 
 The repository adopted the user's [technical writing policy](docs/technical-writing.md).
 The captured instruction supports the updated naming and review guidance.
 [[bounded-http-server-design]] now links the HTTP project's architecture, usage guide, and HTML whitepaper.
 The documentation links add no runtime evidence or performance claim.
-M4-004, M4-005, and M4-006 retain their remaining work.
+M4-004 and M4-006 retain their remaining work.
+M4-005 has resumed under the Windows follow-up above.
 M3-006 remains postponed.
 
 ## Progress snapshot — 2026-09-05
@@ -46,18 +63,18 @@ M3-006 remains postponed.
   deployment hardware is available and further qualification is not a current
   priority; existing GitHub-hosted runtime evidence remains valid within its limits.
   The curator service is inactive, with its weekly timer enabled and waiting.
-- **Current scope:** the first M4 HTTP MVP is implemented in the private
-  [zig-http project](https://github.com/technologylab-ai/zig-http). Linux io_uring
+- **Current scope:** the first M4 HTTP MVP is implemented in the public
+  [bounded/http project](https://github.com/technologylab-ai/bounded-http). Linux io_uring
   and macOS kqueue pass native ownership/wire gates with exact Zig 0.16.0.
   Inline/gather/batching and Linux contender/deeper-pipeline experiments are
-  implemented and pinned; remaining Windows HTTP, API/reliability and broader
-  comparison work remains queued. The arena/shard integration is the new main
+  implemented and pinned. Windows HTTP work has resumed.
+  Remaining API/reliability and broader comparison work remains queued. The arena/shard integration is the new main
   base with native ownership gates and 36 qualified trials complete. M3-006 stays
   postponed; the roadmap is not entirely complete.
-- **Current measurement cadence:** user-directed Mac/Linux focus while HTTP
-  performance is still being tuned. Repeated Windows measurements/publication
-  gates for HTTP-only changes are deferred; existing receipts remain valid
-  within their original scope. See the platform runbook.
+- **Current verification cadence:** Windows HTTP implementation and gates resumed by user instruction on 2026-09-06.
+  The earlier Mac/Linux tuning cadence does not defer this resumed Windows scope.
+  Existing receipts retain their original limits. M3-006 physical deployment qualification remains postponed.
+  See the platform runbook.
 - **Website:** the user requested a public static wiki on 2026-09-06. B-002 implements that presentation layer; mutable backend work remains deferred.
 
 Source status is tracked as `discovered → selected → captured → synthesized →
@@ -166,7 +183,7 @@ with explicit guarantees, limits, unsupported cases, and measured evidence.
 
 The user authorized the initial implementation on 2026-09-05 after the design
 session. [[bounded-http-server-design]] separates the implemented contract from
-broader proposals. Runnable code is in the dedicated private zig-http project;
+broader proposals. Runnable code is in the public `bounded-http` project;
 [[zig-http-mvp-2026-09-05]] pins its source and native evidence. It has fixed
 startup slots and optional workers, bounded complete-body parsing and lazy headers, a borrowed
 response path, explicit flush/resume/finish, finite refusal/deadlines and
@@ -180,8 +197,9 @@ For the accepted first-iteration scope, M4-003 now owns the working Linux/macOS
 slice; the remaining Windows HTTP adapter is explicitly split into M4-005.
 M3-006 physical Windows deployment qualification remains postponed. The MVP's
 pending/resume API is deliberately replaceable, with dynamic release and broader
-reliability work retained under M4-006. All implementation subagents finished;
-queued items have no assigned running agent. Current performance/ownership evidence
+reliability work retained under M4-006.
+The Windows follow-up assigns active agents to M4-005.
+M4-004 and M4-006 remain queued. Current performance/ownership evidence
 is pinned by [[zig-http-arena-adoption-2026-09-05]], preserving the earlier
 [[zig-http-operation-cells-2026-09-05]] and [[zig-http-batch-quantum-2026-09-05]]; its measurements do not
 claim production capacity or trustworthy tail latency.
@@ -192,7 +210,7 @@ claim production capacity or trustworthy tail latency.
 | M4-002 | done | Establish the first experimental contract: fixed workers and per-slot mailboxes, complete bounded requests, lazy optional headers, explicit flush/resume/finish, requested-byte heap cap and plain loopback HTTP boundary. Implement parser/ownership/failure cases; future API revision remains M4-006. |
 | M4-003 | done | Working standalone Linux io_uring/macOS kqueue HTTP/1.1 MVP with plaintext, preloaded HTML, echo, chunked flush/resume, native gates, watchdogs and retained-borrow shutdown. Source/evidence pinned; not production qualification. Windows portability is tracked explicitly in M4-005. |
 | M4-004 | queued | Completed the adopted arena/shard 36-trial Linux comparison at one/three CPUs (three-core ratios 0.957/0.909/0.860; one-core 1.106/0.778/0.596 at depths 1/16/128). Historical recorded-performance-profile Linux depth sweep: 24 trials passed, Zig 1.74–1.92M/s versus libreactor 4.30–13.63M/s at depths16–128. Prior profile/EPP remain unknown; no controlled profile speedup is established. Completed pinned Linux baseline/client-sensitivity, inline/gather, batch1/16, one-core, deeper-pipeline32/64/128 and old/current control sweeps. Preserve gains, the fixed-batch plateau and unresolved host/code variation. Remaining: preloaded HTML comparisons, macOS contenders, dedicated-host/NIC saturation and qualified request tails. |
-| M4-005 | queued | Implement Windows HTTP IOCP adapter and hosted native runtime gates; current server intentionally rejects Windows compilation. Separate from postponed M3-006 deployment qualification. |
+| M4-005 | running | User resumed Windows HTTP on 2026-09-06. `arena_parser_review` owns the IOCP backend; `arena_ownership_review` owns build, executable, and workflow integration. Compile and native runtime gates remain pending. M3-006 physical deployment qualification remains postponed. |
 | M4-006 | queued | Adopted the arena/shard base on HTTP main, with worker-cache snapshots, EOF/interim ordering, gated partial startup, secondary failure propagation and exact coordinator/stack budgets. Native gates and 36 qualified Linux trials passed; defaults are 128 descriptors and up to 8192 callbacks per shard. Historical operation-cell/batch experiments remain pinned. Remaining: profiled one-core efficiency, optional offload, dynamic lease release and broader fault/combined-limit qualification; no runner assigned. |
 
 Use the wiki to design, implement, and critique a bounded HTTP server:

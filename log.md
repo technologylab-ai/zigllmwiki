@@ -1140,3 +1140,53 @@ The HTTP viewing links are merged and published at `2b41a0801a655f02223a9ece2e8e
 Updated the roadmap, curation ledger, handoff, and publication receipt.
 Final native gates repeat against the clean pushed successor; the existing receipts preserve exact environments and limits.
 M3-006 remains postponed, and unfinished M4 work remains queued.
+
+## 2026-09-06 — bounded/http naming decision
+
+The user approved `bounded/http` for the brand and website.
+The repository, directory, and executable use `bounded-http`.
+Zig modules and identifiers use `bounded_http`.
+Captured the role-labelled approval and naming proposal in [[bounded-http-naming-2026-09-06]].
+The project retains “a server that stays within its bounds” and “Fast by design. Explicit about limits”.
+Updated current wiki navigation, project guidance, the index, curation ledger, roadmap, and handoff.
+Existing sources, snapshots, reports, and earlier log bytes remain unchanged.
+The unchanged baseline at `3d946e04f70f031bfcef08a1baa67cd9bc3d0f13` passed the exact Zig 0.16.0 Linux gates.
+The baseline passed 87 steps, 74 tests, 28 command tests, 14 builder tests, retrieval policy, and lint.
+Eight platform tests skipped, and the baseline runner released its reservation.
+The naming development checks passed 28 command tests, 14 builder tests, retrieval policy, and focused lint.
+Retrieval scored MRR 1.0, hit@3 1.0, and recall@5 0.96.
+The development site built 189 documents and passed its deterministic artifact check.
+Native verification after edits and final publication checks follow the platform runbook.
+M3-006 remains postponed.
+Unfinished M4 work remains queued.
+
+## 2026-09-06 — Revised byline and resumed Windows HTTP
+
+The user replaced the byline with “for servers that stay within their bounds”.
+The project retains “Fast by design. Explicit about limits”.
+Captured the follow-up in [[bounded-http-followup-2026-09-06]] and preserved the initial naming record unchanged.
+The user also requested subagents to restore Windows builds.
+M4-005 is running: `arena_parser_review` owns IOCP, and `arena_ownership_review` owns build, executable, and workflow integration.
+Both agents are active; Windows HTTP compilation and runtime evidence remain pending.
+Updated current project guidance, the curation ledger, roadmap, runbook, and handoff.
+Focused lint passed with 51 pages and 80 source records.
+All 14 builder tests and the 25-query retrieval policy passed.
+The 190-document development site passed its deterministic artifact check.
+Native verification remains pending behind the shared host reservation.
+M3-006 physical deployment qualification remains postponed.
+M4-004 and M4-006 retain queued work.
+
+## 2026-09-06 — bounded/http naming development verification
+
+The Linux development gate passed 87 build steps and 74 tests, with eight platform skips.
+The gate used exact Zig 0.16.0 on omarx1, Linux 7.1.9-arch1-2 x86_64, with glibc 2.44.
+All 252 streamed file digests matched the frozen input based on `018a2815c7ba2e2a964ab0d821978d10a4a0da5f`.
+The runner finished and released its reservation at 14:16:42 UTC.
+All 28 command tests and 14 builder tests passed.
+The 25-query retrieval policy passed with MRR 1.0, hit@3 1.0, and recall@5 0.96.
+Focused lint found no issues across 51 pages and 80 source records.
+The 190-document development artifact passed its deterministic check.
+The development browser check passed all 13 cases with Chrome 152.
+These results cover development input; final publication gates require the clean pushed revision.
+M4-005 remains active under its assigned agents.
+M3-006 physical deployment qualification remains postponed.

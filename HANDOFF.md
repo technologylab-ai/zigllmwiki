@@ -1,5 +1,42 @@
 # Project handoff — 2026-09-06
 
+## bounded/http naming checkpoint
+
+The user approved `bounded/http` as the HTTP brand and website name.
+The repository, directory, and executable use `bounded-http`.
+Zig modules and identifiers use `bounded_http`.
+[[bounded-http-naming-2026-09-06]] captures the accepted proposal and the user's presentation wording.
+The current byline is “for servers that stay within their bounds”.
+[[bounded-http-followup-2026-09-06]] captures the revised wording and resumed Windows HTTP scope.
+The project retains “Fast by design. Explicit about limits”.
+Current navigation targets the [repository](https://github.com/technologylab-ai/bounded-http) and [website](https://technologylab-ai.github.io/bounded-http/).
+The canonical Mac directory is `../bounded-http`; `../zig-http` remains a compatibility symlink.
+Earlier checkpoints, source records, snapshots, and reports retain their original names and evidence limits.
+The shared host reservation remains `/tmp/zig-http-measurement.lock` for compatibility.
+
+The wiki edits live in `zigllmwiki-bounded-name` on `docs/bounded-http-name`.
+The unchanged baseline is clean pushed revision `3d946e04f70f031bfcef08a1baa67cd9bc3d0f13`.
+Its completed Linux packet used exact Zig 0.16.0 and passed 87 steps, 74 tests, and eight platform skips.
+All 28 command tests, 14 builder tests, the 25-query retrieval policy, and lint passed.
+The baseline runner released its reservation at 13:33:09 UTC on 2026-09-06.
+The naming development checks passed 28 command tests, 14 builder tests, the 25-query retrieval policy, and focused lint.
+Retrieval scored MRR 1.0, hit@3 1.0, and recall@5 0.96.
+The revised byline and Windows-scope edits passed focused lint across 51 pages and 80 source records.
+The development site contains 190 documents and passes the deterministic artifact check.
+The Linux development gate passed 87 build steps and 74 tests, with eight platform skips.
+The gate used Zig 0.16.0 on omarx1, Linux 7.1.9-arch1-2 x86_64, with glibc 2.44.
+All 252 streamed file digests matched the frozen development input.
+The runner released its reservation at 14:16:42 UTC on 2026-09-06.
+The development browser check passed all 13 cases with Chrome 152.
+These development results do not replace final checks on the clean pushed publication revision.
+The naming change adds no server runtime or performance claim.
+Windows HTTP implementation and verification have resumed under M4-005.
+`arena_parser_review` owns the IOCP backend.
+`arena_ownership_review` owns build, executable, and workflow integration.
+Both agents are active; Windows HTTP compilation and runtime evidence remain pending.
+M3-006 physical deployment qualification remains postponed.
+M4-004 and M4-006 retain queued work.
+
 ## Static wiki checkpoint
 
 The standalone website implements search, filters, backlinks, source metadata, highlighted proofs, and an interactive note graph.
@@ -468,7 +505,7 @@ validated hosts. Installed Mac Zig is under
 
 ## Publication
 
-Canonical private origin is `technologylab-ai/zigllmwiki`, branch main. Match
+Canonical public origin is `technologylab-ai/zigllmwiki`, branch main. Match
 hosted run headSha with the intended pushed commit. Publication gates require
 a clean tree, complete local verification/retrieval and Linux through
 `tools/verify_linux_ssh.sh omarx1`. During current M4 tuning, Windows dispatches

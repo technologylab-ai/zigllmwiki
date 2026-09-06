@@ -30,6 +30,23 @@ The official Zig 0.16 release notes are fully inventoried by named section in
 roadmap destination; it does not copy the release notes or claim that queued
 topics have already been synthesized.
 
+## HTTP naming decision — 2026-09-06
+
+[[bounded-http-naming-2026-09-06]] captures the user's approval and the accepted naming proposal.
+The role-labelled snapshot preserves the supplied conversation excerpts.
+[[bounded-http-server-design]] applies `bounded/http`, `bounded-http`, and `bounded_http` to their approved uses.
+Current website navigation follows the renamed project and Pages path.
+The initial source preserves the first byline.
+[[bounded-http-followup-2026-09-06]] records the replacement “for servers that stay within their bounds”.
+The project retains “Fast by design. Explicit about limits”.
+The follow-up also resumes Windows HTTP implementation and verification.
+`arena_parser_review` owns the IOCP backend; `arena_ownership_review` owns build, executable, and workflow integration.
+The agents are active, and Windows HTTP gates remain pending.
+M3-006 physical deployment qualification remains postponed.
+Earlier implementation and performance sections below retain their checkpoint scope.
+This naming decision reached synthesis and introduces no executable claim.
+Existing source records, snapshots, reports, and historical log entries retain their original bytes.
+
 ## Repository writing requirements — 2026-09-06
 
 The user also requested a [public static wiki](docs/wiki-site.md).

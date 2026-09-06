@@ -1,0 +1,14 @@
+User — name selection:
+ok. let's go with bounded/http. but lets' keep reasoning: what should be the filesystem- and source-code friendly name? just remove the slash?
+
+Assistant — accepted naming proposal:
+Brand and website: bounded/http; Repository and directory: bounded-http; Executable: bounded-http; Zig module and identifier: bounded_http; Source filenames: Keep descriptive names such as server.zig, cluster.zig, and connection.zig.
+
+User — proposal approval:
+excellent choices. let's make it happen!
+
+User — byline instruction:
+the extra byline could be "a server that stays within its bounds". but i would not remove "Fast by design. Explicit about limits".
+
+User — wiki instruction:
+excellent we also need to make sure that any wiki docs also are aware of the rename

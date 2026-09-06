@@ -1,12 +1,14 @@
 ---
 id: bounded-http-server-design
-title: Bounded HTTP/1.1 framework MVP and design
+title: bounded/http — HTTP/1.1 framework MVP and design
 kind: pattern
 status: draft
 zig: "0.16.0"
-summary: Experimental Linux/macOS HTTP with bounded ownership and flush barriers, historical performance checkpoints, a preliminary output-arena/shard reference and explicit Windows gaps.
+summary: bounded/http is an experimental Linux/macOS HTTP framework with bounded ownership, flush barriers, recorded comparisons, and explicit Windows gaps.
 updated: 2026-09-06
 sources:
+  - "[[bounded-http-naming-2026-09-06]]"
+  - "[[bounded-http-followup-2026-09-06]]"
   - "[[repository-technical-writing-2026-09-06]]"
   - "[[zig-http-arena-adoption-2026-09-05]]"
   - "[[http11-framing-and-limits]]"
@@ -37,25 +39,44 @@ platforms:
   - windows
 ---
 
-# Bounded HTTP/1.1 framework MVP and design
+# bounded/http — HTTP/1.1 framework MVP and design
 
 ## Remember
 
-M4 now has a working experimental Linux/macOS implementation in the private
-[zig-http project](https://github.com/technologylab-ai/zig-http). Its current
-main adopts the arena/shard base with reviewed ownership/startup fixes and
-qualified local comparisons: [[zig-http-arena-adoption-2026-09-05]]. Earlier
-checkpoints and the independent proposal remain below as historical evidence.
+The public [bounded/http project](https://github.com/technologylab-ai/bounded-http) provides the experimental Linux/macOS implementation for M4.
+Its adopted arena/shard base includes reviewed ownership and startup fixes.
+[[zig-http-arena-adoption-2026-09-05]] pins that implementation and its qualified comparisons.
+Earlier checkpoints and the independent proposal remain below as historical evidence.
 This page stays draft: Windows HTTP, production qualification and further API
 work remain pending.
+The user resumed Windows HTTP implementation and verification on 2026-09-06.
+That active work adds no completed Windows adapter evidence yet. [[bounded-http-followup-2026-09-06]]
+
+## Project names
+
+The [naming decision](../sources/bounded-http-naming-2026-09-06.md) records the user's approved names.
+
+| Use | Name |
+| --- | --- |
+| Brand and website | `bounded/http` |
+| Repository and directory | `bounded-http` |
+| Executable | `bounded-http` |
+| Zig module and identifier | `bounded_http` |
+
+Source filenames retain descriptive names such as `server.zig`, `cluster.zig`, and `connection.zig`.
+The current byline is “for servers that stay within their bounds”.
+The [follow-up instruction](../sources/bounded-http-followup-2026-09-06.md) replaces the earlier byline and resumes Windows HTTP work.
+The project retains “Fast by design. Explicit about limits”.
+Earlier source records retain `zig-http` names, paths, and revision URLs.
+Those records preserve evidence from before the rename.
 
 ## Project documentation
 
 The following links select the HTTP project's current documentation.
 
-- [Architecture](https://github.com/technologylab-ai/zig-http/blob/main/docs/ARCHITECTURE.md) explains components, ownership, limits, and request processing.
-- [Usage guide](https://github.com/technologylab-ai/zig-http/blob/main/docs/USING.md) explains how applications configure and call the server.
-- [HTML whitepaper](https://github.com/technologylab-ai/zig-http/blob/main/docs/whitepaper.html) presents the design as a standalone document.
+- [Architecture](https://technologylab-ai.github.io/bounded-http/docs/read.html?file=docs/ARCHITECTURE.md) explains components, ownership, limits, and request processing.
+- [Usage guide](https://technologylab-ai.github.io/bounded-http/docs/read.html?file=docs/USING.md) explains how applications configure and call the server.
+- [HTML whitepaper](https://technologylab-ai.github.io/bounded-http/) presents the design as a standalone document.
 
 These moving links provide navigation.
 [[zig-http-arena-adoption-2026-09-05]] remains the pinned authority for the implementation and measurements below.

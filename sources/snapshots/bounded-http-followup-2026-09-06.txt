@@ -1,0 +1,5 @@
+User — revised byline:
+and actually after "A ... framework" saying "a server that..." reads silly. Maybe it should be "for servers that stay within their bounds"
+
+User — resumed Windows support:
+and i need you to task subagents to enable windows builds again. we did all this work in the wiki already and so it would be a shame not supporting windows.

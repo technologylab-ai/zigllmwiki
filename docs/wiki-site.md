@@ -39,7 +39,7 @@ Append a heading fragment when a specific section matters.
 The reader resolves Obsidian links and ordinary Markdown links within the published corpus.
 Unpublished repository attachments open at the publication commit on GitHub.
 
-The [HTTP whitepaper](https://technologylab-ai.github.io/zig-http/) links to this reader.
+The [bounded/http whitepaper](https://technologylab-ai.github.io/bounded-http/) links to this reader.
 Keep immutable source citations unchanged when adding viewing links.
 
 ## Build and preview

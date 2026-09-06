@@ -69,6 +69,7 @@ benchmark, heavy build, or runtime test suite. If `mkdir` fails because the path
 exists, hold off on that host and inspect `owner.json`; checking for absence and
 then starting work without acquiring is racy. A lock on one host does not reserve
 the other. Keep lightweight editing and remote orchestration available.
+The HTTP rename preserves this shared reservation path for compatibility.
 
 The acquiring agent writes `owner.json` with its identity, purpose, host, UTC
 start, owner PID, unique ownership token and any working directory. For Linux,
@@ -90,7 +91,16 @@ only if a workload actually needs both machines; otherwise reserve its execution
 host alone. Recheck and acquire before later builds rather than assuming an
 earlier empty process list still applies.
 
-## Current M4 performance cadence — user decision 2026-09-05
+## Windows HTTP resumed — user decision 2026-09-06
+
+The user resumed Windows HTTP implementation and verification.
+The [captured follow-up](../sources/bounded-http-followup-2026-09-06.md) records that instruction.
+The earlier tuning cadence below does not defer the resumed Windows scope.
+M4-005 now includes Windows HTTP compilation and native runtime gates.
+Pending gates establish no adapter support or runtime result.
+M3-006 physical deployment qualification remains postponed.
+
+## Earlier M4 performance cadence — user decision 2026-09-05
 
 While the HTTP implementation is still being tuned, focus on macOS correctness
 and Linux runtime/performance. The user explicitly deferred further Windows
@@ -361,8 +371,10 @@ review remains independent of write authority.
 
 ## Standalone M4 HTTP gates
 
-The private sibling `zig-http` is the runnable HTTP application; its modules are
-registered by its own `zig build verify`. Its first source-hashed packet is
+The public sibling `bounded-http` contains the runnable bounded/http application.
+The application registers its modules through its own `zig build verify`.
+The [naming decision](../sources/bounded-http-naming-2026-09-06.md) defines the project names.
+The HTTP project's first source-hashed packet is
 [[zig-http-mvp-2026-09-05]], separate from this wiki's registered lifecycle proofs.
 Run its Debug and ReleaseSafe verifiers, build ReleaseSafe, then its Python
 generic, inline, gather, batch and arena lifecycle integration suites, the comparator receipt
@@ -377,10 +389,12 @@ overrides, passed. Debug with explicit LLVM/LLD passed too. Preserve the target,
 CRT and compiler evidence; see [[build-diagnostics-and-generated-code]]. This
 is unrelated to Windows compiler diagnostics or a Zig version upgrade.
 
-The HTTP server currently has Linux/macOS runtime gates only. Dispatching this
+The HTTP server's existing evidence covers Linux/macOS runtime gates only.
+The user has resumed Windows HTTP implementation and verification under M4-005.
+Those new gates remain pending. Dispatching this
 wiki's Windows workflow still validates the existing wiki proofs; it does not
 supply Windows runtime or even compile evidence for the HTTP server. That
-adapter remains queued under M4-005, while M3-006 stays postponed.
+adapter is active work under M4-005, while M3-006 stays postponed.
 
 Performance experiments belong in the sibling project's maintained comparison
 harness. Keep assertion-enabled ReleaseSafe, pinned contender/source/binary
