@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="A source-driven field guide to Zig systems programming, bounded resources, and platform I/O.">
+  <meta name="theme-color" content="#172936">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <title>Zig LLM Wiki · A systems field guide</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="vendor/marked.js"></script>
+  <script defer src="vendor/purify.js"></script>
+  <script defer src="vendor/highlight.js"></script>
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="masthead">
+    <a class="brand" href="?" data-home aria-label="Zig LLM Wiki home"><span class="brand-mark" aria-hidden="true">Z</span><span>Zig LLM Wiki<small>A systems field guide</small></span></a>
+    <nav class="top-nav" aria-label="Main navigation">
+      <a href="?" data-home id="nav-explore">Explore</a>
+      <a href="?view=graph" id="nav-graph">Knowledge graph <span aria-hidden="true">↗</span></a>
+      <a href="https://technologylab-ai.github.io/zig-http/" class="http-link">HTTP project <span aria-hidden="true">↗</span></a>
+    </nav>
+    <span class="version"><span aria-hidden="true"></span>Zig <b id="zig-version">0.16.0</b></span>
+  </header>
+  <div class="layout">
+    <aside class="sidebar" aria-label="Search and browse">
+      <div class="sidebar-inner">
+        <label class="search-label" for="search">Find a useful answer</label>
+        <div class="search-box"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Search the wiki…" autocomplete="off" spellcheck="false" maxlength="300"><kbd aria-hidden="true">/</kbd></div>
+        <p class="search-help">Search notes, source records, and proofs.</p>
+        <details class="filter-details" open>
+          <summary>Refine your search <span aria-hidden="true">+</span></summary>
+          <div class="filters">
+            <label for="layer-filter">Layer<select id="layer-filter"><option value="">All layers</option><option value="wiki">Wiki notes</option><option value="source">Source records</option><option value="proof">Proof files</option><option value="project">Project documents</option></select></label>
+            <label for="platform-filter">Platform<select id="platform-filter"><option value="">All platforms</option><option value="cross-platform">Cross-platform</option><option value="linux">Linux</option><option value="macos">macOS</option><option value="windows">Windows</option></select></label>
+            <label for="status-filter">Evidence status<select id="status-filter"><option value="">All statuses</option></select></label>
+          </div>
+        </details>
+        <nav class="browse-nav" aria-label="Reading paths">
+          <p class="eyebrow">Reading paths</p>
+          <a href="?page=wiki/zig-0.16-baseline.md"><span aria-hidden="true">01</span> Start with Zig 0.16</a>
+          <a href="?page=wiki/std-io.md"><span aria-hidden="true">02</span> Understand I/O</a>
+          <a href="?page=wiki/tigerstyle.md"><span aria-hidden="true">03</span> Design with limits</a>
+          <a href="?page=wiki/platform-io-backend-decision-table.md"><span aria-hidden="true">04</span> Choose a backend</a>
+          <a href="?page=wiki/bounded-http-server-design.md"><span aria-hidden="true">05</span> Build an HTTP server</a>
+        </nav>
+        <div class="sidebar-note"><span class="small-rule"></span><p>Follow the evidence.</p><span>Each note keeps its source, compiler, and platform boundaries visible.</span></div>
+        <a class="all-documents" href="?layer=wiki">Browse all wiki notes <span aria-hidden="true">→</span></a>
+      </div>
+    </aside>
+    <main id="main" tabindex="-1">
+      <div id="loading" class="loading-state" role="status"><span class="eyebrow">Opening the field guide</span><h1>Knowledge, with its evidence.</h1><p>Loading the wiki and its source map…</p></div>
+      <div id="view"></div>
+      <noscript><div class="notice"><h1>Open the source collection</h1><p>This reader needs JavaScript for navigation and search.</p><a href="https://github.com/technologylab-ai/zigllmwiki">Browse the repository on GitHub.</a></div></noscript>
+    </main>
+  </div>
+  <footer class="site-footer"><span>Built from the same files that agents read.</span><span id="revision">Source revision loading…</span><a href="vendor/manifest.json">Rendering libraries</a></footer>
+  <div id="announcement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+</body>
+</html>

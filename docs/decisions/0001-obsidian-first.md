@@ -3,6 +3,9 @@
 - Status: accepted
 - Date: 2026-09-04
 
+The 2026-09-06 [static publication decision](0003-static-public-wiki.md) replaces the frontend deferral below.
+The repository remains canonical, and a mutable backend remains deferred.
+
 ## Decision
 
 Use this repository itself as an Obsidian vault. Defer a custom backend and web

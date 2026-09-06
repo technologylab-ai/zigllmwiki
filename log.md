@@ -1100,3 +1100,19 @@ All 28 command tests and the 25-query retrieval policy passed at that revision.
 Structural lint found zero issues across 51 pages and 78 sources.
 The runner released its reservation after cleanup.
 The documentation receipt preserves the exact revision and environment.
+
+## 2026-09-06 — Standalone wiki implementation
+
+The user requested a public browser wiki with search, backlinks, and a note graph.
+Added a generated static reader with evidence metadata, highlighted canonical proofs, and typed graph connections.
+The publication decision preserves Markdown, Obsidian, and existing curation workflows.
+Updated the index, curation ledger, roadmap, site guide, and durable handoff.
+Both repositories are public by the user's authorization.
+The HTTP documents now have prepared links to the standalone reader.
+
+Development gates passed with exact Zig 0.16.0: 87 steps, 73 tests, and nine platform skips on macOS.
+All 28 command tests, the 25-query retrieval policy, full lint, 14 builder fixtures, and 12 browser checks passed.
+The Mac reservations were released after cleanup.
+B-002 awaits the first successful Pages deployment; Linux publication gates await a pushed commit.
+The website adds no runtime evidence, and existing source records remain unchanged.
+See [the website receipt](reports/2026-09-06-wiki-site.md).

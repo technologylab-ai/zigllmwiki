@@ -58,7 +58,7 @@ M3-006 remains postponed.
   performance is still being tuned. Repeated Windows measurements/publication
   gates for HTTP-only changes are deferred; existing receipts remain valid
   within their original scope. See the platform runbook.
-- **Backend:** intentionally deferred; the Obsidian-first ADR remains in force.
+- **Website:** the user requested a public static wiki on 2026-09-06. B-002 implements that presentation layer; mutable backend work remains deferred.
 
 Source status is tracked as `discovered → selected → captured → synthesized →
 proved` in [CURATION.md](CURATION.md). “Captured” never implies that guidance
@@ -211,8 +211,15 @@ patterns, proofs, decisions, and postmortems.
 
 ## Backend lane
 
-Stay Obsidian-first while one local vault satisfies human browsing. Reconsider a
-web application only when at least one trigger is real:
+The user requested public browser access on 2026-09-06.
+The [static publication decision](docs/decisions/0003-static-public-wiki.md) replaces the earlier frontend deferral.
+Markdown remains canonical, and Obsidian remains supported.
+
+| ID | Status | Deliverable / exit condition |
+| --- | --- | --- |
+| B-002 | running | Publish a static wiki with search, filters, backlinks, evidence metadata, highlighted proofs, and an interactive graph. Connect HTTP documentation through stable viewing links. |
+
+The original reconsideration triggers were:
 
 - readers need browser access without an Obsidian checkout;
 - multi-user review, authentication, or publishing is required;
@@ -220,8 +227,8 @@ web application only when at least one trigger is real:
 - the graph needs typed claim/source/proof edges Obsidian cannot express;
 - an agent API needs behavior beyond filesystem search and the index.
 
-The first backend should be a read-only generated site/index over Markdown, not
-a second content store. A mutable service and database come only after that.
+The website derives its content from Markdown and registered proofs.
+A mutable service and database remain deferred.
 
 ## LLM maintenance lane
 

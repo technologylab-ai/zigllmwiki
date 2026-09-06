@@ -5,3 +5,6 @@
 *.jpg binary
 *.png binary
 *.webp binary
+
+# Preserve vendored license bytes, including upstream whitespace.
+site/vendor/* -whitespace

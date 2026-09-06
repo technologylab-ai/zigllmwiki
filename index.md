@@ -16,6 +16,9 @@ platforms:
 
 Read this page first, then follow only the pages needed for the task.
 
+[Browse the public wiki](https://technologylab-ai.github.io/zigllmwiki/) for search, backlinks, highlighted proofs, and the note graph.
+[Website maintenance](docs/wiki-site.md) explains publication and evidence boundaries.
+
 ## Current Zig
 
 - [[zig-0.16-baseline]] — active version, evidence standard, and upgrade rule.

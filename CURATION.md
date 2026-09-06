@@ -32,6 +32,12 @@ topics have already been synthesized.
 
 ## Repository writing requirements — 2026-09-06
 
+The user also requested a [public static wiki](docs/wiki-site.md).
+The website derives navigation, search, and graph data from canonical repository files.
+The website preserves source revisions, document hashes, and recorded verification status.
+This presentation work adds no source synthesis or runtime evidence.
+Pinned source records retain their existing bytes and authority.
+
 [[repository-technical-writing-2026-09-06]] captures the user's exact prose requirements.
 The snapshot preserves the supplied paragraph and one final newline.
 The [writing policy](docs/technical-writing.md) applies the requirements to authors and reviewers.

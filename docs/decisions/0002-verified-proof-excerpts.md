@@ -2,6 +2,9 @@
 
 Status: accepted design, 2026-09-04. Implementation is not enabled.
 
+The later [static wiki](0003-static-public-wiki.md) displays complete canonical proof files.
+The static wiki does not enable the excerpt directives proposed here.
+
 ## Decision
 
 Keep runnable Zig exclusively in registered `proofs/`. If rendered excerpts are
