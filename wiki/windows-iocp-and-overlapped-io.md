@@ -12,6 +12,8 @@ sources:
   - "[[microsoft-windows-winsock-batched-file-io]]"
   - "[[microsoft-windows-acceptex-provider]]"
   - "[[bounded-http-windows-iocp-2026-09-06]]"
+  - "[[bounded-http-windows-shards-2026-09-06]]"
+  - "[[microsoft-windows-winsock-cleanup]]"
   - "[[microsoft-windows-nt-fs-control]]"
   - "[[zig-0.16-windows-io-source]]"
   - "[[tigerbeetle-io-source]]"
@@ -314,20 +316,37 @@ is nonblocking.
 
 ## HTTP application evidence
 
-The separate [[bounded-http-server-design]] now has a custom one-shard IOCP adapter.
-The adapter uses public `AcceptEx`, `WSARecv`, `WSASend`, and batched completion APIs.
-Stable operation cells and distinct cancellation records preserve terminal ownership.
-[[bounded-http-windows-iocp-2026-09-06]] pins candidate `70f9ae5917076b664081db59c62edc4959ca5041` and its committed report.
+The separate [[bounded-http-server-design]] implements an acceptor handoff across independent IOCP owners.
+Shard zero owns one exclusive listener and accepts without receiving request bytes.
+The acceptor collects terminal completion and updates accepted-socket context before export.
+A single-producer, single-consumer (SPSC) queue transfers metadata to each secondary owner.
+The destination associates the previously unassociated socket before receiving request bytes.
+The original acceptance deadline includes queue residence. [[bounded-http-windows-shards-2026-09-06]]
 
-Native x64 Windows Server 2025 build `26100.33296` passed both Zig 0.16.0 modes with 83 tests and six skips each.
-The complete HTTP gate also passed 80 wire cases, both embedding probes, nine comparator tests, and 30,000 exact smoke responses.
-Four maximum-cell wire fixtures require POSIX process suspension and remain skipped on Windows.
-The first full run failed on unavailable `SIGSTOP`; its passing components do not erase that failure.
-The successful follow-up runs arena input against a live owner.
-Separate Zig tests force internal completion ordering. [[bounded-http-windows-iocp-2026-09-06]]
+Configured capacity `C` includes producer transit, queue residence, consumer transit, and adopted connections.
+A separate accept staging socket permits `C + 1` nonlistener handles plus one listener.
+Each secondary queue reserves `C + 1` optional entries for `C` usable positions.
+Each owner also reserves full private connection, operation, and response storage.
+These application bounds exclude kernel backlog, provider allocations, and background socket cleanup. [[bounded-http-windows-shards-2026-09-06]]
 
-The HTTP evidence covers one shard, native x64, plain loopback traffic, and the recorded finite fixtures.
-It supplies no Windows comparative-performance, ARM64, WOW64, service-control, or production-deployment qualification.
+Receivers acquire `producer_done`, then recheck queue emptiness before exit.
+The flag ends publication; failed producers can still retain kernel operations.
+Successful shutdown reconciles target operations and cancellation acknowledgements before adapter destruction.
+Failed owners retain storage under the process-termination boundary.
+The listener and Winsock startup references survive until every owner exits.
+Final `WSACleanup` affects every process thread and cannot substitute for terminal reconciliation. [[microsoft-windows-winsock-cleanup]]
+
+Feature revision `419de5445901a87ea6973020df5b13a420917483` passed native [run 34044844060](https://github.com/technologylab-ai/bounded-http/actions/runs/34044844060).
+Merge `1c74a4e379c365ec0a201e6fe3df1a5a9718d504` preserves its exact Git tree.
+Native x64 Windows Server 2025 build `26100.33296` passed both Zig 0.16.0 modes with 95 tests and four skips each.
+The gate also passed 89 wire cases, both embedding probes, nine comparator tests, and 30,000 exact smoke responses.
+Four maximum-cell wire fixtures require POSIX suspension and remain skipped.
+Live wire fixtures and deterministic internal fixtures retain distinct scheduling claims. [[bounded-http-windows-shards-2026-09-06]]
+
+Windows defaults to one shard; explicit inline configurations accept one through 64 shards.
+The native fixtures cover one through four owners; worker execution requires one shard.
+The packet supplies no Windows performance, ARM64, WOW64, service-control, or production-deployment qualification.
+[[bounded-http-windows-iocp-2026-09-06]] preserves the earlier single-owner implementation and failed full-gate history.
 The older wiki architecture proofs below retain their separate scope.
 M3-006 physical deployment qualification remains postponed.
 

@@ -1,6 +1,54 @@
 # Project handoff — 2026-09-06
 
-## Windows HTTP evidence checkpoint
+## Windows HTTP shard handoff checkpoint
+
+[[bounded-http-windows-shards-2026-09-06]] pins qualified feature `419de5445901a87ea6973020df5b13a420917483`.
+Merge `1c74a4e379c365ec0a201e6fe3df1a5a9718d504` preserves Git tree `7b6f43cecff06791c7f91ad4ac794eb3d024119d`.
+The native run retains its feature identity; tree equality does not rename that run.
+The preserved report still describes candidate `514c901fafd005f140a0a6fdf10ee28d0ff8796a`.
+[[microsoft-windows-winsock-cleanup]] adds the final process-wide cleanup contract before synthesis.
+The curator verified candidate and native input hashes, raw archive bytes, final ownership counters, and merge tree equality.
+
+[Windows run 34044844060](https://github.com/technologylab-ai/bounded-http/actions/runs/34044844060) passed exact Zig 0.16.0 on native x64 Windows Server 2025 build `26100.33296`.
+Each mode passed 16 steps and 95 tests, with four POSIX skips.
+Both embedding probes, nine comparator tests, 89 wire cases, and 30,000 exact smoke responses passed.
+Four maximum-cell wire fixtures require POSIX suspension and remain excluded.
+The final executable SHA-256 is `98e3f0c32c81d596ce3acc512c35549d6c3234f322be8ff9617836d5d2e431d6`.
+Artifact `9992846068` has verified ZIP SHA-256 `972ded4fad43fa7417b8aa6376b6682259c232369d6cec5840a0baedeb173745`.
+[Pages run 34045683304](https://github.com/technologylab-ai/bounded-http/actions/runs/34045683304) published the merge.
+HTTP bookkeeping commit `7c24003924bcc76b2a3808cc2fae194082a40105` changes only HANDOFF and ROADMAP after that merge.
+
+One accepting owner distributes socket metadata through fixed queues to independently owned IOCPs.
+Shared capacity includes producer transit, queue residence, consumer transit, and adopted connections.
+Successful shutdown retains listener and startup references until every owner exits.
+Windows defaults to one shard; explicit inline configurations accept one through 64 shards.
+Native fixtures cover one through four owners; workers require one shard.
+Windows performance and broader deployment remain unqualified.
+M4-005 is complete for this experimental scope.
+M4-004 and M4-006 retain queued work; M3-006 remains postponed.
+
+The wiki edits live in `zigllmwiki-windows-shards` on `docs/windows-http-shards`.
+Fresh clean baseline `8e7fc89d76bc1d0eecf7288f6f09251050980675` passed exact Zig 0.16.0 on Mac before content edits.
+The verifier passed 87 steps and 73 tests, with nine platform skips.
+All 28 command tests, 14 builder tests, 25 retrieval queries, lint, and deterministic site checks passed.
+The baseline runner released its reservation at 16:33:11 UTC on 2026-09-06.
+The baseline packet is `.zig-cache/windows-shards-baseline-macos/` in the ingestion worktree.
+Development verification passed with exact Zig 0.16.0 on Mac and Linux.
+Mac passed 87 steps and 73 tests, with nine platform skips.
+Linux passed 87 steps and 74 tests, with eight platform skips.
+Both hosts passed 28 command tests, 14 builder tests, 25 retrieval queries, and focused lint.
+Retrieval scored MRR 0.98, hit@3 1.0, and recall@5 0.96.
+Lint found zero issues across 51 pages and 84 source records.
+The 194-document development site passed deterministic construction and comparison on Mac.
+All 260 frozen input hashes matched their development receipts.
+Mac released its reservation at 16:42:17 UTC; Linux released its reservation at 16:42:21 UTC.
+Both runners confirmed no remaining owned workloads.
+The packets remain in `.zig-cache/windows-shards-development-{macos,linux}/` in the ingestion worktree.
+Parent review approved the source and synthesis; the parent owns canonical fast-forward and publication.
+Exact published-commit results will remain in `.zig-cache/windows-shards-publication/summary.json` after publication.
+This documentation-only ingest requires no unrelated Windows wiki dispatch.
+
+## Earlier Windows HTTP evidence checkpoint
 
 [[bounded-http-windows-iocp-2026-09-06]] pins HTTP publication `bb14d98756152936fadb6e8353852a686e8d315d` and native candidate `70f9ae5917076b664081db59c62edc4959ca5041`.
 [[microsoft-windows-acceptex-provider]] captures the primary setup and provider-ownership contracts before synthesis.

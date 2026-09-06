@@ -30,7 +30,21 @@ The official Zig 0.16 release notes are fully inventoried by named section in
 roadmap destination; it does not copy the release notes or claim that queued
 topics have already been synthesized.
 
-## Windows HTTP source and evidence — 2026-09-06
+## Windows HTTP shard handoff — 2026-09-06
+
+[[bounded-http-windows-shards-2026-09-06]] pins the qualified feature and its identical-tree merge before synthesis.
+The snapshot retains the earlier candidate report, final native archive, and 28 qualified source inputs.
+The curator checked 295 candidate Git digests, 28 final input digests, and the report packet's 29 recorded file hashes.
+The curator verified the hosted ZIP, extracted bytes, final shutdown counters, and merge tree equality.
+[[microsoft-windows-winsock-cleanup]] supplies the previously uncaptured final cleanup contract.
+Existing HTTP, Windows, and backend-selection pages now explain independent IOCP owners, fixed handoff queues, and shared admission.
+The guidance preserves original deadlines and separates publication completion from retained kernel ownership.
+M4-005 includes native x64 fixtures with one through four owners.
+Windows performance remains unqualified; M3-006 remains postponed.
+Existing source records, snapshots, proof code, and historical log entries remain unchanged.
+The current change adds no runnable Zig proof; HTTP executable evidence remains in the HTTP repository.
+
+## Earlier Windows HTTP source and evidence — 2026-09-06
 
 [[microsoft-windows-acceptex-provider]] pins five Microsoft API files and four exact Zig 0.16.0 ABI files.
 The curator checked every Microsoft blob and each copied ABI file before synthesis.

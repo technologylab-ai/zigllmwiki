@@ -21,6 +21,8 @@ sources:
   - "[[microsoft-windows-winsock-batched-file-io]]"
   - "[[microsoft-windows-acceptex-provider]]"
   - "[[bounded-http-windows-iocp-2026-09-06]]"
+  - "[[bounded-http-windows-shards-2026-09-06]]"
+  - "[[microsoft-windows-winsock-cleanup]]"
   - "[[zig-0.16-windows-io-source]]"
   - "[[tigerbeetle-io-source]]"
 proofs:
@@ -172,8 +174,11 @@ runtime phases, exact images and unobserved storage paths. Architecture breadth
 does not discharge deployment durability, device/error or production-SLO gates.
 
 Design application: [[bounded-http-server-design]] implements experimental Linux io_uring, macOS kqueue, and Windows IOCP HTTP backends.
-The Windows adapter requires one shard and uses public overlapped Winsock APIs.
-Its native x64 gate passed 80 wire cases and 30,000 exact smoke responses with exact Zig 0.16.0.
-[[bounded-http-windows-iocp-2026-09-06]] retains source identities, fixture skips, and qualification limits.
+The Windows adapter defaults to one shard and supports explicit inline configurations from one through 64 shards.
+One accepting owner transfers socket metadata through fixed queues to independent IOCP owners.
+Shared admission includes queued, transferred, and adopted connections.
+Native x64 fixtures cover one through four owners, 89 wire cases, and 30,000 exact smoke responses.
+[[bounded-http-windows-shards-2026-09-06]] retains source identities, fixture skips, and qualification limits.
+Final Winsock cleanup follows every owner's terminal reconciliation. [[microsoft-windows-winsock-cleanup]]
 The HTTP implementation does not implement the complete `std.Io` interface.
 Its API proposals and production qualification remain open.

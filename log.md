@@ -1239,3 +1239,36 @@ Each Mac mode passed 78 tests with two Linux-only skips; each Linux mode passed 
 Both hosts passed 84 wire cases, nine comparator tests, both embedding probes, and 30,000 exact smoke responses.
 Both runners released their reservations after child cleanup.
 The wiki publication receipt will remain in `.zig-cache/windows-http-publication/summary.json` in `zigllmwiki-windows-http`.
+
+
+## 2026-09-06 — Windows HTTP acceptor handoff evidence
+
+Captured [[bounded-http-windows-shards-2026-09-06]] before updating HTTP, Windows, and backend-selection guidance.
+The source pins qualified feature `419de5445901a87ea6973020df5b13a420917483` and identical-tree merge `1c74a4e379c365ec0a201e6fe3df1a5a9718d504`.
+The report retains earlier candidate `514c901fafd005f140a0a6fdf10ee28d0ff8796a` and its separate native run.
+The curator checked 295 candidate Git digests, 28 final native input digests, 29 report hashes, and final archive bytes.
+Captured [[microsoft-windows-winsock-cleanup]] for final process-wide cleanup; earlier primary records remain unchanged.
+Synthesis explains fixed socket handoff, independent IOCP owners, shared admission, original deadlines, and producer completion before receiver exit.
+
+[Windows run 34044844060](https://github.com/technologylab-ai/bounded-http/actions/runs/34044844060) passed 95 Zig tests per mode with four POSIX skips each.
+Both embedding probes, nine comparator tests, 89 wire cases, and 30,000 exact smoke responses passed.
+Four POSIX suspension wire cases remain excluded.
+Native fixtures cover one through four owners; explicit inline configuration permits one through 64 and defaults to one.
+No Windows performance claim is added.
+[HTTP Pages run 34045683304](https://github.com/technologylab-ai/bounded-http/actions/runs/34045683304) published the identical-tree merge.
+M4-005 retains its completed experimental scope; M3-006 physical deployment qualification remains postponed.
+
+The fresh clean wiki baseline passed exact Zig 0.16.0 before content mutation.
+Mac passed 87 steps, 73 tests, nine skips, 28 command tests, 14 builder tests, retrieval policy, and lint.
+The runner released its reservation at 16:33:11 UTC.
+Existing source records, snapshots, and proof code retain their original bytes.
+
+The completed development gates used exact Zig 0.16.0 on both Mac and Linux.
+Mac passed 87 steps and 73 tests, with nine platform skips; Linux passed 87 steps and 74 tests, with eight skips.
+Both hosts passed 28 command tests, 14 builder tests, 25 retrieval queries, and focused lint.
+Retrieval scored MRR 0.98, hit@3 1.0, and recall@5 0.96; lint found zero issues.
+The 194-document site passed deterministic construction and comparison.
+Both packets matched all 260 frozen input hashes.
+Mac released its reservation at 16:42:17 UTC; Linux released its reservation at 16:42:21 UTC.
+The parent reviewed the source and synthesis before publication.
+Exact published-commit results will remain in `.zig-cache/windows-shards-publication/summary.json` in the ingestion worktree.

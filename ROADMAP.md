@@ -19,12 +19,16 @@ produce Zig 0.16.0 code that:
 
 ## Windows HTTP implementation — 2026-09-06
 
-[[bounded-http-windows-iocp-2026-09-06]] pins the experimental IOCP implementation and successful native x64 gate.
-The source record retains the earlier failed full gate and its Python suspension error.
-[[microsoft-windows-acceptex-provider]] pins accepted-socket setup and provider-resource ownership before synthesis.
-The HTTP gate passed 83 Zig tests per mode, 80 wire cases, both embedding probes, and 30,000 exact smoke responses.
-Six Zig tests per mode and four wire fixtures explicitly skipped.
-Windows currently requires one shard and plain IPv4 loopback traffic.
+[[bounded-http-windows-shards-2026-09-06]] pins qualified feature `419de5445901a87ea6973020df5b13a420917483` and its identical-tree merge `1c74a4e379c365ec0a201e6fe3df1a5a9718d504`.
+One accepting owner transfers socket metadata through fixed queues to independent IOCP owners.
+Shared admission includes queued, transferred, and adopted connections.
+[[microsoft-windows-winsock-cleanup]] adds final process-wide cleanup to the existing primary ownership contracts.
+The native x64 HTTP gate passed 95 Zig tests per mode, 89 wire cases, both embedding probes, and 30,000 exact smoke responses.
+Four Zig tests per mode and four POSIX suspension wire fixtures explicitly skipped.
+Windows defaults to one shard and accepts explicit inline configurations from one through 64 shards.
+Native fixtures cover one through four owners on plain IPv4 loopback traffic.
+Worker execution requires one shard.
+[[bounded-http-windows-iocp-2026-09-06]] preserves the earlier single-owner gate and failed Python suspension run.
 The gate supplies no Windows performance or broader deployment qualification.
 M4-005 is complete for this bounded implementation scope.
 M4-004 and M4-006 retain queued work.
@@ -211,7 +215,7 @@ slice; M4-005 separately owns the completed experimental Windows IOCP adapter.
 M3-006 physical Windows deployment qualification remains postponed. The MVP's
 pending/resume API is deliberately replaceable, with dynamic release and broader
 reliability work retained under M4-006.
-The Windows follow-up completed M4-005 with its explicit one-shard x64 qualification boundary.
+The Windows follow-up completed M4-005 with native x64 fixtures covering one through four IOCP owners.
 M4-004 and M4-006 remain queued. Current performance/ownership evidence
 is pinned by [[zig-http-arena-adoption-2026-09-05]], preserving the earlier
 [[zig-http-operation-cells-2026-09-05]] and [[zig-http-batch-quantum-2026-09-05]]; its measurements do not
@@ -223,7 +227,7 @@ claim production capacity or trustworthy tail latency.
 | M4-002 | done | Establish the first experimental contract: fixed workers and per-slot mailboxes, complete bounded requests, lazy optional headers, explicit flush/resume/finish, requested-byte heap cap and plain loopback HTTP boundary. Implement parser/ownership/failure cases; future API revision remains M4-006. |
 | M4-003 | done | Working standalone Linux io_uring/macOS kqueue HTTP/1.1 MVP with plaintext, preloaded HTML, echo, chunked flush/resume, native gates, watchdogs and retained-borrow shutdown. Source/evidence pinned; not production qualification. Windows portability is tracked explicitly in M4-005. |
 | M4-004 | queued | Completed the adopted arena/shard 36-trial Linux comparison at one/three CPUs (three-core ratios 0.957/0.909/0.860; one-core 1.106/0.778/0.596 at depths 1/16/128). Historical recorded-performance-profile Linux depth sweep: 24 trials passed, Zig 1.74–1.92M/s versus libreactor 4.30–13.63M/s at depths16–128. Prior profile/EPP remain unknown; no controlled profile speedup is established. Completed pinned Linux baseline/client-sensitivity, inline/gather, batch1/16, one-core, deeper-pipeline32/64/128 and old/current control sweeps. Preserve gains, the fixed-batch plateau and unresolved host/code variation. Remaining: preloaded HTML comparisons, macOS contenders, dedicated-host/NIC saturation and qualified request tails. |
-| M4-005 | done | Experimental one-shard Windows IOCP HTTP adapter passed native x64 Debug/ReleaseSafe, embedding, 80 wire cases, and 30,000 exact smoke responses. The pinned report retains six Zig skips per mode and four POSIX suspension wire exclusions. Provider/kernel resources, ARM64/WOW64, service controls, production deployment, and Windows performance remain unqualified. M3-006 stays postponed. |
+| M4-005 | done | Experimental Windows IOCP acceptor handoff passed native x64 Debug/ReleaseSafe, embedding, 89 wire cases, and 30,000 exact smoke responses. Native fixtures cover one through four owners; inline configuration supports one through 64, with a default of one. Each mode retains four Zig skips; four POSIX suspension wire fixtures remain excluded. Provider/kernel resources, ARM64/WOW64, service controls, production deployment, and Windows performance remain unqualified. M3-006 stays postponed. |
 | M4-006 | queued | Adopted the arena/shard base on HTTP main, with worker-cache snapshots, EOF/interim ordering, gated partial startup, secondary failure propagation and exact coordinator/stack budgets. Native gates and 36 qualified Linux trials passed; defaults are 128 descriptors and up to 8192 callbacks per shard. Historical operation-cell/batch experiments remain pinned. Remaining: profiled one-core efficiency, optional offload, dynamic lease release and broader fault/combined-limit qualification; no runner assigned. |
 
 Use the wiki to design, implement, and critique a bounded HTTP server:

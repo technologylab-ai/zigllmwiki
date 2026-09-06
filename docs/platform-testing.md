@@ -97,7 +97,9 @@ The user resumed Windows HTTP implementation and verification.
 The [captured follow-up](../sources/bounded-http-followup-2026-09-06.md) records that instruction.
 The earlier tuning cadence below does not defer the resumed Windows scope.
 M4-005 now includes a native x64 HTTP IOCP implementation and its finite runtime gates.
-[[bounded-http-windows-iocp-2026-09-06]] pins the HTTP candidate, report, and successful hosted packet.
+[[bounded-http-windows-shards-2026-09-06]] pins the qualified acceptor handoff and its identical-tree merge.
+Native HTTP fixtures cover one through four IOCP owners.
+[[bounded-http-windows-iocp-2026-09-06]] preserves the earlier single-owner candidate and hosted packet.
 Four POSIX suspension fixtures remain excluded from the Windows HTTP suite.
 This documentation-only ingest changes no wiki proof and requires no unrelated Windows wiki dispatch.
 Changed Windows HTTP code still requires its relevant native gate.
@@ -393,7 +395,9 @@ CRT and compiler evidence; see [[build-diagnostics-and-generated-code]]. This
 is unrelated to Windows compiler diagnostics or a Zig version upgrade.
 
 The HTTP server now has Linux, macOS, and native x64 Windows runtime evidence.
-[[bounded-http-windows-iocp-2026-09-06]] pins the Windows implementation and its explicit limits.
+[[bounded-http-windows-shards-2026-09-06]] pins the Windows acceptor handoff and its explicit limits.
+The maintained Windows shard suite supplements the common wire suites on Windows.
+Runtime fixtures cover one through four owners; configuration acceptance through 64 owners does not prove that wider range.
 The wiki's Windows workflow validates the existing wiki proofs.
 Those proofs do not supply runtime or compile evidence for the separate HTTP executable.
 A documentation-only HTTP evidence ingest does not require that unrelated dispatch.
