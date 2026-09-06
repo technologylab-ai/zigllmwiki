@@ -43,7 +43,7 @@ async function navigate(query = '') {
   await send('Page.navigate', {url: 'about:blank'});
   await until(() => evaluate('location.href === "about:blank"'), 'Blank navigation failed');
   await send('Page.navigate', {url: new URL(query, base).href});
-  await until(() => evaluate('!!document.documentElement.dataset.wikiReady'), 'Wiki failed to finish its route');
+  await until(() => evaluate('["true","error"].includes(document.documentElement.dataset.wikiReady)'), 'Wiki failed to finish its route');
 }
 async function screenshot(name) {
   const shot = await send('Page.captureScreenshot', {format: 'png', captureBeyondViewport: false});
@@ -90,7 +90,8 @@ try {
   });
   const target = await send('Target.createTarget', {url: 'about:blank'}, null);
   session = (await send('Target.attachToTarget', {targetId: target.targetId, flatten: true}, null)).sessionId;
-  await send('Page.enable'); await send('Runtime.enable');
+  await send('Page.enable'); await send('Runtime.enable'); await send('Network.enable');
+  await send('Network.setCacheDisabled',{cacheDisabled:true});
   const version = await send('Browser.getVersion', {}, null);
   await send('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'no-preference'}]});
   await send('Emulation.setDeviceMetricsOverride', {width: 1440, height: 1040, deviceScaleFactor: 1, mobile: false});

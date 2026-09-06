@@ -1129,3 +1129,14 @@ Implemented those behaviors with finite transitions and reduced-motion support.
 All 13 browser checks passed, including actual node motion, exact centering, keyboard selection, and cleanup.
 Updated the operator guide, publication receipt, and handoff.
 The update awaits its Pages publication and final native gate.
+
+## 2026-09-06 — Public wiki delivery complete
+
+B-002 is complete: the animated graph update is merged into main and published at `7cf716b239cd78801a9685fee681c22546d9993a`.
+All 13 live browser checks passed with caching disabled.
+The harness now waits for completed rendering during asynchronous graph loading.
+All layers and the matching-note list start visible, and selecting a node animates it to the center.
+The HTTP viewing links are merged and published at `2b41a0801a655f02223a9ece2e8ebddfffed64f7`.
+Updated the roadmap, curation ledger, handoff, and publication receipt.
+Final native gates repeat against the clean pushed successor; the existing receipts preserve exact environments and limits.
+M3-006 remains postponed, and unfinished M4 work remains queued.

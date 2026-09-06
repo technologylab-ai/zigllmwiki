@@ -12,8 +12,10 @@ Canonical Markdown and registered proofs retain their existing roles.
 
 The first implementation is merged into main at `f5e0a22798a677bcae196781f79e0e1fca99fc2f`.
 The [first deployment](https://github.com/technologylab-ai/zigllmwiki/actions/runs/34035331551) published the [public wiki](https://technologylab-ai.github.io/zigllmwiki/).
-The `feat/wiki-pages` branch and `zigllmwiki-pages` worktree retain the current graph update.
-B-002 remains running until that update reaches the public site.
+The [animated graph deployment](https://github.com/technologylab-ai/zigllmwiki/actions/runs/34036135180) published main at `7cf716b239cd78801a9685fee681c22546d9993a`.
+The `feat/wiki-pages` branch and `zigllmwiki-pages` worktree retain the implementation and publication notes.
+B-002 is complete.
+The [HTTP deployment](https://github.com/technologylab-ai/zig-http/actions/runs/34035425137) published reader links from main at `2b41a0801a655f02223a9ece2e8ebddfffed64f7`.
 
 The [website receipt](reports/2026-09-06-wiki-site.md) records development verification.
 Exact Zig 0.16.0 passed all 87 local steps, with 73 tests and nine platform skips.
@@ -22,7 +24,8 @@ All 14 builder fixtures and 13 browser checks passed, including the requested gr
 Both Mac development runners finished and released their reservations.
 Linux publication verification passed the first pushed revision: 87 steps, 74 tests, and eight platform skips.
 Its command, builder, retrieval, and lint gates passed.
-The animated successor needs its own final publication gate.
+The animated graph passed all 13 checks against the live site with browser caching disabled.
+The final publication gate repeats native verification on the clean pushed successor.
 Windows remains deferred for this presentation change.
 M3-006 remains postponed; unfinished M4 work remains queued.
 

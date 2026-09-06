@@ -35,6 +35,8 @@ topics have already been synthesized.
 The user also requested a [public static wiki](docs/wiki-site.md).
 The website derives navigation, search, and graph data from canonical repository files.
 The website preserves source revisions, document hashes, and recorded verification status.
+The published graph starts with all four layers and its matching-note list visible.
+Animated selection centers a document and rearranges its connections.
 This presentation work adds no source synthesis or runtime evidence.
 Pinned source records retain their existing bytes and authority.
 

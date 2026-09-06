@@ -217,7 +217,7 @@ Markdown remains canonical, and Obsidian remains supported.
 
 | ID | Status | Deliverable / exit condition |
 | --- | --- | --- |
-| B-002 | running | Publish a static wiki with search, filters, backlinks, evidence metadata, highlighted proofs, and an interactive graph. Connect HTTP documentation through stable viewing links. |
+| B-002 | done | Published the static wiki with search, filters, backlinks, evidence metadata, highlighted proofs, and an animated graph. Clicks center nodes; all layers and the matching-note list start visible. HTTP documents use stable viewing links. |
 
 The original reconsideration triggers were:
 
