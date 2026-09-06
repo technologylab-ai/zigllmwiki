@@ -177,7 +177,7 @@ function renderHome() {
     ['01', 'The I/O model', 'Understand scheduling, cancellation, and the limits behind std.Io.', 'wiki/std-io.md'],
     ['02', 'Design with limits', 'Connect TigerStyle to ownership, assertions, allocation, and failure.', 'wiki/tigerstyle.md'],
     ['03', 'Across operating systems', 'Compare Linux, macOS, and Windows by their actual contracts.', 'wiki/platform-io-backend-decision-table.md'],
-    ['04', 'An HTTP server, in practice', 'Follow the bounded framework from its design to its measured experiments.', 'wiki/bounded-http-server-design.md']
+    ['04', 'bounded/http, in practice', 'Follow the bounded framework from its design to its measured experiments.', 'wiki/bounded-http-server-design.md']
   ];
   for (const [number, name, description, path] of topics) {
     if (!state.documents.has(path)) continue;
