@@ -17,6 +17,15 @@ produce Zig 0.16.0 code that:
 - applies TigerStyle as concrete engineering constraints;
 - can trace important recommendations to primary sources and runnable proofs.
 
+## Documentation follow-up — 2026-09-06
+
+The repository adopted the user's [technical writing policy](docs/technical-writing.md).
+The captured instruction supports the updated naming and review guidance.
+[[bounded-http-server-design]] now links the HTTP project's architecture, usage guide, and HTML whitepaper.
+The documentation links add no runtime evidence or performance claim.
+M4-004, M4-005, and M4-006 retain their remaining work.
+M3-006 remains postponed.
+
 ## Progress snapshot — 2026-09-05
 
 - **Foundation milestone:** M0 is complete. Portable local evidence, the full

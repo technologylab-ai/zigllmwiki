@@ -23,6 +23,14 @@ agents. Humans browse the same files in Obsidian.
   are rejected until a tangle-and-compile verifier exists.
 - Run `zig build verify` after any content, proof, schema, or link change.
 
+## Technical writing
+
+Repository prose follows **Simplified Technical English (ASD-STE100), guided by Zinsser**.
+Apply the [writing policy](docs/technical-writing.md) from the captured user instruction.
+The policy defines sentence limits, actor clarity, stable terms, and exact-text exceptions.
+Reviewers inspect meaning manually.
+Verification commands do not certify compliance with the complete external standard.
+
 ## Layers and ownership
 
 - `sources/` contains pinned source records. Once a record is cited, do not

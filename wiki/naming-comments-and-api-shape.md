@@ -5,11 +5,12 @@ kind: pattern
 status: source-verified
 zig: "0.16.0"
 summary: Make Zig systems code auditable through domain names, explicit options, callback order, top-down files, intentional comments, and a declared TigerStyle naming profile.
-updated: 2026-09-04
+updated: 2026-09-06
 sources:
   - "[[source-tigerstyle]]"
   - "[[zig-0.16.0-style-guide]]"
   - "[[matklad-steering-zig-fmt]]"
+  - "[[repository-technical-writing-2026-09-06]]"
 proofs:
   - proofs/fmt_steering.zig
 platforms:
@@ -136,6 +137,24 @@ documented reason for it.
 
 ## Comments preserve reasoning
 
+The [repository writing policy](../docs/technical-writing.md) governs prose, including explanatory comments.
+The user supplied the requirements in [[repository-technical-writing-2026-09-06]].
+Authors express one idea per sentence, with at most 20 words.
+Descriptions may contain up to 25 words.
+Authors use active voice and name the actor.
+Authors define each technical term when the term first appears.
+Authors retain one term per concept.
+Authors give each word one meaning.
+Authors never use the same word as both a noun and a verb.
+Authors keep a clear noun for every “that,” “this,” and “it.”
+Code identifiers, quoted output, error strings, and exact-format text retain their original form.
+The prose policy does not override the code naming profiles above.
+
+A resource owner controls access to a resource.
+Authors name the resource owner before explaining when ownership ends.
+Authors name the failing action and the resources the owner still retains.
+[[code-reading-and-mechanical-checks]] connects these explanations to source review.
+
 - Explain why a decision exists and show the reasoning that produced it. Do
   not translate the adjacent statement into English.
 - Start a substantial test with its goal and methodology so a reviewer can
@@ -184,6 +203,8 @@ TigerStyle's hard limit.
 The pinned TigerStyle revision is the authority for its project rules. The
 versioned Zig 0.16 style guide is the authority for Zig's general conventions
 and explicitly says those conventions are not compiler-enforced.
+The writing policy derives from the captured user instruction.
+The repository does not claim independently verified compliance with the complete ASD-STE100 standard.
 
 The [style fixture](../proofs/fmt_steering.zig) demonstrates a Zig 0.16.0 API
 with same-typed and nullable choices in explicit options, positional unique

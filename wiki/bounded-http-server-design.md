@@ -5,8 +5,9 @@ kind: pattern
 status: draft
 zig: "0.16.0"
 summary: Experimental Linux/macOS HTTP with bounded ownership and flush barriers, historical performance checkpoints, a preliminary output-arena/shard reference and explicit Windows gaps.
-updated: 2026-09-05
+updated: 2026-09-06
 sources:
+  - "[[repository-technical-writing-2026-09-06]]"
   - "[[zig-http-arena-adoption-2026-09-05]]"
   - "[[http11-framing-and-limits]]"
   - "[[http-overload-refusal]]"
@@ -47,6 +48,18 @@ qualified local comparisons: [[zig-http-arena-adoption-2026-09-05]]. Earlier
 checkpoints and the independent proposal remain below as historical evidence.
 This page stays draft: Windows HTTP, production qualification and further API
 work remain pending.
+
+## Project documentation
+
+The following links select the HTTP project's current documentation.
+
+- [Architecture](https://github.com/technologylab-ai/zig-http/blob/main/docs/ARCHITECTURE.md) explains components, ownership, limits, and request processing.
+- [Usage guide](https://github.com/technologylab-ai/zig-http/blob/main/docs/USING.md) explains how applications configure and call the server.
+- [HTML whitepaper](https://github.com/technologylab-ai/zig-http/blob/main/docs/whitepaper.html) presents the design as a standalone document.
+
+These moving links provide navigation.
+[[zig-http-arena-adoption-2026-09-05]] remains the pinned authority for the implementation and measurements below.
+The [writing policy](../docs/technical-writing.md) governs repository explanations and diagram review.
 
 ## Adopted arena/shard contract
 

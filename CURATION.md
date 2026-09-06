@@ -30,6 +30,20 @@ The official Zig 0.16 release notes are fully inventoried by named section in
 roadmap destination; it does not copy the release notes or claim that queued
 topics have already been synthesized.
 
+## Repository writing requirements — 2026-09-06
+
+[[repository-technical-writing-2026-09-06]] captures the user's exact prose requirements.
+The snapshot preserves the supplied paragraph and one final newline.
+The [writing policy](docs/technical-writing.md) applies the requirements to authors and reviewers.
+[[naming-comments-and-api-shape]] and [[code-reading-and-mechanical-checks]] connect the requirements to existing guidance.
+The requirements reached synthesis.
+The requirements introduce no executable claim.
+The user instruction does not establish compliance with the complete external standard.
+
+[[bounded-http-server-design]] links the HTTP project's architecture, usage guide, and HTML whitepaper.
+Those moving links provide navigation.
+[[zig-http-arena-adoption-2026-09-05]] remains the pinned authority for existing implementation and measurement claims.
+
 ## matklad — synthesized now
 
 | Source | Status | Wiki effect |

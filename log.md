@@ -1070,3 +1070,26 @@ the clean pushed revision; Windows tuning remains deferred and M3-006 postponed.
 The complete reviewed wiki gate passed87/87 local steps,73/82 Mac tests with
 9platform skips,28command tests, zero lint issues across77sources/51pages,
 and25-query retrieval policy (MRR0.98, hit@3=1.0, recall@5=0.96).
+
+## 2026-09-06 — Adopt repository writing requirements
+
+Captured the user's exact paragraph in [[repository-technical-writing-2026-09-06]] before synthesis.
+The snapshot digest is `7c0d6fd1ec015d04dc6fa80193706c6f3b4295f1197b48afd58b1d7f27b08a2f`.
+The [writing policy](docs/technical-writing.md) defines author rules, terminology, ownership explanations, diagram accessibility, and manual review.
+The requirements preserve identifiers, quoted output, error strings, and exact-format text.
+The repository does not claim independently verified compliance with the complete ASD-STE100 standard.
+
+Updated the agent contract, index, curation ledger, roadmap, handoff, and two existing conceptual pages.
+The HTTP design page now links the project's architecture, usage guide, and HTML whitepaper.
+The moving links provide navigation; the existing adoption record retains the implementation and measurement evidence.
+Earlier source captures and log bytes remain unchanged.
+
+Linux development verification passed all 87 steps with 74 passing tests and eight platform skips.
+All 28 command tests passed.
+The 25-query retrieval policy passed with MRR 0.98, hit@3 1.0, and recall@5 0.96.
+Full lint found zero issues across 51 pages and 78 sources.
+The runner used exact Zig 0.16.0 on Omarchy 4.0.2 x86_64, kernel `7.1.9-arch1-2`, with `io_uring_disabled=0`.
+The runner released its Linux reservation after cleanup.
+The [documentation receipt](reports/2026-09-06-documentation-publication.md) separates development results from the clean publication gate.
+M4-004, M4-005, and M4-006 retain queued work.
+M3-006 remains postponed.

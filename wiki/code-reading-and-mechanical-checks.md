@@ -5,12 +5,13 @@ kind: pattern
 status: source-verified
 zig: "0.16.0"
 summary: Review whole subsystems by tracing control flow and every state mutation, then turn stable discoveries into small automated repository invariants.
-updated: 2026-09-04
+updated: 2026-09-06
 sources:
   - "[[matklad-look-for-bugs]]"
   - "[[matklad-mechanical-habits]]"
   - "[[matklad-always-be-blaming]]"
   - "[[source-tigerstyle]]"
+  - "[[repository-technical-writing-2026-09-06]]"
 proofs: []
 platforms:
   - cross-platform
@@ -79,6 +80,31 @@ executable proofs. `zig build graph` emits deterministic link-health scores,
 and [the semantic lint procedure](../tools/semantic_lint.md) turns their review
 into a dated report. Link counts are triage signals, never substitutes for
 checking the meaning and evidence of a recommendation.
+
+## Prose and diagram review
+
+The [repository writing policy](../docs/technical-writing.md) applies the requirements in [[repository-technical-writing-2026-09-06]].
+Reviewers inspect new explanations beside the relevant source.
+Reviewers identify each actor, resource owner, and event that permits the owner to release storage.
+Reviewers distinguish an attempted cancellation from the event that ends the operation.
+Reviewers preserve exact identifiers, output, and error strings while correcting surrounding prose.
+
+Each sentence must express one idea within 20 words.
+A description may contain up to 25 words.
+Reviewers confirm active voice, stable terms, and a clear noun for each pronoun.
+Reviewers inspect each technical term's first definition.
+Reviewers reject vocabulary changes that hide the same owner or state.
+[[naming-comments-and-api-shape]] connects vocabulary choices to code navigation.
+
+A diagram caption explains the diagram's purpose and scope.
+Reviewers compare diagram arrows with the source's actual actions and ownership changes.
+Reviewers inspect the nearby explanation without relying on the diagram's colors.
+Authors provide alternative text that describes images for readers who cannot see the images.
+
+A sentence-length check can flag excessive wording.
+Such a check cannot establish one idea, a clear actor, or correct technical meaning.
+Reviewers must inspect meaning manually.
+Existing verification commands do not certify compliance with the complete ASD-STE100 standard.
 
 ## Process effects worth transferring
 

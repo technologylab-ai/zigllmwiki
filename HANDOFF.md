@@ -1,4 +1,32 @@
-# Project handoff — 2026-09-05
+# Project handoff — 2026-09-06
+
+The repository adopted the user's [technical writing policy](docs/technical-writing.md).
+[[repository-technical-writing-2026-09-06]] preserves the exact instruction and its snapshot digest.
+Authors use short sentences, explicit actors, and stable terms.
+Reviewers inspect meaning manually.
+Reviewers preserve exact-text exceptions.
+The repository does not claim independently verified compliance with the complete ASD-STE100 standard.
+
+The existing HTTP page now links the project's architecture, usage guide, and HTML whitepaper.
+Those links follow project main for navigation.
+[[zig-http-arena-adoption-2026-09-05]] retains the implementation and measurement evidence at HTTP revision `4b3cd55`.
+The documentation change adds no runtime claim.
+The documentation change leaves every proof unchanged.
+
+The baseline passed with exact Zig 0.16.0 before editing.
+Linux development verification passed all 87 steps with 74 passing tests and eight platform skips.
+All 28 command tests and the 25-query retrieval policy passed.
+Retrieval scored MRR 0.98, hit@3 1.0, and recall@5 0.96.
+Full lint found zero issues across 51 pages and 78 sources.
+The Linux runner finished and released its reservation.
+The [documentation receipt](reports/2026-09-06-documentation-publication.md) records the environment and verification scope.
+Publication checks use Linux while the document agent uses the Mac.
+Windows checks remain deferred for the current HTTP documentation scope.
+M4-004, M4-005, and M4-006 retain queued work.
+M3-006 remains postponed.
+The checkpoints below preserve their original dates and evidence limits.
+
+## Arena adoption checkpoint — 2026-09-05
 
 The arena/shard implementation is now the HTTP main base, committed and pushed
 at **4b3cd5551d80b422ec6ef763627d019e6f1dfb83**. The user selected the external agent's version;

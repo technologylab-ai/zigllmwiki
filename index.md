@@ -5,7 +5,7 @@ kind: map
 status: draft
 zig: "0.16.0"
 summary: Retrieval map for current Zig systems programming, std.Io, TigerStyle, and platform I/O.
-updated: 2026-09-05
+updated: 2026-09-06
 sources: []
 proofs: []
 platforms:
@@ -132,6 +132,7 @@ Read this page first, then follow only the pages needed for the task.
 
 - [Agent contract](AGENTS.md) — schema plus query, ingest, lint, review, and
   upgrade workflows with explicit mutation boundaries.
+- [Technical writing policy](docs/technical-writing.md) — short sentences, explicit actors, stable terms, exact-text exceptions, and manual meaning review.
 - [Roadmap](ROADMAP.md) — persistent content, LLM, and backend work.
 - [Session handoff](HANDOFF.md) — exact completion state, platform evidence,
   deliberate decisions, verification commands, and honest remaining gaps.
