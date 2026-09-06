@@ -96,8 +96,11 @@ earlier empty process list still applies.
 The user resumed Windows HTTP implementation and verification.
 The [captured follow-up](../sources/bounded-http-followup-2026-09-06.md) records that instruction.
 The earlier tuning cadence below does not defer the resumed Windows scope.
-M4-005 now includes Windows HTTP compilation and native runtime gates.
-Pending gates establish no adapter support or runtime result.
+M4-005 now includes a native x64 HTTP IOCP implementation and its finite runtime gates.
+[[bounded-http-windows-iocp-2026-09-06]] pins the HTTP candidate, report, and successful hosted packet.
+Four POSIX suspension fixtures remain excluded from the Windows HTTP suite.
+This documentation-only ingest changes no wiki proof and requires no unrelated Windows wiki dispatch.
+Changed Windows HTTP code still requires its relevant native gate.
 M3-006 physical deployment qualification remains postponed.
 
 ## Earlier M4 performance cadence — user decision 2026-09-05
@@ -105,7 +108,7 @@ M3-006 physical deployment qualification remains postponed.
 While the HTTP implementation is still being tuned, focus on macOS correctness
 and Linux runtime/performance. The user explicitly deferred further Windows
 measurements and repeated Windows publication gates because they slow this loop
-without validating the current Linux/macOS-only HTTP server. A wiki update that
+without validating the then Linux/macOS-only HTTP server. A wiki update that
 records these HTTP experiments does not require a new Windows dispatch.
 
 Keep the manual Windows workflow and all existing receipts. Resume its gates
@@ -113,7 +116,7 @@ when Windows portability/work is explicitly resumed or a change needs new
 Windows-specific evidence; never apply an old successful run to changed Windows
 code. Any affected but unexecuted Windows claim remains pending. This is a
 measurement-cadence decision, separate from M3-006's postponed physical deployment
-qualification and from the absent M4 Windows HTTP adapter.
+qualification and from the then-absent M4 Windows HTTP adapter.
 
 Use ReleaseSafe for every timing experiment, record power profile and CPU policy,
 and preserve changes of environment as separate measurement conditions. Do not
@@ -212,7 +215,7 @@ those builds provide compile-only evidence. The most recently recorded hosted
 image is Windows Server 2025 x86_64; `windows-latest` can change, so record the
 actual image and build for every new runtime claim.
 
-The private repository exposes the manual workflow `Windows runtime
+The public repository exposes the manual workflow `Windows runtime
 verification` in `.github/workflows/windows-runtime-verify.yml`. Dispatch it
 with:
 
@@ -389,12 +392,12 @@ overrides, passed. Debug with explicit LLVM/LLD passed too. Preserve the target,
 CRT and compiler evidence; see [[build-diagnostics-and-generated-code]]. This
 is unrelated to Windows compiler diagnostics or a Zig version upgrade.
 
-The HTTP server's existing evidence covers Linux/macOS runtime gates only.
-The user has resumed Windows HTTP implementation and verification under M4-005.
-Those new gates remain pending. Dispatching this
-wiki's Windows workflow still validates the existing wiki proofs; it does not
-supply Windows runtime or even compile evidence for the HTTP server. That
-adapter is active work under M4-005, while M3-006 stays postponed.
+The HTTP server now has Linux, macOS, and native x64 Windows runtime evidence.
+[[bounded-http-windows-iocp-2026-09-06]] pins the Windows implementation and its explicit limits.
+The wiki's Windows workflow validates the existing wiki proofs.
+Those proofs do not supply runtime or compile evidence for the separate HTTP executable.
+A documentation-only HTTP evidence ingest does not require that unrelated dispatch.
+M3-006 physical deployment qualification remains postponed.
 
 Performance experiments belong in the sibling project's maintained comparison
 harness. Keep assertion-enabled ReleaseSafe, pinned contender/source/binary

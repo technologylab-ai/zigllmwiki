@@ -4,11 +4,13 @@ title: bounded/http — HTTP/1.1 framework MVP and design
 kind: pattern
 status: draft
 zig: "0.16.0"
-summary: bounded/http is an experimental Linux/macOS HTTP framework with bounded ownership, flush barriers, recorded comparisons, and explicit Windows gaps.
+summary: bounded/http provides bounded HTTP ownership on Linux, macOS, and Windows, with pinned native fixtures and explicit performance and deployment limits.
 updated: 2026-09-06
 sources:
   - "[[bounded-http-naming-2026-09-06]]"
   - "[[bounded-http-followup-2026-09-06]]"
+  - "[[bounded-http-windows-iocp-2026-09-06]]"
+  - "[[microsoft-windows-acceptex-provider]]"
   - "[[repository-technical-writing-2026-09-06]]"
   - "[[zig-http-arena-adoption-2026-09-05]]"
   - "[[http11-framing-and-limits]]"
@@ -43,14 +45,13 @@ platforms:
 
 ## Remember
 
-The public [bounded/http project](https://github.com/technologylab-ai/bounded-http) provides the experimental Linux/macOS implementation for M4.
+The public [bounded/http project](https://github.com/technologylab-ai/bounded-http) provides experimental Linux, macOS, and Windows implementations for M4.
 Its adopted arena/shard base includes reviewed ownership and startup fixes.
 [[zig-http-arena-adoption-2026-09-05]] pins that implementation and its qualified comparisons.
 Earlier checkpoints and the independent proposal remain below as historical evidence.
-This page stays draft: Windows HTTP, production qualification and further API
-work remain pending.
-The user resumed Windows HTTP implementation and verification on 2026-09-06.
-That active work adds no completed Windows adapter evidence yet. [[bounded-http-followup-2026-09-06]]
+The Windows IOCP adapter passed native x64 ownership and wire gates after the user resumed Windows work.
+[[bounded-http-windows-iocp-2026-09-06]] pins the implementation and qualification limits.
+This page stays draft because production qualification and further API work remain pending.
 
 ## Project names
 
@@ -79,8 +80,82 @@ The following links select the HTTP project's current documentation.
 - [HTML whitepaper](https://technologylab-ai.github.io/bounded-http/) presents the design as a standalone document.
 
 These moving links provide navigation.
-[[zig-http-arena-adoption-2026-09-05]] remains the pinned authority for the implementation and measurements below.
+[[zig-http-arena-adoption-2026-09-05]] pins the arena implementation and Linux measurements below.
+[[bounded-http-windows-iocp-2026-09-06]] pins the later Windows implementation and native fixtures.
 The [writing policy](../docs/technical-writing.md) governs repository explanations and diagram review.
+
+## Windows IOCP implementation
+
+The Windows implementation uses an I/O completion port (IOCP), which delivers terminal operation results to the server owner.
+The custom adapter belongs to bounded/http, independently of `std.Io.Threaded` and its APC implementation.
+Windows currently requires one shard and an IPv4 loopback listener.
+The implementation remains experimental. [[bounded-http-windows-iocp-2026-09-06]]
+
+The adapter reserves `4 × connections + 2` operation cells and equally bounded ready storage during startup.
+Each cell retains a stable `OVERLAPPED` record, which identifies an operation to Windows.
+The socket table reserves `connections + 1` entries, alongside a separate listener handle.
+Common completions carry logical table indices instead of pointer-sized Winsock handles.
+The parser, response arenas, batching, callback budgets, and flush ownership remain shared with the other backends.
+Worker execution reserves its threads and notification events before heap sealing. [[bounded-http-windows-iocp-2026-09-06]]
+
+`AcceptEx` accepts without waiting for request bytes because the adapter supplies a zero receive length.
+The adapter sets `SO_UPDATE_ACCEPT_CONTEXT` before ordinary accepted-socket configuration.
+`WSARecv` fills retained slot storage.
+`WSASend` submits scalar or gathered response spans.
+Winsock captures converted descriptors during submission; response payloads remain borrowed through terminal completion. [[microsoft-windows-acceptex-provider]] [[microsoft-windows-winsock-batched-file-io]]
+
+The selected notification policy queues completion packets after immediate success.
+Each `GetQueuedCompletionStatusEx` call collects at most 256 entries.
+The adapter checks each operation result through documented result functions.
+A `CancelIoEx` acknowledgement does not release the target cell.
+`ERROR_NOT_FOUND` can race a queued terminal result, so the target retains ownership until reconciliation.
+Shutdown stops admission, cancels, drains, and reconciles retained borrows before destruction. [[bounded-http-windows-iocp-2026-09-06]]
+
+The executable accepts Ctrl-C and Ctrl-Break stop requests.
+A counted reference protects the cluster while a console callback uses it.
+Teardown clears the published pointer before waiting for existing callback references.
+Unreconciled ownership reaches the process-termination boundary.
+An external watchdog remains necessary when application code can stall the owner. [[bounded-http-windows-iocp-2026-09-06]]
+
+### Native x64 evidence
+
+Candidate `70f9ae5917076b664081db59c62edc4959ca5041` passed [Windows run 34039591972](https://github.com/technologylab-ai/bounded-http/actions/runs/34039591972).
+The native x64 host ran Windows Server 2025 Datacenter 24H2, build `26100.33296`, with exact Zig 0.16.0.
+The hosted image was `win25-vs2026`, version `20260824.214.3`.
+The host exposed two AMD EPYC 9V74 cores and four logical processors.
+[[bounded-http-windows-iocp-2026-09-06]] pins the source, report, compiler, executable, and raw results.
+
+| Gate | Observed result |
+| --- | --- |
+| Debug and ReleaseSafe | Each mode passed 16 build steps and 83 tests, with six explicit platform skips. |
+| Independent embedding | Each mode passed the exact GET/HEAD/GET pipeline. |
+| Comparator receipts | All nine tests passed. |
+| Wire cases | 80 passed: eight arena, 25 batch, 11 gather, ten inline, and 26 general cases. |
+| Wire exclusions | Four maximum-cell batch cases require POSIX process suspension and skipped on Windows. |
+| Smoke | The client checked 30,000 exact response bodies through IOCP. |
+| Final ownership | The 53 saved shutdown records have zero live connections, live operations, and late framework allocations. |
+
+The first [run 34039231092](https://github.com/technologylab-ai/bounded-http/actions/runs/34039231092) failed when a Python fixture used unavailable Windows `SIGSTOP`.
+Its passing native components do not qualify that failed full gate.
+The successful follow-up changes fixture scheduling, without changing server or transport source.
+Windows arena wire cases deliver input to a live owner; they do not force the POSIX suspension timing.
+Separate Zig tests force internal completion ordering. [[bounded-http-windows-iocp-2026-09-06]]
+
+### Qualification boundary
+
+A Winsock provider implements socket services and allocates associated operating-system resources.
+`WSASocketW` creates replacement socket resources during admission.
+Default socket closure can retain provider resources during background cleanup.
+The fixed table bounds application-owned handles; heap sealing does not bound all provider or kernel memory. [[microsoft-windows-acceptex-provider]]
+
+Ordinary Winsock transfers retain kernel copies.
+These fixtures establish neither kernel zero-copy nor hard real-time progress.
+The evidence covers native x64, one shard, and plain loopback HTTP.
+It does not qualify Windows ARM64, WOW64, TLS, external deployment, console closure, logoff, or service controls.
+Older wiki architecture proofs cannot extend this executable's platform evidence.
+The smoke run supplies no comparative performance, server-capacity, or latency guarantee.
+Windows child CPU measurements remain unavailable in the saved Python receipt.
+M3-006 physical deployment qualification remains postponed. [[bounded-http-windows-iocp-2026-09-06]]
 
 ## Adopted arena/shard contract
 

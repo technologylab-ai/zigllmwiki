@@ -1,6 +1,57 @@
 # Project handoff — 2026-09-06
 
-## bounded/http naming checkpoint
+## Windows HTTP evidence checkpoint
+
+[[bounded-http-windows-iocp-2026-09-06]] pins HTTP publication `bb14d98756152936fadb6e8353852a686e8d315d` and native candidate `70f9ae5917076b664081db59c62edc4959ca5041`.
+[[microsoft-windows-acceptex-provider]] captures the primary setup and provider-ownership contracts before synthesis.
+The curator verified five Microsoft Git blobs, four installed Zig ABI files, and 26 HTTP native source digests.
+The portable snapshot preserves the report and 86 hashed raw files.
+Existing source captures and proof code remain unchanged.
+
+Windows run 34039591972 passed on native x64 Windows Server 2025 build `26100.33296` with exact Zig 0.16.0.
+Both modes passed 16 steps and 83 tests, with six explicit skips each.
+Both embedding probes, nine comparator tests, 80 wire cases, and 30,000 exact smoke responses passed.
+Four wire cases require POSIX suspension and remain skipped on Windows.
+All 53 saved shutdown records show zero live connections, operations, and late framework allocations.
+The first full run remains failed after its Python `SIGSTOP` error.
+The report preserves the different hosts and the successful fixture-only follow-up.
+
+The [final HTTP publication gate](https://github.com/technologylab-ai/bounded-http/actions/runs/34040289489) passed exact pushed HTTP revision `bb14d98756152936fadb6e8353852a686e8d315d`.
+Both Windows modes again passed 16 steps and 83 tests, with six skips each.
+Both embedding probes, nine comparator tests, 80 wire cases, and 30,000 exact smoke responses passed again.
+The four POSIX suspension exclusions remain unchanged.
+The final host used AMD EPYC 7763 and remains distinct from the candidate's EPYC 9V74 host.
+Both hosts ran native x64 Windows Server 2025 build `26100.33296` with exact Zig 0.16.0.
+The final executable SHA-256 is `57c72afaba6e1e9c3b9c77447f93ef73b0c16ac6750cbdc8879ad6ec7545d7da`.
+Artifact `9991511439` has verified ZIP SHA-256 `d0161c0b43226007cbdec11f8c6739d1a2854822b8d7e923d512b43e82c07911`.
+The candidate source record remains unchanged.
+
+The adapter remains experimental, with one shard and plain IPv4 loopback traffic.
+Provider resources, hard real-time progress, Windows performance, ARM64/WOW64, service controls, and external deployment remain unqualified.
+M4-005 is complete for the implemented x64 scope.
+M4-004 and M4-006 retain queued work.
+M3-006 physical deployment qualification remains postponed.
+
+The wiki edits live in `zigllmwiki-windows-http` on `docs/windows-http-evidence`.
+The unchanged baseline is clean pushed wiki revision `4e372f6887c30cc76a410216fbcd598322d2379a`.
+Its exact Zig 0.16.0 gates passed 87 steps on Mac and Linux.
+Mac passed 73 tests with nine platform skips; Linux passed 74 with eight.
+Both hosts passed 28 command tests, 14 builder tests, retrieval policy, and lint.
+The baseline receipt is `../zigllmwiki-bounded-name/.zig-cache/bounded-name-publication/summary.json`.
+The Mac development gate passed exact Zig 0.16.0 after synthesis.
+The verifier passed 87 steps and 73 tests, with nine platform skips.
+All 28 command tests, 14 builder tests, 25 retrieval queries, and focused lint passed.
+Retrieval scored MRR 0.98, hit@3 1.0, and recall@5 0.96.
+Lint found zero issues across 51 pages and 82 source records.
+The 192-document development site passed its deterministic artifact check.
+All 256 frozen input digests matched before and after execution.
+The runner released its Mac reservation at 14:54:02 UTC on 2026-09-06.
+The development packet is `.zig-cache/windows-http-development-macos/` in the ingestion worktree.
+Final Mac/Linux checks follow on the clean pushed wiki commit.
+This documentation-only ingest requires no unrelated Windows wiki dispatch.
+The checkpoints below preserve their earlier scope and evidence limits.
+
+## Earlier bounded/http naming checkpoint
 
 The user approved `bounded/http` as the HTTP brand and website name.
 The repository, directory, and executable use `bounded-http`.

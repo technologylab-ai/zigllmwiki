@@ -30,6 +30,21 @@ The official Zig 0.16 release notes are fully inventoried by named section in
 roadmap destination; it does not copy the release notes or claim that queued
 topics have already been synthesized.
 
+## Windows HTTP source and evidence — 2026-09-06
+
+[[microsoft-windows-acceptex-provider]] pins five Microsoft API files and four exact Zig 0.16.0 ABI files.
+The curator checked every Microsoft blob and each copied ABI file before synthesis.
+[[bounded-http-windows-iocp-2026-09-06]] pins HTTP publication `bb14d98756152936fadb6e8353852a686e8d315d` and native candidate `70f9ae5917076b664081db59c62edc4959ca5041`.
+The snapshot retains 86 hashed raw files, the report, and the failed first run.
+All 26 native source digests match the candidate and publication.
+The curator checked the successful hosted artifact and 53 zero-owner shutdown records.
+Existing Windows and HTTP pages now distinguish application ownership, provider cleanup, and native x64 fixture limits.
+The backend map and index route those distinctions without another concept page.
+No proof code is duplicated; HTTP execution evidence remains in the HTTP repository.
+M4-005 is complete for the experimental one-shard x64 implementation.
+M4-004 and M4-006 retain queued work; M3-006 remains postponed.
+The older checkpoints below retain their earlier source and measurement conditions.
+
 ## HTTP naming decision — 2026-09-06
 
 [[bounded-http-naming-2026-09-06]] captures the user's approval and the accepted naming proposal.
@@ -41,7 +56,7 @@ The initial source preserves the first byline.
 The project retains “Fast by design. Explicit about limits”.
 The follow-up also resumes Windows HTTP implementation and verification.
 `arena_parser_review` owns the IOCP backend; `arena_ownership_review` owns build, executable, and workflow integration.
-The agents are active, and Windows HTTP gates remain pending.
+The Windows implementation and its completed native gate are recorded in the current section above.
 M3-006 physical deployment qualification remains postponed.
 Earlier implementation and performance sections below retain their checkpoint scope.
 This naming decision reached synthesis and introduces no executable claim.
@@ -258,7 +273,7 @@ M4-005 Windows HTTP remains queued and M3-006 remains postponed.
    question; source synthesis does not prove an engine or storage deployment.
 
 
-## Current performance follow-up
+## Earlier performance follow-up — 2026-09-05
 
 The user switched omarx1 to the performance power profile and requested focusing
 on Mac/Linux while tuning. Windows runs are now deferred for this HTTP-only

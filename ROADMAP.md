@@ -17,6 +17,19 @@ produce Zig 0.16.0 code that:
 - applies TigerStyle as concrete engineering constraints;
 - can trace important recommendations to primary sources and runnable proofs.
 
+## Windows HTTP implementation — 2026-09-06
+
+[[bounded-http-windows-iocp-2026-09-06]] pins the experimental IOCP implementation and successful native x64 gate.
+The source record retains the earlier failed full gate and its Python suspension error.
+[[microsoft-windows-acceptex-provider]] pins accepted-socket setup and provider-resource ownership before synthesis.
+The HTTP gate passed 83 Zig tests per mode, 80 wire cases, both embedding probes, and 30,000 exact smoke responses.
+Six Zig tests per mode and four wire fixtures explicitly skipped.
+Windows currently requires one shard and plain IPv4 loopback traffic.
+The gate supplies no Windows performance or broader deployment qualification.
+M4-005 is complete for this bounded implementation scope.
+M4-004 and M4-006 retain queued work.
+M3-006 physical deployment qualification remains postponed.
+
 ## HTTP naming follow-up — 2026-09-06
 
 The user approved `bounded/http` as the HTTP project's brand.
@@ -30,7 +43,7 @@ Current wiki navigation and [[bounded-http-server-design]] apply the decision.
 The rename adds no runtime evidence.
 The remaining M4 experiments retain their existing scope.
 M4-004 and M4-006 retain queued work.
-M4-005 is running, with Windows HTTP evidence pending.
+M4-005 now has the completed implementation and native evidence described above.
 M3-006 remains postponed.
 
 ## Documentation follow-up — 2026-09-06
@@ -67,7 +80,7 @@ M3-006 remains postponed.
   [bounded/http project](https://github.com/technologylab-ai/bounded-http). Linux io_uring
   and macOS kqueue pass native ownership/wire gates with exact Zig 0.16.0.
   Inline/gather/batching and Linux contender/deeper-pipeline experiments are
-  implemented and pinned. Windows HTTP work has resumed.
+  implemented and pinned. Windows IOCP now has separate native x64 HTTP evidence.
   Remaining API/reliability and broader comparison work remains queued. The arena/shard integration is the new main
   base with native ownership gates and 36 qualified trials complete. M3-006 stays
   postponed; the roadmap is not entirely complete.
@@ -191,14 +204,14 @@ cancellation drain. The original checkpoint passed 44 Debug and 44 ReleaseSafe t
 executions plus 26 integration cases; current inline/gather/batch evidence below
 passes 67/69 per mode on Mac (2 Linux-only skips), 69/69 on Linux,
 plus 26 generic + 10 inline + 11 gather + 29 batch + 8 arena lifecycle cases. Finite smoke validated 30k exact responses
-per host; these are client-bound experiments, not capacity or TechEmpower rank.
+per host; these finite fixtures establish neither server capacity nor TechEmpower rank.
 
 For the accepted first-iteration scope, M4-003 now owns the working Linux/macOS
-slice; the remaining Windows HTTP adapter is explicitly split into M4-005.
+slice; M4-005 separately owns the completed experimental Windows IOCP adapter.
 M3-006 physical Windows deployment qualification remains postponed. The MVP's
 pending/resume API is deliberately replaceable, with dynamic release and broader
 reliability work retained under M4-006.
-The Windows follow-up assigns active agents to M4-005.
+The Windows follow-up completed M4-005 with its explicit one-shard x64 qualification boundary.
 M4-004 and M4-006 remain queued. Current performance/ownership evidence
 is pinned by [[zig-http-arena-adoption-2026-09-05]], preserving the earlier
 [[zig-http-operation-cells-2026-09-05]] and [[zig-http-batch-quantum-2026-09-05]]; its measurements do not
@@ -210,7 +223,7 @@ claim production capacity or trustworthy tail latency.
 | M4-002 | done | Establish the first experimental contract: fixed workers and per-slot mailboxes, complete bounded requests, lazy optional headers, explicit flush/resume/finish, requested-byte heap cap and plain loopback HTTP boundary. Implement parser/ownership/failure cases; future API revision remains M4-006. |
 | M4-003 | done | Working standalone Linux io_uring/macOS kqueue HTTP/1.1 MVP with plaintext, preloaded HTML, echo, chunked flush/resume, native gates, watchdogs and retained-borrow shutdown. Source/evidence pinned; not production qualification. Windows portability is tracked explicitly in M4-005. |
 | M4-004 | queued | Completed the adopted arena/shard 36-trial Linux comparison at one/three CPUs (three-core ratios 0.957/0.909/0.860; one-core 1.106/0.778/0.596 at depths 1/16/128). Historical recorded-performance-profile Linux depth sweep: 24 trials passed, Zig 1.74–1.92M/s versus libreactor 4.30–13.63M/s at depths16–128. Prior profile/EPP remain unknown; no controlled profile speedup is established. Completed pinned Linux baseline/client-sensitivity, inline/gather, batch1/16, one-core, deeper-pipeline32/64/128 and old/current control sweeps. Preserve gains, the fixed-batch plateau and unresolved host/code variation. Remaining: preloaded HTML comparisons, macOS contenders, dedicated-host/NIC saturation and qualified request tails. |
-| M4-005 | running | User resumed Windows HTTP on 2026-09-06. `arena_parser_review` owns the IOCP backend; `arena_ownership_review` owns build, executable, and workflow integration. Compile and native runtime gates remain pending. M3-006 physical deployment qualification remains postponed. |
+| M4-005 | done | Experimental one-shard Windows IOCP HTTP adapter passed native x64 Debug/ReleaseSafe, embedding, 80 wire cases, and 30,000 exact smoke responses. The pinned report retains six Zig skips per mode and four POSIX suspension wire exclusions. Provider/kernel resources, ARM64/WOW64, service controls, production deployment, and Windows performance remain unqualified. M3-006 stays postponed. |
 | M4-006 | queued | Adopted the arena/shard base on HTTP main, with worker-cache snapshots, EOF/interim ordering, gated partial startup, secondary failure propagation and exact coordinator/stack budgets. Native gates and 36 qualified Linux trials passed; defaults are 128 descriptors and up to 8192 callbacks per shard. Historical operation-cell/batch experiments remain pinned. Remaining: profiled one-core efficiency, optional offload, dynamic lease release and broader fault/combined-limit qualification; no runner assigned. |
 
 Use the wiki to design, implement, and critique a bounded HTTP server:

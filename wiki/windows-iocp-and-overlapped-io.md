@@ -5,11 +5,13 @@ kind: platform
 status: source-verified
 zig: "0.16.0"
 summary: Windows IOCP adapters require stable OVERLAPPED ownership and terminal cancellation reconciliation, while Zig 0.16 std.Io.Threaded instead mixes worker-blocking and APC-based NtDll paths and has no Windows Evented backend.
-updated: 2026-09-05
+updated: 2026-09-06
 sources:
   - "[[microsoft-windows-iocp]]"
   - "[[microsoft-windows-iocp-api]]"
   - "[[microsoft-windows-winsock-batched-file-io]]"
+  - "[[microsoft-windows-acceptex-provider]]"
+  - "[[bounded-http-windows-iocp-2026-09-06]]"
   - "[[microsoft-windows-nt-fs-control]]"
   - "[[zig-0.16-windows-io-source]]"
   - "[[tigerbeetle-io-source]]"
@@ -193,6 +195,28 @@ packet. If the adapter explicitly enables
 the direct call path and no packet is queued for that case. Select exactly one
 reclamation owner for either policy.
 
+## Accept setup and provider resources
+
+A Winsock provider implements socket services and allocates associated operating-system resources.
+`AcceptEx` accepts a connection into an application-created socket using overlapped completion.
+The application resolves that extension through the listener with `WSAIoctl`.
+A zero receive length permits acceptance before the peer sends request bytes.
+Each IPv4 address region requires at least 32 bytes.
+After completion, `SO_UPDATE_ACCEPT_CONTEXT` connects the accepted socket's configuration to the listener.
+Ordinary accepted-socket configuration follows that update. [[microsoft-windows-acceptex-provider]]
+
+`WSASocketW` creates a descriptor and related provider resources.
+A fixed application handle table therefore does not preallocate every future provider resource.
+Default `closesocket` behavior can retain provider resources during background TCP cleanup.
+The descriptor can become reusable before canceled operations deliver terminal notifications.
+Operation records and buffers must survive those notifications. [[microsoft-windows-acceptex-provider]]
+
+An adapter should reserve its own operation storage and bound admission explicitly.
+It must also distinguish application ownership from kernel and provider lifetime.
+Heap sealing cannot establish a bound on all operating-system memory.
+Provider calls also supply no general hard real-time progress guarantee.
+These limits constrain the custom adapter in [[bounded-http-server-design]].
+
 ## Cancellation is request plus terminal reconciliation
 
 Win32 `CancelIoEx` and NT `NtCancelIoFileEx` are related layers with different
@@ -287,6 +311,25 @@ The source has no public general cancel operation at that revision, and some
 actions still execute synchronously. It validates a bounded ownership shape;
 it is not a Zig 0.16 `std.Io` backend or evidence that every wrapper operation
 is nonblocking.
+
+## HTTP application evidence
+
+The separate [[bounded-http-server-design]] now has a custom one-shard IOCP adapter.
+The adapter uses public `AcceptEx`, `WSARecv`, `WSASend`, and batched completion APIs.
+Stable operation cells and distinct cancellation records preserve terminal ownership.
+[[bounded-http-windows-iocp-2026-09-06]] pins candidate `70f9ae5917076b664081db59c62edc4959ca5041` and its committed report.
+
+Native x64 Windows Server 2025 build `26100.33296` passed both Zig 0.16.0 modes with 83 tests and six skips each.
+The complete HTTP gate also passed 80 wire cases, both embedding probes, nine comparator tests, and 30,000 exact smoke responses.
+Four maximum-cell wire fixtures require POSIX process suspension and remain skipped on Windows.
+The first full run failed on unavailable `SIGSTOP`; its passing components do not erase that failure.
+The successful follow-up runs arena input against a live owner.
+Separate Zig tests force internal completion ordering. [[bounded-http-windows-iocp-2026-09-06]]
+
+The HTTP evidence covers one shard, native x64, plain loopback traffic, and the recorded finite fixtures.
+It supplies no Windows comparative-performance, ARM64, WOW64, service-control, or production-deployment qualification.
+The older wiki architecture proofs below retain their separate scope.
+M3-006 physical deployment qualification remains postponed.
 
 ## Runtime evidence and remaining limits
 

@@ -5,7 +5,7 @@ kind: map
 status: source-verified
 zig: "0.16.0"
 summary: Choose Zig 0.16 file and network I/O from the required guarantee and evidence level, not from a shared label such as async or evented.
-updated: 2026-09-05
+updated: 2026-09-06
 sources:
   - "[[zig-0.16.0-release-notes]]"
   - "[[zig-0.16.0-stdlib]]"
@@ -19,6 +19,8 @@ sources:
   - "[[microsoft-windows-iocp-api]]"
   - "[[microsoft-windows-nt-fs-control]]"
   - "[[microsoft-windows-winsock-batched-file-io]]"
+  - "[[microsoft-windows-acceptex-provider]]"
+  - "[[bounded-http-windows-iocp-2026-09-06]]"
   - "[[zig-0.16-windows-io-source]]"
   - "[[tigerbeetle-io-source]]"
 proofs:
@@ -88,6 +90,11 @@ races all returned success; canceled file results, physical durability and
 additional architecture runs are not established by that observation. Its five-second cycle diagnostic and sixty-second process watchdog
 are fixture limits, not production latency or power-loss guarantees.
 See [[windows-iocp-and-overlapped-io]] for the exact qualification boundary.
+
+A custom Winsock adapter must distinguish application handle limits from provider resources.
+`WSASocketW` allocates provider resources during admission.
+Default `closesocket` cleanup can retain those resources after handle release.
+A fixed application table therefore supplies no complete kernel-memory bound. [[microsoft-windows-acceptex-provider]]
 
 ## Recommendation by project stage
 
@@ -164,6 +171,9 @@ crashes are a distinct recorded toolchain limit. See
 runtime phases, exact images and unobserved storage paths. Architecture breadth
 does not discharge deployment durability, device/error or production-SLO gates.
 
-Design application: [[bounded-http-server-design]] explores a Linux-first
-HTTP/1.1 framework with borrowed buffers and a bounded response writer; its
-API and backend choices remain proposals without HTTP runtime evidence.
+Design application: [[bounded-http-server-design]] implements experimental Linux io_uring, macOS kqueue, and Windows IOCP HTTP backends.
+The Windows adapter requires one shard and uses public overlapped Winsock APIs.
+Its native x64 gate passed 80 wire cases and 30,000 exact smoke responses with exact Zig 0.16.0.
+[[bounded-http-windows-iocp-2026-09-06]] retains source identities, fixture skips, and qualification limits.
+The HTTP implementation does not implement the complete `std.Io` interface.
+Its API proposals and production qualification remain open.

@@ -129,12 +129,13 @@ on `omarx1` with parallelism suited to its resources. Follow the runbook's host
 selection and checkout rules. Native platform gates still require their OS;
 record unavailable gates as pending rather than substituting cross-compilation.
 
-During the user-directed M4 performance-tuning phase (2026-09-05), use macOS
-and Linux gates and defer repeated Windows measurements/publication runs for
-HTTP-only changes. The current HTTP server has no Windows adapter. Preserve
-existing Windows receipts; resume Windows verification for explicitly resumed
-Windows work or new Windows evidence, following the runbook. Never relabel a
-pending Windows claim as tested because older unrelated proofs passed.
+The user resumed Windows HTTP work on 2026-09-06 after the earlier Mac/Linux tuning phase.
+The experimental HTTP adapter now has separate native x64 evidence in the `bounded-http` repository.
+Preserve each receipt's exact revision, platform, and fixture limits.
+A documentation-only wiki ingest does not require redispatching unrelated Windows proofs.
+Changed Windows code still requires relevant Windows evidence under the runbook.
+Never relabel a pending claim as tested because older unrelated proofs passed.
+M3-006 physical deployment qualification remains postponed.
 
 Do not turn plan output into unattended content mutation. A wrapper can check
 structure and state, but cannot establish that a synthesis follows its primary

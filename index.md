@@ -74,13 +74,13 @@ Read this page first, then follow only the pages needed for the task.
 - [[macos-kqueue-and-aio]] — `kqueue` readiness, Dispatch I/O/POSIX AIO
   completion, exact Zig 0.16 backend gaps, and measured macOS evidence.
 - [[windows-iocp-and-overlapped-io]] — APC/batch/device cancellation, the
-  Windows batch progress defect, bounded IOCP ownership and TCP-to-file qualification.
+  Windows batch progress defect, AcceptEx/provider ownership, and separate TCP-file/HTTP qualification.
 - [[tigerbeetle-io]] — source-verified comparison of TigerBeetle's Linux
   `io_uring`, Darwin `kqueue`, and Windows IOCP backend choices.
 
 - [[bounded-http-server-design]] — bounded/http: M4 Linux/macOS HTTP/1.1 MVP, project names, and design:
   inline callbacks, lazy headers, borrowed buffers, flush barriers, output
-  arenas, bounded batching, operation cells, shard resources, qualified comparisons, and resumed Windows HTTP work.
+  arenas, bounded batching, operation cells, shard resources, Linux comparisons, and native x64 Windows IOCP limits.
 
 ## Engineering system
 
