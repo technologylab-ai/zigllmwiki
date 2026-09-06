@@ -1231,3 +1231,11 @@ All 256 frozen input digests matched before and after execution.
 The runner released its Mac reservation at 14:54:02 UTC on 2026-09-06.
 The development packet is `.zig-cache/windows-http-development-macos/` in the ingestion worktree.
 Final Mac/Linux checks follow on the clean pushed wiki commit.
+
+## 2026-09-06 — Final HTTP Mac/Linux publication gates
+
+Final HTTP publication gates also passed on Mac and Linux at the same pushed revision.
+Each Mac mode passed 78 tests with two Linux-only skips; each Linux mode passed all 80 tests.
+Both hosts passed 84 wire cases, nine comparator tests, both embedding probes, and 30,000 exact smoke responses.
+Both runners released their reservations after child cleanup.
+The wiki publication receipt will remain in `.zig-cache/windows-http-publication/summary.json` in `zigllmwiki-windows-http`.

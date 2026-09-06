@@ -25,6 +25,10 @@ Both hosts ran native x64 Windows Server 2025 build `26100.33296` with exact Zig
 The final executable SHA-256 is `57c72afaba6e1e9c3b9c77447f93ef73b0c16ac6750cbdc8879ad6ec7545d7da`.
 Artifact `9991511439` has verified ZIP SHA-256 `d0161c0b43226007cbdec11f8c6739d1a2854822b8d7e923d512b43e82c07911`.
 The candidate source record remains unchanged.
+Final HTTP publication gates also passed on Mac and Linux at the same pushed revision.
+Each Mac mode passed 78 tests with two Linux-only skips; each Linux mode passed all 80 tests.
+Both hosts passed 84 wire cases, nine comparator tests, both embedding probes, and 30,000 exact smoke responses.
+Both runners released their reservations after child cleanup.
 
 The adapter remains experimental, with one shard and plain IPv4 loopback traffic.
 Provider resources, hard real-time progress, Windows performance, ARM64/WOW64, service controls, and external deployment remain unqualified.
@@ -48,6 +52,7 @@ All 256 frozen input digests matched before and after execution.
 The runner released its Mac reservation at 14:54:02 UTC on 2026-09-06.
 The development packet is `.zig-cache/windows-http-development-macos/` in the ingestion worktree.
 Final Mac/Linux checks follow on the clean pushed wiki commit.
+The final receipt will remain in `.zig-cache/windows-http-publication/summary.json` in the ingestion worktree.
 This documentation-only ingest requires no unrelated Windows wiki dispatch.
 The checkpoints below preserve their earlier scope and evidence limits.
 
