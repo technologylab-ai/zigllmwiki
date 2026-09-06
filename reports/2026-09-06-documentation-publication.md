@@ -37,8 +37,17 @@ The local development packet remains at `/tmp/zigllmwiki-docs-development.e9znbf
 
 ## Publication boundary
 
-The clean pushed revision must pass the maintained Linux wrapper and the command and retrieval gates.
-The documentation agent reserves the Mac for document rendering and embedding builds.
+Clean pushed revision `d9d26453844a24cc559320cb21c45c5662996935` passed `tools/verify_linux_ssh.sh omarx1`.
+The wrapper streamed the clean tree into its validated temporary directory.
+The wrapper passed 87/87 steps with 74 passing tests and eight platform skips.
+The isolated command copy passed all 28 command tests and the same 25-query retrieval policy.
+Structural lint found zero issues across 51 pages and 78 sources.
+The publication packet remains at `/tmp/zigllmwiki-docs-publication.du105m1y`.
+The publication reservation token was `9c0a5df8b3df491aa2a5f250f106c620`.
+The runner released the reservation after both temporary directories were removed.
+
+The receipt commit must repeat the maintained wrapper and target-independent gates at its clean pushed revision.
+Linux handled verification while the Mac remained available for document rendering and embedding builds.
 The prior Mac baseline remains evidence for its original tree.
 The documentation change introduces no new macOS runtime claim.
 Windows checks remain deferred under the user's current HTTP cadence.

@@ -1093,3 +1093,10 @@ The runner released its Linux reservation after cleanup.
 The [documentation receipt](reports/2026-09-06-documentation-publication.md) separates development results from the clean publication gate.
 M4-004, M4-005, and M4-006 retain queued work.
 M3-006 remains postponed.
+
+Clean pushed documentation revision `d9d26453844a24cc559320cb21c45c5662996935` passed the maintained Linux wrapper.
+The wrapper passed all 87 steps with 74 passing tests and eight platform skips.
+All 28 command tests and the 25-query retrieval policy passed at that revision.
+Structural lint found zero issues across 51 pages and 78 sources.
+The runner released its reservation after cleanup.
+The documentation receipt preserves the exact revision and environment.

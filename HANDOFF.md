@@ -20,7 +20,10 @@ Retrieval scored MRR 0.98, hit@3 1.0, and recall@5 0.96.
 Full lint found zero issues across 51 pages and 78 sources.
 The Linux runner finished and released its reservation.
 The [documentation receipt](reports/2026-09-06-documentation-publication.md) records the environment and verification scope.
-Publication checks use Linux while the document agent uses the Mac.
+Clean pushed revision `d9d26453844a24cc559320cb21c45c5662996935` passed the maintained Linux wrapper with the same counts.
+Its command, retrieval, and structural lint gates also passed.
+The publication runner finished and released its reservation.
+Linux handled the checks while the Mac remained available for document work.
 Windows checks remain deferred for the current HTTP documentation scope.
 M4-004, M4-005, and M4-006 retain queued work.
 M3-006 remains postponed.
