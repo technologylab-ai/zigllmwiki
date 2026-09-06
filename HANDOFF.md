@@ -3,22 +3,26 @@
 ## Static wiki checkpoint
 
 The standalone website implements search, filters, backlinks, source metadata, highlighted proofs, and an interactive note graph.
+The graph update animates startup and selection, centers the selected node, and rearranges surrounding nodes.
+All four layers start enabled, and matching notes start expanded.
 The [site guide](docs/wiki-site.md) describes maintenance and stable viewing links.
 The [publication decision](docs/decisions/0003-static-public-wiki.md) replaces the earlier frontend deferral.
 Both repositories are public by the user's authorization.
 Canonical Markdown and registered proofs retain their existing roles.
 
-The implementation lives on `feat/wiki-pages` in the `zigllmwiki-pages` worktree.
-Pages is configured at [the public wiki address](https://technologylab-ai.github.io/zigllmwiki/).
-The first deployment awaits this branch's merge and push.
-B-002 remains running until publication succeeds.
+The first implementation is merged into main at `f5e0a22798a677bcae196781f79e0e1fca99fc2f`.
+The [first deployment](https://github.com/technologylab-ai/zigllmwiki/actions/runs/34035331551) published the [public wiki](https://technologylab-ai.github.io/zigllmwiki/).
+The `feat/wiki-pages` branch and `zigllmwiki-pages` worktree retain the current graph update.
+B-002 remains running until that update reaches the public site.
 
 The [website receipt](reports/2026-09-06-wiki-site.md) records development verification.
 Exact Zig 0.16.0 passed all 87 local steps, with 73 tests and nine platform skips.
 All 28 command tests, the 25-query retrieval policy, and full lint passed.
-All 14 builder fixtures and 12 browser checks passed.
+All 14 builder fixtures and 13 browser checks passed, including the requested graph behavior.
 Both Mac development runners finished and released their reservations.
-Linux publication verification awaits the pushed revision.
+Linux publication verification passed the first pushed revision: 87 steps, 74 tests, and eight platform skips.
+Its command, builder, retrieval, and lint gates passed.
+The animated successor needs its own final publication gate.
 Windows remains deferred for this presentation change.
 M3-006 remains postponed; unfinished M4 work remains queued.
 

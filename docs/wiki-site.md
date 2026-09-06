@@ -15,11 +15,16 @@ A backlink identifies another document that references the current document.
 Each reader page exposes nearby documents, source records, and registered proofs.
 The contents list links to individual headings.
 
-The note graph displays document relationships.
-Select a node to inspect its title and open its document.
-Use the evidence controls to include source records and proofs.
+The note graph displays document relationships with an animated layout.
+Wiki, Sources, Proofs, and Project layers start enabled.
+Click a node to center the graph on that document.
+The neighboring nodes rearrange around the selected node.
+Open the selected document from its details panel.
+Use the layer controls to narrow the graph.
 Use the local graph to inspect one document's neighborhood.
 The list view provides an alternative to graphical navigation.
+The note list starts expanded and shows matching documents during search.
+The graph honors the browser's reduced-motion preference.
 
 Status labels reproduce the recorded evidence status.
 Read each page's evidence section for environments, dates, and remaining limits.

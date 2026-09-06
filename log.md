@@ -1116,3 +1116,16 @@ The Mac reservations were released after cleanup.
 B-002 awaits the first successful Pages deployment; Linux publication gates await a pushed commit.
 The website adds no runtime evidence, and existing source records remain unchanged.
 See [the website receipt](reports/2026-09-06-wiki-site.md).
+
+## 2026-09-06 — Graph interaction follow-up
+
+The first wiki deployment and its Linux publication gates passed at `f5e0a22798a677bcae196781f79e0e1fca99fc2f`.
+The HTTP site published reader links at `2b41a0801a655f02223a9ece2e8ebddfffed64f7`.
+Live reader and cross-site navigation checks passed.
+
+The user requested animated rearrangement and click centering in the knowledge graph.
+The user also requested all four layers enabled and the matching-note list expanded by default.
+Implemented those behaviors with finite transitions and reduced-motion support.
+All 13 browser checks passed, including actual node motion, exact centering, keyboard selection, and cleanup.
+Updated the operator guide, publication receipt, and handoff.
+The update awaits its Pages publication and final native gate.

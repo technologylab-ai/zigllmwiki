@@ -14,6 +14,7 @@ const output = path.resolve(outputArgument);
 const executable = process.env.BROWSER || (process.platform === 'darwin'
   ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' : '/usr/bin/chromium');
 const cases = [];
+const exceptions = [];
 const pending = new Map();
 let browser, socket, session, sequence = 0;
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -82,6 +83,7 @@ try {
   });
   socket.addEventListener('message', event => {
     const message = JSON.parse(event.data), job = pending.get(message.id);
+    if (message.method === 'Runtime.exceptionThrown') exceptions.push(message.params.exceptionDetails);
     if (!job) return;
     clearTimeout(job.timer); pending.delete(message.id);
     if (message.error) job.reject(new Error(JSON.stringify(message.error))); else job.resolve(message.result);
@@ -90,6 +92,7 @@ try {
   session = (await send('Target.attachToTarget', {targetId: target.targetId, flatten: true}, null)).sessionId;
   await send('Page.enable'); await send('Runtime.enable');
   const version = await send('Browser.getVersion', {}, null);
+  await send('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'no-preference'}]});
   await send('Emulation.setDeviceMetricsOverride', {width: 1440, height: 1040, deviceScaleFactor: 1, mobile: false});
 
   await check('home-and-navigation', async () => {
@@ -128,7 +131,12 @@ try {
     await navigate(href);
     const state = await evaluate(`({hash:location.hash,heading:!!document.getElementById(decodeURIComponent(location.hash.slice(1))),scroll:scrollY})`);
     assert(state.hash && state.heading);
-    await until(() => evaluate('scrollY>0'), 'Heading link did not scroll'); return state;
+    await until(() => evaluate('scrollY>0'), 'Heading link did not scroll');
+    const original=await evaluate('location.href');
+    await evaluate(`[...document.querySelectorAll('.prose a')].find(a=>new URL(a.href).searchParams.get('page')?.startsWith('wiki/') && new URL(a.href).searchParams.get('page')!=='wiki/std-io.md').click()`);
+    await until(()=>evaluate(`new URL(location.href).searchParams.get('page')!=='wiki/std-io.md'`),'Internal navigation failed');
+    await evaluate('history.back()');
+    await until(()=>evaluate('location.href==='+JSON.stringify(original)),'Browser history failed'); return state;
   });
   await check('source-provenance', async () => {
     await navigate('?page=sources/zig-0.16.0-stdlib.md');
@@ -147,28 +155,71 @@ try {
   await check('graph-and-node-navigation', async () => {
     await navigate('?view=graph');
     await until(() => evaluate(`document.querySelectorAll('#graph-root svg circle').length > 0`), 'Graph did not render');
-    const state = await evaluate(`({circles:document.querySelectorAll('#graph-root svg circle').length,controls:document.querySelectorAll('#graph-root button,#graph-root input').length,text:document.querySelector('#graph-root').textContent.slice(0,800)})`);
+    const state = await evaluate(`({circles:document.querySelectorAll('#graph-root svg circle').length,controls:document.querySelectorAll('#graph-root button,#graph-root input').length,layers:[...document.querySelectorAll('.wg-layers input:checked')].map(input=>input.value),text:document.querySelector('#graph-root').textContent.slice(0,800)})`);
     assert(state.circles >= 40); assert(state.controls >= 4);
+    assert.deepEqual(state.layers,['wiki','source','proof','project']);
+    assert.equal(await evaluate(`document.querySelector('.wg-list').open`),true);
+    await evaluate(`document.querySelector('.wg-find input').value='io';document.querySelector('.wg-find input').dispatchEvent(new Event('input',{bubbles:true}))`);
+    assert.match(await evaluate(`document.querySelector('.wg-list summary').textContent`),/Matching notes/);
+    assert.equal(await evaluate(`document.querySelector('.wg-list').open`),true);
+    await evaluate(`document.querySelector('.wg-find input').value='';document.querySelector('.wg-find input').dispatchEvent(new Event('input',{bubbles:true}))`);
+    const initial=await evaluate(`[...document.querySelectorAll('.wg-node')].map(node=>node.getAttribute('transform'))`);
+    await delay(180);
+    assert.notDeepEqual(await evaluate(`[...document.querySelectorAll('.wg-node')].map(node=>node.getAttribute('transform'))`),initial,'Startup should animate the layout');
+    await until(()=>evaluate(`document.querySelector('.wiki-graph').dataset.motion==='settled'`),'Graph did not settle');
     await screenshot('graph-desktop'); return state;
   });
   await check('graph-selection-zoom-layers-and-keyboard-list', async () => {
+    await until(()=>evaluate(`document.querySelector('.wiki-graph').dataset.motion==='settled'`),'Initial graph did not settle');
+    const original=await evaluate(`[...document.querySelectorAll('.wg-node')].map(node=>node.getAttribute('transform'))`);
     const point=await evaluate(`(()=>{const r=document.querySelector('[data-wg-path="wiki/std-io.md"] .wg-dot').getBoundingClientRect();return{x:r.x+r.width/2,y:r.y+r.height/2}})()`);
     await send('Input.dispatchMouseEvent',{type:'mousePressed',button:'left',clickCount:1,...point});
     await send('Input.dispatchMouseEvent',{type:'mouseReleased',button:'left',clickCount:1,...point});
     assert.equal(await evaluate(`document.querySelector('.wg-details h3').textContent`),'std.Io');
+    const start=await evaluate(`[...document.querySelectorAll('.wg-node')].map(node=>node.getAttribute('transform'))`);
+    await delay(200);
+    const middle=await evaluate(`[...document.querySelectorAll('.wg-node')].map(node=>node.getAttribute('transform'))`);
+    assert.notDeepEqual(middle,start,'Nodes must move during the transition');
+    await until(()=>evaluate(`document.querySelector('.wiki-graph').dataset.motion==='settled'`),'Selection did not settle');
+    const rearranged=await evaluate(`[...document.querySelectorAll('.wg-node')].map(node=>node.getAttribute('transform'))`);
+    assert.equal(rearranged.length,original.length); assert.notDeepEqual(rearranged,original);
+    const centered=await evaluate(`(()=>{const node=document.querySelector('[data-wg-path="wiki/std-io.md"] .wg-dot').getBoundingClientRect(),frame=document.querySelector('.wg-svg').getBoundingClientRect();return{dx:node.x+node.width/2-frame.x-frame.width/2,dy:node.y+node.height/2-frame.y-frame.height/2}})()`);
+    assert(Math.abs(centered.dx)<3 && Math.abs(centered.dy)<3,JSON.stringify(centered));
     const before=await evaluate(`document.querySelector('.wg-svg>g').getAttribute('transform')`);
     await evaluate(`document.querySelector('[aria-label="Zoom in"]').click()`);
     assert.notEqual(await evaluate(`document.querySelector('.wg-svg>g').getAttribute('transform')`),before);
-    await evaluate(`document.querySelector('.wg-layers input[value=source]').click();document.querySelector('.wg-layers input[value=proof]').click()`);
+    await evaluate(`document.querySelector('.wg-layers input[value=source]').click()`);
+    assert.equal(await evaluate(`document.querySelectorAll('.wg-node[data-layer=source]').length`),0);
+    await evaluate(`document.querySelector('.wg-layers input[value=source]').click()`);
     const evidence=await evaluate(`({sources:document.querySelectorAll('.wg-node[data-layer=source]').length,proofs:document.querySelectorAll('.wg-node[data-layer=proof]').length,sourceEdges:document.querySelectorAll('.wg-edge[data-type=source]').length,proofEdges:document.querySelectorAll('.wg-edge[data-type=proof]').length})`);
     assert(Object.values(evidence).every(value=>value>0));
-    await evaluate(`document.querySelector('.wg-list').open=true;document.querySelector('[data-wg-select="wiki/std-io.md"]').click();document.querySelector('.wg-open').click()`);
+    await evaluate(`document.querySelector('[data-wg-select="wiki/std-io.md"]').focus()`);
+    await send('Input.dispatchKeyEvent',{type:'keyDown',key:'Enter',code:'Enter',windowsVirtualKeyCode:13});
+    await send('Input.dispatchKeyEvent',{type:'keyUp',key:'Enter',code:'Enter',windowsVirtualKeyCode:13});
+    await evaluate(`document.querySelector('.wg-open').click()`);
     await until(()=>evaluate(`!!document.querySelector('.document-header h1')`),'Graph note navigation failed');
     assert.equal(await evaluate(`new URL(location.href).searchParams.get('page')`),'wiki/std-io.md');
     await navigate('?view=graph&focus=wiki/std-io.md');
+    assert.equal(await evaluate(`document.querySelectorAll('.wg-node').length`),original.length);
+    await evaluate(`document.querySelector('.wg-toolbar button').click()`);
     const focused=await evaluate(`({nodes:document.querySelectorAll('.wg-node').length,local:document.querySelector('.wg-toolbar button').getAttribute('aria-pressed')})`);
-    assert(focused.nodes>1 && focused.nodes<=50); assert.equal(focused.local,'true');
-    return {evidence,focused};
+    assert(focused.nodes>1 && focused.nodes<original.length); assert.equal(focused.local,'true');
+    return {evidence,focused,centered};
+  });
+  await check('graph-reduced-motion-and-cleanup', async()=>{
+    await send('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'reduce'}]});
+    await navigate('?view=graph&focus=wiki/std-io.md');
+    assert.equal(await evaluate(`document.querySelector('.wiki-graph').dataset.motion`),'settled');
+    const initial=await evaluate(`document.querySelector('[data-wg-path="wiki/std-io.md"]').getAttribute('transform')`);
+    await delay(100);
+    assert.equal(await evaluate(`document.querySelector('[data-wg-path="wiki/std-io.md"]').getAttribute('transform')`),initial);
+    await send('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'no-preference'}]});
+    await navigate('?view=graph');
+    await evaluate(`document.querySelector('#nav-explore').click()`);
+    await delay(1000);
+    assert.equal(await evaluate(`document.querySelectorAll('.wiki-graph').length`),0);
+    assert.equal(await evaluate(`document.querySelectorAll('.topic-card').length`),4);
+    return {reducedMotion:'settled',unmounted:true};
   });
   await check('hostile-markdown-is-inert', async () => {
     const fixture=await (await fetch(new URL('data.json',base))).json();
@@ -209,8 +260,8 @@ try {
     }
     return results;
   });
-  await writeFile(path.join(output,'receipt.json'), JSON.stringify({base:base.href,browser:version.product,cases},null,2)+'\n');
-  if (cases.some(test=>!test.ok)) process.exitCode=1;
+  await writeFile(path.join(output,'receipt.json'), JSON.stringify({base:base.href,browser:version.product,cases,exceptions},null,2)+'\n');
+  if (cases.some(test=>!test.ok) || exceptions.length) process.exitCode=1;
 } finally {
   if (socket?.readyState === WebSocket.OPEN) {
     await send('Browser.close', {}, null).catch(()=>{}); socket.close();

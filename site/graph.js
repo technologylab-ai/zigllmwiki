@@ -62,20 +62,25 @@ function model(data) {
   return {documents, edges: [...edges.values()], neighbors};
 }
 
-// The solver finishes at startup. It never runs an animation or timer loop.
-function layout(documents, edges, focus) {
+// Compute finite force targets. Rendering interpolates toward them and then stops.
+function layout(documents, edges, focus, previous = new Map()) {
   const nodes = documents.map((note, index) => {
     const angle = index * 2.399963229728653 + (hash(note.path) % 100) / 400;
     const radius = 35 + 210 * Math.sqrt((index + 1) / Math.max(1, documents.length));
-    return {path: note.path, x: Math.cos(angle) * radius, y: Math.sin(angle) * radius, vx: 0, vy: 0};
+    const old = previous.get(note.path);
+    return {path: note.path, x: old ? old.x : Math.cos(angle) * radius, y: old ? old.y : Math.sin(angle) * radius, vx: 0, vy: 0};
   });
   const byPath = new Map(nodes.map(node => [node.path, node]));
-  const pairs = nodes.length * (nodes.length - 1) / 2 + edges.length + 1;
+  const center = byPath.get(focus);
+  if (center) { center.x = 0; center.y = 0; }
+  const allPairs = nodes.length * (nodes.length - 1) / 2;
+  const stride = Math.max(1, Math.ceil(allPairs / 100000));
+  const pairs = Math.ceil(allPairs / stride) + nodes.length + edges.length + 1;
   const iterations = Math.max(1, Math.min(80, Math.floor(1500000 / pairs)));
   for (let turn = 0; turn < iterations; turn++) {
     for (let i = 0; i < nodes.length; i++) {
       const left = nodes[i];
-      for (let j = i + 1; j < nodes.length; j++) {
+      for (let j = i + 1; j < nodes.length; j += stride) {
         const right = nodes[j];
         const dx = left.x - right.x || .01, dy = left.y - right.y || .01;
         const squared = dx * dx + dy * dy + 100;
@@ -107,17 +112,20 @@ function layout(documents, edges, focus) {
 export function mountGraph(container, data, {focus = null, onNavigate} = {}) {
   const id = 'wiki-graph-' + ++mounts;
   const graph = model(data);
-  const activeLayers = new Set(['wiki']);
+  const activeLayers = new Set(Object.keys(LAYERS));
   let selected = graph.documents.has(focus) ? focus : null;
   if (selected) activeLayers.add(graph.documents.get(selected).layer);
-  let neighborhood = !!selected, query = '', hovered = null, disposed = false;
+  let neighborhood = false, query = '', hovered = null, disposed = false;
   let visible = [], visibleEdges = [], positions = new Map(), degree = new Map();
+  const remembered = new Map();
   let nodeElements = new Map(), edgeElements = [], labelOrder = [];
   let width = 900, height = 500, view = {x: 450, y: 250, scale: 1};
   let pointer = null, dragged = false;
+  let animation = null, animationFrame = null;
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const listeners = new AbortController();
   const listen = (target, event, handler, options = {}) => target.addEventListener(event, handler, {...options, signal: listeners.signal});
-  const root = element('section', {class: 'wiki-graph', 'aria-label': 'Interactive note graph'});
+  const root = element('section', {class: 'wiki-graph', 'aria-label': 'Interactive note graph', 'data-motion': 'settled'});
   root.append(element('style', {}, CSS));
   const toolbar = element('div', {class: 'wg-toolbar'});
   const findLabel = element('label', {class: 'wg-find'});
@@ -143,14 +151,14 @@ export function mountGraph(container, data, {focus = null, onNavigate} = {}) {
   const searchHelp = element('span', {id: id + '-search-help'}, 'Find highlights notes and narrows the list.');
   meta.append(counts, searchHelp); root.append(meta);
   const frame = element('div', {class: 'wg-frame'});
-  const svg = vector('svg', {class: 'wg-svg', tabindex: '0', role: 'img', 'aria-label': 'Connected notes. Use the note list below for keyboard selection.', 'aria-describedby': id + '-help'});
+  const svg = vector('svg', {class: 'wg-svg', tabindex: '0', role: 'img', 'aria-label': 'Connected notes. Select a node to center and rearrange the graph. The note list supports keyboard selection.', 'aria-describedby': id + '-help'});
   const stage = vector('g'); svg.append(stage); frame.append(svg);
   const controls = element('div', {class: 'wg-controls', 'aria-label': 'Graph view controls'});
   const zoomIn = element('button', {class: 'wg-button', type: 'button', 'aria-label': 'Zoom in'}, '+');
   const zoomOut = element('button', {class: 'wg-button', type: 'button', 'aria-label': 'Zoom out'}, '−');
   const reset = element('button', {class: 'wg-button', type: 'button', 'aria-label': 'Fit all visible notes'}, 'Reset');
   controls.append(zoomIn, zoomOut, reset); frame.append(controls);
-  frame.append(element('p', {class: 'wg-help', id: id + '-help'}, 'Drag to pan. Use + / − or Ctrl + scroll to zoom. Arrow keys pan. Home resets.'));
+  frame.append(element('p', {class: 'wg-help', id: id + '-help'}, 'Select a node to center its connections. Drag to pan. + / − zoom. Arrow keys pan. Home resets.'));
   const empty = element('p', {class: 'wg-empty'}); frame.append(empty); root.append(frame);
   const details = element('div', {class: 'wg-details', 'aria-live': 'polite', 'aria-atomic': 'true'});
   const detailText = element('div'), detailMeta = element('span', {class: 'wg-detail-meta'});
@@ -162,7 +170,7 @@ export function mountGraph(container, data, {focus = null, onNavigate} = {}) {
     const item = element('span'); item.append(element('i', {'data-type': type, 'aria-hidden': 'true'}), document.createTextNode(label)); legend.append(item);
   }
   legend.append(element('span', {}, 'Larger dots have more visible links.')); root.append(legend);
-  const list = element('details', {class: 'wg-list'}), listSummary = element('summary'), listItems = element('ul');
+  const list = element('details', {class: 'wg-list', open: ''}), listSummary = element('summary'), listItems = element('ul');
   const listEmpty = element('p', {class: 'wg-list-empty'}); list.append(listSummary, listItems, listEmpty); root.append(list);
   container.append(root);
 
@@ -177,7 +185,7 @@ export function mountGraph(container, data, {focus = null, onNavigate} = {}) {
     const note = graph.documents.get(selected);
     detailMeta.textContent = note ? LAYERS[note.layer] + ' · ' + (degree.get(selected) || 0) + ' visible connections' : 'Explore the wiki';
     title.textContent = note ? note.title : 'Follow a connection.';
-    description.textContent = note ? (note.summary || 'This note has no recorded summary.') : 'Select a dot to read its summary. Open the note to inspect its guidance and evidence.';
+    description.textContent = note ? (note.summary || 'This note has no recorded summary.') : 'Select a dot to center its connections and read its summary. Open the note to inspect its guidance and evidence.';
     open.disabled = !note || typeof onNavigate !== 'function';
     local.disabled = !note; local.title = note ? 'Show this note and its direct neighbors' : 'Select a note first';
     local.setAttribute('aria-pressed', String(neighborhood));
@@ -185,7 +193,7 @@ export function mountGraph(container, data, {focus = null, onNavigate} = {}) {
 
   function updateList() {
     const notes = visible.filter(matches).sort((a, b) => compare(a.title.toLowerCase(), b.title.toLowerCase()) || compare(a.path, b.path));
-    listSummary.textContent = 'Browse ' + notes.length + (query ? ' matching' : ' visible') + ' notes without the graph';
+    listSummary.textContent = (query ? 'Matching notes' : 'Visible notes') + ' (' + notes.length + ')';
     listEmpty.textContent = notes.length ? '' : 'No notes match these controls.'; listEmpty.hidden = !!notes.length;
     listItems.replaceChildren();
     for (const note of notes) {
@@ -201,8 +209,14 @@ export function mountGraph(container, data, {focus = null, onNavigate} = {}) {
   }
 
   function choose(path, fromList = false) {
+    if (!graph.documents.has(path)) return;
     selected = path; hovered = null;
-    if (neighborhood) render(); else { paint(); updateDetails(); updateList(); }
+    if (neighborhood) render();
+    else {
+      const target = layout(visible, visibleEdges, selected, positions);
+      transition(target, {x: width / 2, y: height / 2, scale: view.scale});
+      paint(); updateDetails(); updateList();
+    }
     if (fromList) open.focus({preventScroll: true});
   }
 
@@ -240,16 +254,82 @@ export function mountGraph(container, data, {focus = null, onNavigate} = {}) {
     labels();
   }
 
-  function fit() {
-    if (!positions.size) { view = {x: width / 2, y: height / 2, scale: 1}; applyView(); return; }
-    const points = [...positions.values()];
+  function fitted(pointsByPath, center = false) {
+    if (!pointsByPath.size) return {x: width / 2, y: height / 2, scale: 1};
+    const points = [...pointsByPath.values()];
     const minX = Math.min(...points.map(point => point.x)), maxX = Math.max(...points.map(point => point.x));
     const minY = Math.min(...points.map(point => point.y)), maxY = Math.max(...points.map(point => point.y));
-    const scale = Math.max(.15, Math.min(3, (width - 110) / Math.max(120, maxX - minX), (height - 125) / Math.max(120, maxY - minY)));
-    view = {x: width / 2 - (minX + maxX) * scale / 2, y: height / 2 - (minY + maxY) * scale / 2, scale}; applyView();
+    const extentX = center ? 2 * Math.max(Math.abs(minX), Math.abs(maxX)) : maxX - minX;
+    const extentY = center ? 2 * Math.max(Math.abs(minY), Math.abs(maxY)) : maxY - minY;
+    const scale = Math.max(.15, Math.min(3, (width - 110) / Math.max(120, extentX), (height - 125) / Math.max(120, extentY)));
+    return {x: width / 2 - (center ? 0 : (minX + maxX) * scale / 2), y: height / 2 - (center ? 0 : (minY + maxY) * scale / 2), scale};
+  }
+
+  function drawPositions() {
+    for (const [path, point] of positions) {
+      nodeElements.get(path)?.group.setAttribute('transform', `translate(${point.x} ${point.y})`);
+      remembered.set(path, {path, x: point.x, y: point.y});
+    }
+    for (const {element: line, edge} of edgeElements) {
+      const left = positions.get(edge.source), right = positions.get(edge.target);
+      line.setAttribute('x1', left.x); line.setAttribute('y1', left.y);
+      line.setAttribute('x2', right.x); line.setAttribute('y2', right.y);
+    }
+    applyView();
+  }
+
+  function stopMotion(finish = false) {
+    if (animationFrame !== null) cancelAnimationFrame(animationFrame);
+    animationFrame = null;
+    if (finish && animation) {
+      positions = animation.target;
+      if (animation.camera) view = {...animation.camera};
+      drawPositions();
+    }
+    animation = null;
+    root.dataset.motion = 'settled';
+  }
+
+  function tick(now) {
+    animationFrame = null;
+    if (disposed || !animation) return;
+    const progress = Math.max(0, Math.min(1, (now - animation.started) / 850));
+    const eased = 1 - Math.pow(1 - progress, 3);
+    for (const [path, target] of animation.target) {
+      const start = animation.start.get(path), point = positions.get(path);
+      point.x = start.x + (target.x - start.x) * eased;
+      point.y = start.y + (target.y - start.y) * eased;
+    }
+    if (animation.camera) {
+      const camera = animation.camera, start = animation.startView;
+      view = {x: start.x + (camera.x - start.x) * eased, y: start.y + (camera.y - start.y) * eased, scale: start.scale + (camera.scale - start.scale) * eased};
+    }
+    drawPositions();
+    if (progress === 1) { animation = null; root.dataset.motion = 'settled'; }
+    else animationFrame = requestAnimationFrame(tick);
+  }
+
+  function transition(target, camera) {
+    stopMotion();
+    animation = {target, camera, start: new Map([...positions].map(([path, point]) => [path, {x: point.x, y: point.y}])), startView: {...view}, started: performance.now()};
+    if (reducedMotion.matches || !target.size) { stopMotion(true); return; }
+    root.dataset.motion = 'running';
+    animationFrame = requestAnimationFrame(tick);
+  }
+
+  function takeCamera() {
+    // Manual view controls never restart the layout or fight its camera tween.
+    if (animation) animation.camera = null;
+  }
+
+  function fit() {
+    stopMotion(true);
+    view = fitted(positions, !!selected);
+    applyView();
   }
 
   function zoom(factor, point = {x: width / 2, y: height / 2}) {
+    takeCamera();
     const scale = Math.max(.15, Math.min(8, view.scale * factor)), ratio = scale / view.scale;
     view = {x: point.x - (point.x - view.x) * ratio, y: point.y - (point.y - view.y) * ratio, scale}; applyView();
   }
@@ -271,14 +351,23 @@ export function mountGraph(container, data, {focus = null, onNavigate} = {}) {
   }
 
   function render() {
+    stopMotion();
     hovered = null;
+    for (const [path, point] of positions) remembered.set(path, {path, x: point.x, y: point.y});
     const neighborhoodPaths = neighborhood && selected ? new Set([selected, ...graph.neighbors.get(selected)]) : null;
     visible = [...graph.documents.values()].filter(note => activeLayers.has(note.layer) && (!neighborhoodPaths || neighborhoodPaths.has(note.path))).sort((a, b) => compare(a.path, b.path));
     const paths = new Set(visible.map(note => note.path));
     visibleEdges = graph.edges.filter(edge => paths.has(edge.source) && paths.has(edge.target));
     degree = new Map(visible.map(note => [note.path, 0]));
     for (const edge of visibleEdges) { degree.set(edge.source, degree.get(edge.source) + 1); degree.set(edge.target, degree.get(edge.target) + 1); }
-    positions = layout(visible, visibleEdges, neighborhood ? selected : null);
+    const oldPositions = positions;
+    positions = new Map(visible.map((note, index) => {
+      const old = oldPositions.get(note.path) || remembered.get(note.path);
+      const angle = index * 2.399963229728653 + (hash(note.path) % 100) / 400;
+      const radius = 35 + 210 * Math.sqrt((index + 1) / Math.max(1, visible.length));
+      return [note.path, {path: note.path, x: old ? old.x : Math.cos(angle) * radius, y: old ? old.y : Math.sin(angle) * radius}];
+    }));
+    const target = layout(visible, visibleEdges, selected, positions);
     labelOrder = [...visible].sort((a, b) => degree.get(b.path) - degree.get(a.path) || compare(a.path, b.path));
     nodeElements = new Map(); edgeElements = [];
     const lines = vector('g', {'aria-hidden': 'true'}), nodes = vector('g'), names = vector('g', {'aria-hidden': 'true'});
@@ -299,7 +388,10 @@ export function mountGraph(container, data, {focus = null, onNavigate} = {}) {
     stage.replaceChildren(lines, nodes, names);
     empty.textContent = activeLayers.size ? 'This view has no connected notes in the selected layers.' : 'Choose a layer to show notes.';
     empty.hidden = !!visible.length;
-    updateDetails(); updateList(); fit(); paint();
+    updateDetails(); updateList();
+    if (!oldPositions.size) view = fitted(positions);
+    applyView(); paint();
+    transition(target, fitted(target, !!selected));
   }
 
   function point(event) {
@@ -326,6 +418,7 @@ export function mountGraph(container, data, {focus = null, onNavigate} = {}) {
     else if (event.key === '-') zoom(1 / 1.3);
     else if (event.key === 'Home' || event.key === '0') fit();
     else if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) {
+      takeCamera();
       view.x += event.key === 'ArrowLeft' ? 30 : event.key === 'ArrowRight' ? -30 : 0;
       view.y += event.key === 'ArrowUp' ? 30 : event.key === 'ArrowDown' ? -30 : 0; applyView();
     } else return;
@@ -333,6 +426,7 @@ export function mountGraph(container, data, {focus = null, onNavigate} = {}) {
   });
   listen(svg, 'pointerdown', event => {
     if (event.button !== 0 || pointer) return;
+    takeCamera();
     const start = point(event), target = event.target.closest('[data-wg-path]')?.getAttribute('data-wg-path');
     pointer = {id: event.pointerId, start, x: view.x, y: view.y, target}; dragged = false;
     svg.setPointerCapture(event.pointerId);
@@ -358,13 +452,15 @@ export function mountGraph(container, data, {focus = null, onNavigate} = {}) {
     if (next !== hovered) { hovered = next; paint(); }
   });
   listen(svg, 'pointerleave', () => { if (hovered) { hovered = null; paint(); } });
+  listen(reducedMotion, 'change', () => { if (reducedMotion.matches) stopMotion(true); });
   const resize = new ResizeObserver(() => {
     if (disposed) return;
     const nextWidth = Math.max(280, frame.clientWidth), nextHeight = Math.max(300, frame.clientHeight);
     if (nextWidth === width && nextHeight === height) return;
     width = nextWidth; height = nextHeight; svg.setAttribute('viewBox', `0 0 ${width} ${height}`); fit();
   });
+  width = Math.max(280, frame.clientWidth); height = Math.max(300, frame.clientHeight);
   svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
   render(); resize.observe(frame);
-  return () => { disposed = true; listeners.abort(); resize.disconnect(); root.remove(); };
+  return () => { disposed = true; stopMotion(); listeners.abort(); resize.disconnect(); root.remove(); };
 }
