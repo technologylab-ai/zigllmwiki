@@ -1,5 +1,17 @@
 # Project handoff — 2026-09-06
 
+## Bounded maintenance checkpoint — 2026-09-14
+
+[Review 34105239480, attempt 1](reports/curation-review-34105239480-1.md) records a two-page scheduling review at base `a48ddf3ce6d956b4f7e1e0db6a7a31e403c0d27f`.
+Exact installed Zig 0.16.0 source supports the shared dispatch-capacity clarification and corrected implementation link.
+Structural lint and all 25 retrieval cases passed after the guidance edits.
+The sandbox rejected `ps`, preventing the runbook's existing-workload check before a runtime suite.
+The caller must run `zig build verify` after inspecting the diff and obtaining the host reservation.
+The packet's earlier Linux gate does not verify these edits.
+Mixed-dispatch runtime proof coverage remains a separate follow-up; source records and proof files retain their original bytes.
+This pass did not inspect M4 guidance or change milestone statuses.
+The caller owns publication; the earlier checkpoints retain their original scope.
+
 ## Windows HTTP shard handoff checkpoint
 
 [[bounded-http-windows-shards-2026-09-06]] pins qualified feature `419de5445901a87ea6973020df5b13a420917483`.

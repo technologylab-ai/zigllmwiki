@@ -4,8 +4,8 @@ title: std.Io.Threaded implementation guide
 kind: concept
 status: source-verified
 zig: "0.16.0"
-summary: Zig 0.16's default I/O implementation combines blocking OS calls, pooled task threads, explicit dispatch limits, and cooperative cancellation of blocked calls.
-updated: 2026-09-04
+summary: Zig 0.16 Threaded combines blocking I/O, pooled threads, shared dispatch capacity, allocation, and cooperative cancellation.
+updated: 2026-09-14
 sources:
   - "[[zig-0.16.0-release-notes]]"
   - "[[zig-0.16.0-stdlib]]"
@@ -34,14 +34,25 @@ on this page.
 
 ## Task dispatch and allocation
 
-`async_limit` defaults to one fewer than the detected logical CPU count. When
-all permitted workers are busy, or allocation/thread creation fails, `async`
-destroys any temporary task record and executes the function in the caller.
+`async_limit` defaults to one fewer than the detected logical CPU count.
+If CPU detection fails, the default becomes `.nothing`; `cpu_count_error` retains the failure.
+`concurrent_limit` defaults to `.unlimited`.
 
-`concurrent_limit` defaults to unlimited. `concurrent` allocates a future and
-grows the pool when necessary; lack of allocator capacity, thread creation,
-implementation support, or configured capacity becomes
-`error.ConcurrencyUnavailable`. It does not silently run the task inline.
+Both limits apply to the same `busy_count`, which counts workers unavailable for new tasks.
+`async` and `groupAsync` compare that count with `async_limit`.
+`concurrent` and `groupConcurrent` compare that count with `concurrent_limit`.
+Each dispatch checks its limit before checking for an idle pool thread.
+Consequently, concurrent work can exhaust async dispatch capacity even when the pool contains idle threads.
+The limits do not reserve separate worker pools.
+
+At its limit, `async` destroys its temporary task record and executes the function in the caller.
+Allocation or thread creation failure also causes inline execution.
+`concurrent` returns `error.ConcurrencyUnavailable` for its limit, allocation failure, thread creation failure, or single-threaded compilation.
+Below the applicable limit, either method reuses an idle thread or adds a thread when necessary.
+
+These are implementation facts from `Threaded.init`, `async`, `concurrent`, `groupAsync`, `groupConcurrent`, and `worker` in [[zig-0.16.0-stdlib]].
+The existing dispatch proof tests zero-capacity behavior; it does not exercise competition between both scheduling methods.
+Use [[async-vs-concurrent]] to choose the interface guarantee before sizing shared dispatch capacity.
 
 The allocator passed to `Threaded.init` must be thread-safe. The implementation
 uses it for task dispatch and some operation paths. Avoiding task dispatch

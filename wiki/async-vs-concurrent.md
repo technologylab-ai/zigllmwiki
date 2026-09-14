@@ -5,7 +5,7 @@ kind: pattern
 status: runtime-verified
 zig: "0.16.0"
 summary: async may execute work inline, while concurrent requires independent caller progress or returns ConcurrencyUnavailable.
-updated: 2026-09-04
+updated: 2026-09-14
 sources:
   - "[[zig-0.16.0-stdlib]]"
   - "[[zig-0.16.0-release-notes]]"
@@ -29,19 +29,13 @@ waits on I/O, or scheduling fails explicitly with
 `error.ConcurrencyUnavailable`.
 
 That distinction belongs to the `std.Io` interface. The resource cliff below is
-specific to [[std-io|`std.Io.Threaded`]].
+specific to [[io-threaded|`std.Io.Threaded`]].
 
 ## What `std.Io.Threaded` does
 
-Its `async_limit` defaults to one less than the detected logical CPU count.
-When all units are busy and the limit has been reached, `async` executes the
-function immediately in the calling task. Allocation or thread-creation failure
-can take the same eager fallback path.
-
-Its `concurrent_limit` defaults to unlimited. `concurrent` may grow the thread
-pool; if it cannot allocate a future, create a thread, support concurrency, or
-stay within a configured limit, it returns `error.ConcurrencyUnavailable`
-instead of executing the task inline.
+`Threaded.async` executes inline when dispatch capacity, allocation, or thread creation cannot support deferred execution.
+`Threaded.concurrent` returns `error.ConcurrencyUnavailable` when it cannot provide concurrency.
+The [[io-threaded|implementation guide]] owns the limit defaults, shared worker accounting, and allocation details.
 
 ## The sleeping-timeout trap
 

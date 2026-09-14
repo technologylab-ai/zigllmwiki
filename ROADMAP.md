@@ -281,6 +281,10 @@ hybrid search when thresholds fail or real agent queries demonstrate misses.
 
 ## Research queue
 
+- [Bounded review 34105239480](reports/curation-review-34105239480-1.md) clarified shared Threaded dispatch capacity from exact Zig 0.16.0 source.
+  Existing zero-capacity tests do not exercise mixed async/concurrent saturation or dispatch with idle threads above a limit.
+  A focused proof extension requires a separately authorized code pass; no runner is assigned.
+  Existing milestone statuses remain unchanged.
 - Implemented the Queue/Select follow-ups from
   [bounded review 33921176578](reports/curation-review-33921176578-1.md):
   zero-minimum contention, partial-transfer cancellation and re-armed fast

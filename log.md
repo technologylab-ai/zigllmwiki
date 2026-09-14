@@ -1272,3 +1272,23 @@ Both packets matched all 260 frozen input hashes.
 Mac released its reservation at 16:42:17 UTC; Linux released its reservation at 16:42:21 UTC.
 The parent reviewed the source and synthesis before publication.
 Exact published-commit results will remain in `.zig-cache/windows-shards-publication/summary.json` in the ingestion worktree.
+
+
+## 2026-09-14 — Bounded scheduling review 34105239480, attempt 1
+
+Reviewed the authenticated packet for base `a48ddf3ce6d956b4f7e1e0db6a7a31e403c0d27f` and two scheduling pages.
+The [bounded report](reports/curation-review-34105239480-1.md) records exact packet, compiler, source, and proof identities.
+Installed Zig 0.16.0 source confirms shared worker accounting across async and concurrent dispatch.
+[[io-threaded]] now describes that boundary and the failed CPU-detection default.
+[[async-vs-concurrent]] links the implementation guide and removes duplicate limit descriptions.
+Existing zero-capacity proofs do not establish mixed-dispatch runtime behavior; ROADMAP.md records the separate proof opportunity.
+Source records, proofs, Zig version, page statuses, and milestone statuses remain unchanged.
+
+Structural lint passed with zero issues across 51 pages and 84 sources.
+All 25 retrieval cases passed policy: MRR 0.98, hit@3 1.0, and recall@5 0.96.
+The graph reports 50 strong pages, 507 directed edges, and no orphans, weak pages, or connected-band pages.
+Those mechanical counts do not certify uninspected guidance.
+The sandbox blocked process inspection, so the runbook's existing-workload check could not precede a local runtime suite.
+No reservation or runtime suite started; `zig build verify` remains pending with the caller.
+The packet's successful Linux gate applies to the reviewed base, not these edits.
+The pass performed no M4 work, remote execution, subagent delegation, or publication.

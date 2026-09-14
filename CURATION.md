@@ -30,6 +30,16 @@ The official Zig 0.16 release notes are fully inventoried by named section in
 roadmap destination; it does not copy the release notes or claim that queued
 topics have already been synthesized.
 
+## Bounded dispatch review — 2026-09-14
+
+[Review 34105239480, attempt 1](reports/curation-review-34105239480-1.md) inspects two scheduling pages and their focused evidence.
+The installed Zig 0.16.0 source confirms shared worker accounting across async and concurrent dispatch.
+[[io-threaded]] now states that boundary; [[async-vs-concurrent]] links the implementation details without duplicating them.
+The existing standard-library record supplies the evidence; no new source capture was needed.
+Existing proof coverage does not establish mixed-dispatch behavior at runtime.
+Structural lint and retrieval policy passed; local runtime verification remains pending because sandbox restrictions prevent host workload inspection.
+The pass adds no runtime status or milestone promotion.
+
 ## Windows HTTP shard handoff — 2026-09-06
 
 [[bounded-http-windows-shards-2026-09-06]] pins the qualified feature and its identical-tree merge before synthesis.
