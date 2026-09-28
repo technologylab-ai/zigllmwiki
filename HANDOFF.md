@@ -1,4 +1,16 @@
-# Project handoff — 2026-09-06
+# Project handoff — 2026-09-28
+
+## Bounded curation review — 2026-09-28
+
+[Review 35585801744, attempt 1](reports/curation-review-35585801744-1.md) inspects Threaded dispatch at base `a48ddf3ce6d956b4f7e1e0db6a7a31e403c0d27f`.
+The installed compiler reports exact Zig 0.16.0.
+[[io-threaded]] now explains shared admission accounting and allocation before the limit check.
+[[async-vs-concurrent]] routes implementation details to that guide and removes duplicated limit descriptions.
+The index exposes the capacity and allocation questions.
+Mixed-dispatch, idle-worker, limit-change, and allocator-count cases remain source evidence, without new runtime claims.
+The report records local checks, the verification blocker, and the exact inspected scope.
+The caller owns independent trusted gates and publication.
+All earlier checkpoints below retain their original dates and evidence limits.
 
 ## Windows HTTP shard handoff checkpoint
 

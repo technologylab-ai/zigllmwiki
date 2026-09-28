@@ -1272,3 +1272,27 @@ Both packets matched all 260 frozen input hashes.
 Mac released its reservation at 16:42:17 UTC; Linux released its reservation at 16:42:21 UTC.
 The parent reviewed the source and synthesis before publication.
 Exact published-commit results will remain in `.zig-cache/windows-shards-publication/summary.json` in the ingestion worktree.
+
+## 2026-09-28 — Bounded Threaded dispatch review
+
+Reviewed the authenticated packet for run `35585801744`, attempt `1`, at base `a48ddf3ce6d956b4f7e1e0db6a7a31e403c0d27f`.
+The installed compiler reports Zig 0.16.0.
+[The review report](reports/curation-review-35585801744-1.md) records inspected pages, source identities, findings, and exclusions.
+The pass checked two dispatch pages, four source records, one proof, and two adjacent pages for context.
+Upstream-head differences supplied inspection prompts without establishing stale guidance.
+
+[[io-threaded]] now explains the shared dispatch counter and allocation before admission checks.
+The guide distinguishes source conclusions from the existing zero-limit proof's runtime coverage.
+[[async-vs-concurrent]] links directly to the implementation guide and removes repeated limit descriptions.
+The index exposes shared capacity and allocation order.
+The roadmap records unassigned proof follow-up; the handoff records caller-owned validation.
+No new source record, executable change, or runtime promotion was made.
+
+The retrieval policy passed all 25 reviewed queries with MRR 0.98, hit@3 1.0, and recall@5 0.96.
+Structural lint passed with zero issues across 51 pages and 84 source records.
+The graph retains 50 strong pages and 507 directed edges; those counts do not establish semantic correctness.
+Diff and scope checks passed for seven changed files within the 24-file and 1 MiB limits.
+The sandbox denied process inspection required before the shared-host runtime suite.
+Therefore `zig build verify` was not started; the report records the exact preflight errors.
+The caller owns the full trusted gate and publication.
+No M4 work, subagent, remote runner, commit, push, PR, or external message occurred.

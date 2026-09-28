@@ -5,7 +5,7 @@ kind: map
 status: draft
 zig: "0.16.0"
 summary: Retrieval map for current Zig systems programming, std.Io, TigerStyle, and platform I/O.
-updated: 2026-09-06
+updated: 2026-09-28
 sources: []
 proofs: []
 platforms:
@@ -32,8 +32,8 @@ Read this page first, then follow only the pages needed for the task.
   root and thread narrower I/O, allocation, configuration, and authority into
   components.
 - [[std-io]] — the explicit I/O capability and implementation landscape.
-- [[io-threaded]] — how the production Zig 0.16 implementation schedules and
-  cancels blocking work.
+- [[io-threaded]] — how Zig 0.16 Threaded shares dispatch capacity, allocates
+  before admission, and cancels supported blocking calls.
 - [[async-vs-concurrent]] — the scheduling distinction most likely to produce
   subtly wrong code.
 - [[cancellation]] — request/acknowledgement, ownership, shutdown, and crash
