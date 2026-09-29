@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Consume a trusted wiki-review packet with local Codex; optionally publish a draft PR."""
+"""Consume a trusted wiki-review packet with local Codex; optionally publish and merge a PR."""
 from __future__ import annotations
 
 import argparse
@@ -321,27 +321,43 @@ def consume(args: argparse.Namespace) -> dict[str, Any]:
 
 See `reports/curation-review-{run_id}-{attempt}.md` for inspected evidence, changes and remaining gaps.
 
-Validation: exact Zig {baseline} full local verifier, command/consumer tests, retrieval policy, immutable-source and append-only-log checks. These local gates do not create new cross-platform runtime evidence. Draft PR; no automatic merge.
+Validation: exact Zig {baseline} full local verifier, command/consumer tests, retrieval policy, immutable-source and append-only-log checks. These local gates do not create new cross-platform runtime evidence. The curator merges this PR after these gates; the PR is the record.
 ''')
             pr_command = ['gh', 'pr', 'create', '--repo', REPOSITORY,
-                          '--base', 'main', '--head', branch, '--draft',
+                          '--base', 'main', '--head', branch,
                           '--title', f'Curate wiki review {run_id}', '--body-file', str(body)]
             result['status'] = 'push-pending'
-            result['draft_pr_command'] = pr_command
+            result['pr_command'] = pr_command
             (state / 'result.json').write_text(json.dumps(result, indent=2) + '\n')
             run(['git', 'push', 'origin', f'HEAD:refs/heads/{branch}'], cwd=worktree)
             result['status'] = 'branch-pushed-pr-pending'
             result['branch_pushed'] = True
             (state / 'result.json').write_text(json.dumps(result, indent=2) + '\n')
             result['pull_request'] = run(pr_command, cwd=worktree).strip()
-            result['status'] = 'draft-pr-opened'
+            result['status'] = 'pr-opened'
+            (state / 'result.json').write_text(json.dumps(result, indent=2) + '\n')
+            # Merge at once: unmerged curation PRs only pile up, and main would
+            # stay on the reviewed commit, so the next pass curates it again.
+            # Only this exact commit is merged. The branch goes afterwards;
+            # the PR keeps the record.
+            run(['gh', 'pr', 'merge', result['pull_request'], '--repo', REPOSITORY, '--merge',
+                 '--match-head-commit', result['commit']], cwd=ROOT)
+            result['status'] = 'merged'
+            try:
+                run(['gh', 'api', '-X', 'DELETE', f'repos/{REPOSITORY}/git/refs/heads/{branch}'], cwd=ROOT)
+            except ReviewError:
+                result['branch_left'] = branch  # harmless: the PR is merged
         (state / 'result.json').write_text(json.dumps(result, indent=2) + '\n')
         return result
     except BaseException as error:
-        if result.get('branch_pushed'):
+        if result.get('status') == 'pr-opened':
+            result['status'] = 'pr-opened-merge-failed'
+            result['recovery'] = ('The PR is open and verified. Merge it after a look, or close it; '
+                                  'do not rerun the agent for the same review.')
+        elif result.get('branch_pushed'):
             result['status'] = 'branch-pushed-pr-pending'
             result['recovery'] = ('Check for an existing PR for the recorded branch; if absent, '
-                                  'retry draft_pr_command. Do not rerun the agent or replace '
+                                  'retry pr_command. Do not rerun the agent or replace '
                                   'the published branch.')
         elif result.get('status') == 'push-pending':
             result['status'] = 'push-outcome-unknown'
@@ -361,7 +377,7 @@ def main() -> int:
     source = parser.add_mutually_exclusive_group(required=True)
     source.add_argument('--run-id', type=int)
     source.add_argument('--latest', action='store_true')
-    parser.add_argument('--publish', action='store_true', help='push a branch and open a draft PR')
+    parser.add_argument('--publish', action='store_true', help='push a branch, open a PR and merge it')
     parser.add_argument('--state-dir', type=Path, default=ROOT / '.zig-cache' / 'curation')
     parser.add_argument('--timeout-seconds', type=int, default=1800)
     args = parser.parse_args()

@@ -3,7 +3,8 @@
 The weekly `wiki-review.yml` workflow remains read-only. It supplies test logs,
 source-head/release signals and retrieval results. `tools/curate_review.py`
 connects that packet to a separately invoked local Codex agent and uses `gh`
-for GitHub access and draft-PR publication. It never merges a PR.
+for GitHub access and PR publication. After its gates pass, it merges its own
+PR; the PR stays as the record.
 
 ## Run one pass
 
@@ -26,8 +27,8 @@ Or use `--latest` to select a successful packet for the current publication
 revision. Without `--publish`, the tool still invokes the agent and verifies
 its proposal, but retains the staged edits locally. The invocation is the
 agent's curation authorization; `--publish` additionally authorizes the branch
-push and draft PR. These flags do not grant source upgrades, proof changes,
-new runtime claims or automatic merging.
+push, the PR and its merge. These flags do not grant source upgrades, proof
+changes or new runtime claims.
 
 ## Scope and ownership
 
@@ -54,8 +55,12 @@ The caller reruns the full exact-Zig verifier, Python command/consumer tests,
 and retrieval policy after checking the diff. It checks content again after
 verification, then commits and pushes a unique `curation/review-RUN-ATTEMPT`
 branch. `main` must still match the reviewed commit. Existing PRs make repeat
-invocations idempotent, and no force-push is used. A draft PR is the reviewable
-result, not a declaration of new platform evidence.
+invocations idempotent, and no force-push is used. The curator then merges the
+PR, only at the commit it verified (`gh pr merge --match-head-commit`), and
+deletes the branch. The PR is the reviewable record, not a declaration of new
+platform evidence. Merging at once keeps unmerged curation PRs from piling up:
+while a pass stays unmerged, `main` does not move, and the next weekly pass
+curates the same reviewed commit again.
 
 ## Limits and recovery
 
@@ -64,7 +69,9 @@ to two hours); each verifier gate has 15 minutes. On POSIX, agent timeout kills
 its process group. Logs, the input prompt, packet hashes, proposal and failure
 reason stay in the state directory for inspection. A failure before publication leaves the proposal unpushed. If the push
 succeeds but PR creation fails, the result records that partial publication
-and the exact recovery command; do not rerun the agent merely to create the PR. An interrupted run is not automatically retried in the same directory;
+and the exact recovery command; do not rerun the agent merely to create the PR.
+If the merge fails, for example on a conflict, the PR stays open and the
+result says so (`pr-opened-merge-failed`); merge or close it by hand. An interrupted run is not automatically retried in the same directory;
 inspect it before using a new `--state-dir` to retry. Simultaneous calls on one
 host cannot create the same state directory; across hosts, unique branch/PR
 identity and non-forced publication expose conflicts.

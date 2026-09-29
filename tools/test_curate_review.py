@@ -188,7 +188,8 @@ class CurateReviewTests(unittest.TestCase):
                 self.assertEqual(result['status'], expected)
                 self.assertEqual(result['commit'], 'b' * 40)
                 self.assertIn('recovery', result)
-                self.assertEqual(result['draft_pr_command'][:3], ['gh', 'pr', 'create'])
+                self.assertEqual(result['pr_command'][:3], ['gh', 'pr', 'create'])
+                self.assertNotIn('--draft', result['pr_command'])
 
     def test_latest_without_current_packet_waits_without_agent_or_state(self):
         args = Namespace(latest=True, run_id=None)
