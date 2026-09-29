@@ -281,6 +281,9 @@ hybrid search when thresholds fail or real agent queries demonstrate misses.
 
 ## Research queue
 
+- [Bounded review 35585801744](reports/curation-review-35585801744-1.md) clarifies Threaded's shared dispatch counter and allocation before admission.
+  Mixed-dispatch, idle-worker, limit-change, and allocator-count proofs require separate authorization.
+  Those cases remain source evidence; no agent is assigned to the proof work.
 - Implemented the Queue/Select follow-ups from
   [bounded review 33921176578](reports/curation-review-33921176578-1.md):
   zero-minimum contention, partial-transfer cancellation and re-armed fast
