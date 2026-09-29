@@ -21,8 +21,11 @@ def main() -> int:
     args = parser.parse_args()
     environment = os.environ.copy()
     environment['PYTHONDONTWRITEBYTECODE'] = '1'
-    # The local script may run from an isolated deployment clone. It never
-    # resets either authoring checkout. The consumer makes its own work clone.
+    # The local script may run from an isolated deployment clone. The Mac is
+    # the preferred host, so its authoring checkout follows main: when it is
+    # clean, on main and has no commits of its own, it is fast-forwarded.
+    # Nothing is ever reset; a checkout with local work stays as it is and the
+    # pass runs locally. The consumer makes its own work clone.
     if sys.platform == 'linux' and not args.local_only:
         ssh = ['ssh', '-o', 'BatchMode=yes', '-o', 'ConnectTimeout=5',
                '-o', 'ConnectionAttempts=1', '-o', 'ServerAliveInterval=15',
@@ -30,7 +33,9 @@ def main() -> int:
         probe = (f'export PATH={shlex.quote(MAC_PATH)}; '
                  f'cd {shlex.quote(args.mac_root)} && '
                  'test -z "$(git status --porcelain)" && '
+                 'test "$(git symbolic-ref --quiet --short HEAD)" = main && '
                  'git fetch origin main --quiet && '
+                 'git merge --ff-only --quiet origin/main && '
                  'test "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" && '
                  'command -v codex >/dev/null && command -v zig >/dev/null && '
                  'command -v gh >/dev/null && test -f tools/curate_review.py')

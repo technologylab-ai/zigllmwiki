@@ -537,8 +537,8 @@ Units are under `~/.config/systemd/user/zig-wiki-curation.*`; their dedicated
 runner clone is `~/.local/state/zigllmwiki-curator/runner`. The timer is waiting,
 not a continuously running agent. Service routing, successful publication and
 idempotent Linux fallback were tested; the service is inactive after success.
-The wrapper prefers an available clean/current maxross checkout, otherwise
-runs locally; once an agent starts remotely it never launches a second fallback
+The wrapper prefers an available clean maxross checkout on `main`, which it
+fast-forwards to `origin/main` first, otherwise runs locally; once an agent starts remotely it never launches a second fallback
 agent on failure. No current successful review packet produces an idle result.
 
 ## Verification checkpoints

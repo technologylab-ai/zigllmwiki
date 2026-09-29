@@ -91,7 +91,10 @@ budget and serializes its own activations. It uses a dedicated clone at
 execution, preserving the user's authoring clone.
 
 `tools/curate_scheduled.py` prefers `ssh maxross` when the Mac's checkout is
-clean/current and its tools are available. A bounded probe and SSH keepalives
+clean and on `main` and its tools are available. The probe fast-forwards that
+checkout to `origin/main` first (`git merge --ff-only`), so the Mac stays the
+host while `main` moves every week. It never resets the checkout: with local
+commits or changes, the fast-forward fails and the pass runs locally. A bounded probe and SSH keepalives
 prevent an unavailable Mac from stalling host selection. If that probe fails,
 it runs locally on `omarx1`. Once a remote agent starts, a failure is reported
 without launching a second local agent; inspect the retained remote state.
