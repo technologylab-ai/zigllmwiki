@@ -526,10 +526,10 @@ ARM64 baseline and runs ARM64 PE executables. The native ARM compiler crashed
 during compilation; that separate opt-in diagnostic remains an explicit limit.
 
 The weekly/manual GitHub review stays read-only. The separate local consumer
-uses `gh` for GitHub packets/branches/draft PRs and the authenticated Codex CLI
+uses `gh` for GitHub packets, branches and PRs and the authenticated Codex CLI
 for semantic curation. It uses an isolated clone, bounded Markdown edits,
 immutable-source/append-only-log checks, independent exact-Zig/Python/retrieval
-gates, and no automatic merge. See [agent curation](docs/agent-curation.md).
+gates, then merges its own PR at the verified commit. See [agent curation](docs/agent-curation.md).
 
 On omarx1 the user-systemd timer is installed and enabled for Mondays at
 05:17 UTC, with `Persistent=true`; the preexisting user manager has Linger=yes.
