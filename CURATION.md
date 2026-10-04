@@ -30,6 +30,16 @@ The official Zig 0.16 release notes are fully inventoried by named section in
 roadmap destination; it does not copy the release notes or claim that queued
 topics have already been synthesized.
 
+## Omajot compiler upgrade and final Baz integration — 2026-10-04
+
+[[omajot-zig-0.17-2026-10-04]] captures 695 files and immutable project revisions.
+The migration guide now includes current-main integration, embedded assets, Unicode changes, and native path checks.
+Direct dependency tests exposed a pre-existing borrowed-slice defect outside libvaxis's selected scalar table.
+The original Safe failure and passing isolated repair remain separately identified.
+Image fixtures, partial GIF coverage, and big-endian limits retain their exact scope.
+Five application PRs merged with qualified-tree equality; all earlier captures remain unchanged.
+The maintained wiki proof graph is unchanged by this ingest.
+
 ## Windows HTTP shard handoff — 2026-09-06
 
 [[bounded-http-windows-shards-2026-09-06]] pins the qualified feature and its identical-tree merge before synthesis.

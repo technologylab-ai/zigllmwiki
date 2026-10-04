@@ -1346,3 +1346,25 @@ Positive proof executions reused their exact-input caches in the final documenta
 The tracked 206-document site had passed before this final source ingest.
 All owned host reservations and children were cleaned.
 The five repository ports remain draft PRs; no merge or application performance comparison is claimed.
+
+## 2026-10-04 — Omajot upgrade and completed application merges
+
+Captured [[omajot-zig-0.17-2026-10-04]] before updating current migration guidance.
+The new immutable packet preserves 695 files; all earlier captures retain their original bytes.
+Baz now integrates current main and passes fresh native and hosted gates at its resulting revision.
+Omajot passed native omarx1 correctness, WASM/Qt/web, CLI/sync, TUI, browser, and package-consumer gates.
+Hosted Linux/macOS/Windows passed both modes at its final port revision.
+Current README, site, build, package, and workflow guidance now targets exact 0.17.
+Historical 0.16 spike and size evidence remains dated.
+
+Direct libvaxis and image tests passed with explicitly recorded skips and corpus limits.
+Uucode's unmodified Debug suite passed 167 tests; Safe failed one optional casing test.
+Source comparison identifies a pre-existing escaped embedded-slice borrow, outside the consumed scalar graph.
+An isolated static-row diagnostic repair passed all 167 tests in both modes.
+The original failed suite remains failed in the evidence record.
+The guide includes dependency-mode testing, Unicode behavior, asset packaging, and native separator lessons.
+
+Five application PRs merged with merge commits and qualified-tree equality.
+The ordinary wiki proof inputs remain unchanged by this content ingest.
+The experimental full Windows ARM64 gate remains deferred.
+No intentional crash reproduction or application performance comparison ran.

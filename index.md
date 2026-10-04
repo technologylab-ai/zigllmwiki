@@ -25,7 +25,7 @@ Read this page first, then follow only the pages needed for the task.
 - [[zig-0.17-baseline]] — active version, evidence standard, and upgrade rule.
 - [[zig-0.16-baseline]] — historical baseline and its dated evidence boundary.
 - [[zig-0.17-upgrade-assessment]] — explicit dependency upgrades, logical-bit casts,
-  reflection, package fetching, test budgets, and native port evidence.
+  reflection, embedded assets, Unicode, ownership defects, test budgets, and native port evidence.
 - [[zig-0.16-release-inventory]] — every named 0.16 release-note topic routed
   to current guidance, a numbered roadmap item, a watch, or an explicit
   out-of-scope decision.

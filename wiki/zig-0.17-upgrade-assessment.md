@@ -11,6 +11,7 @@ sources:
   - "[[zig-0.17.0-stdlib]]"
   - "[[zig-0.17-project-ports-2026-10-04]]"
   - "[[zig-0.17-final-verification-2026-10-04]]"
+  - "[[omajot-zig-0.17-2026-10-04]]"
 proofs:
   - proofs/zig_017_semantics.zig
 platforms:
@@ -22,7 +23,7 @@ platforms:
 ## Remember
 
 Read the [migration guide](../docs/zig-0.16-to-0.17-migration.md) before porting a complete dependency graph.
-The guide incorporates the Baz, [bounded/http](https://technologylab-ai.github.io/bounded-http/), Mustache, and zli ports.
+The guide incorporates the Baz, [bounded/http](https://technologylab-ai.github.io/bounded-http/), Mustache, zli, and Omajot ports.
 The wiki's active baseline is [[zig-0.17-baseline]].
 The upgrade invalidates prior labels before requalifying current pages and proofs.
 
@@ -34,6 +35,8 @@ The upgrade invalidates prior labels before requalifying current pages and proof
 - Update build APIs, final dependency pins, and machine-readable optimization tags.
 - Separate request deadlines from idle limits and test watchdogs.
 - Recheck infinite-sleep semantics and distinguish experimental std.Io backend blockers from OS adapters.
+- Fetch current main before qualifying consumers, and preserve embedded package assets.
+- Run direct dependency suites; inspect Unicode changes, fixture skips, and escaped borrowed slices.
 - Record native verification and excluded historical dependency samples.
 
 [[zig-0.17.0-stdlib]] provides exact compiler and library semantics.
@@ -41,6 +44,9 @@ The upgrade invalidates prior labels before requalifying current pages and proof
 [[zig-0.17-project-ports-2026-10-04]] provides project revisions and verification limits.
 [[zig-0.17-final-verification-2026-10-04]] closes final application and ordinary wiki gates.
 The experimental full ARM64 Windows gate is deferred; its narrower standalone probes remain separate.
+
+[[omajot-zig-0.17-2026-10-04]] adds final Baz integration and Omajot native qualification.
+Its separate helper diagnosis records an optional casing lifetime defect outside the consumed scalar table.
 
 ## Related active guidance
 

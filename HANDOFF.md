@@ -1,6 +1,27 @@
 # Project handoff — Zig 0.17 upgrade, 2026-10-04
 
-## Completed upgrade checkpoint
+## Omajot and completed application merges — 2026-10-04
+
+[[omajot-zig-0.17-2026-10-04]] adds the final consumer and dependency evidence.
+Baz's current-main integration retains route deadlines and optional libc linkage.
+Native omarx1 gates passed 251 Baz tests, five consumer tests, and 556 Python groups.
+Omajot passed its complete native/WASM graph, Qt, web, CLI, sync, TUI, and browser gates.
+Final hosted Linux/macOS/Windows checks passed for both projects.
+Direct libvaxis and image gates passed in Debug/Safe with their recorded skips and fixture limits.
+The unmodified broader uucode Safe suite failed one optional casing test.
+An isolated static-row repair passed all 167 tests in both modes.
+Libvaxis's consumed four scalar fields exclude that pre-existing lifetime defect.
+The published dependency graph remains on audited upstream pins.
+
+Engine, Mustache, zli, Baz, and Omajot PRs are merged.
+The source record preserves merge commits and qualified-tree equality.
+[Wiki integration PR #6](https://github.com/technologylab-ai/zigllmwiki/pull/6) includes this final ingest.
+The new source packet preserves 695 files; earlier captures remain byte-identical.
+No application performance comparison or deliberate crash reproduction ran.
+The experimental Windows ARM64 full gate remains deferred.
+Use exact 0.17 through the task PATH; the omarx1 system default stays 0.16.
+
+## Earlier compiler upgrade checkpoint
 
 The user explicitly authorized the full wiki upgrade after the Baz dependency ports.
 The active compiler is exact Zig 0.17.0.

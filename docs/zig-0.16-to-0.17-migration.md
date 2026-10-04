@@ -1,7 +1,8 @@
 # Migrate Zig 0.16.0 projects to 0.17.0
 
 This guide records the Baz dependency migration performed on 2026-10-04.
-It covers Baz, [bounded/http](https://technologylab-ai.github.io/bounded-http/), Mustache, and zli.
+It covers Baz, [bounded/http](https://technologylab-ai.github.io/bounded-http/), Mustache, zli, and Omajot.
+Omajot adds libvaxis, zigimg, and uucode dependency findings.
 The wiki's active compiler and maintained proofs now target **0.17.0**.
 Use this guide for an explicit project upgrade to **0.17.0**.
 
@@ -10,7 +11,8 @@ Read the [release notes](https://ziglang.org/download/0.17.0/release-notes.html)
 The pinned [source record](../sources/zig-0.17.0-stdlib.md) identifies the release commit and inspected files.
 The [project evidence record](../sources/zig-0.17-project-ports-2026-10-04.md) identifies revisions, gates, and limits.
 The [final verification record](../sources/zig-0.17-final-verification-2026-10-04.md)
-closes the application and ordinary wiki gates, with the experimental full ARM64 gate deferred.
+closes the initial application and ordinary wiki gates, with the experimental full ARM64 gate deferred.
+The [Omajot follow-up record](../sources/omajot-zig-0.17-2026-10-04.md) adds final Baz integration and consumer evidence.
 
 ## Port the complete dependency graph
 
@@ -211,6 +213,148 @@ Quarantine only the cache files your task created if you reproduce this issue.
 Keep the original archive entries and failure log for diagnosis.
 Do not weaken or replace correct package hashes to accept the malformed cache.
 
+## Preserve current upstream behavior before porting
+
+Fetch current main before creating upgrade branches.
+Compare it with the local base and each consumer's pinned revision.
+A compiler port from an old main can pass tests while losing existing features.
+The first Baz port started from `2258ff87`; Omajot already consumed `c7d489a2`.
+That newer revision added route deadlines and removed forced libc linkage.
+Omajot's native executable failed because the initial port lacked `RouteOptions.timeout_ms`.
+Baz `55099ec6` integrates current main with the compiler port.
+Qualify that merged revision with new gates.
+Keep earlier receipts attached to their original revisions.
+
+## Review dependency upgrades for behavior changes
+
+Prefer a tested upstream compatibility revision that preserves the required APIs.
+Pin its commit and complete dependency graph.
+A moving compatibility branch is insufficient.
+Omajot selects libvaxis `6fd944a2`, zigimg `c701c9f9`, and uucode `ea621497`.
+The separately inspected uucode `1fb73433` changes compiler metadata but has identical source files and Unicode inputs.
+Retain libvaxis's published graph unless evidence requires a dependency fork.
+
+Deprecated spellings alone do not prove an incompatible dependency.
+Exact 0.17 source still supports `std.builtin` aliases, `OptimizeMode`, and uppercase optimization constants.
+Inspect their definitions and compile the selected package before replacing them.
+
+The uucode update also moves its Unicode data from 17 to 18.
+Changes include Indic-conjunct/emoji grapheme state, codepoint widths, and default versus Turkic case folding.
+The update also fixes typed packed/signed table initialization and generator input tracking.
+These changes affect TUI cursor movement, deletion, wrapping, and width calculations.
+Omajot's replication core still uses UTF-8, UTF-16 positions, `std.unicode`, and JSON.
+Run the dependency's oracle suites and the application's native TUI tests.
+A successful compile does not qualify Unicode behavior.
+Keep their results separately scoped.
+
+Uucode's generated `[N]int` to `[N]packed Row` cast preserves logical bits and row indices.
+Zigimg's SIMD mask intentionally maps lane zero to bit zero for `@ctz`.
+Zigimg replaces selected extern-structure casts with field assignments.
+Its TGA encoder retains explicit little-endian scalar conversions.
+A separate source audit found native-endian SIMD loads in its existing encoder.
+That mismatch remains a big-endian portability limit.
+Little-endian native gates do not qualify big-endian encoding.
+Retain independent expected-value, lane, and format oracles for these cases.
+
+## Run dependency suites explicitly
+
+Libvaxis's test step does not invoke uucode's or zigimg's test steps.
+Its upstream CI runs libvaxis tests in default Debug mode.
+Run each dependency's own test step with the exact compiler.
+Run Debug and Safe correctness gates separately.
+
+Uucode commits its Unicode 18 corpus, including `GraphemeBreakTest.txt`.
+Its test step registers separate library, generator, config, storage, and build-script test binaries.
+Do not fetch replacement UCD data during qualification.
+Its grapheme tests intentionally tailor emoji-modifier boundaries.
+Report upstream corpus coverage with that documented tailoring.
+Do not claim unqualified strict UAX #29 conformance.
+Uucode fixes its generator and generator-test module to Debug, including top-level Safe runs.
+Record that limitation without presenting generation timings as performance evidence.
+
+
+### Review lifetime failures before blaming cast semantics
+
+Uucode's separate Debug suite passed all 167 tests.
+Its unmodified Safe suite failed the Greek final-sigma condition test: 166/167 passed.
+The generated table contained the correct value.
+The getter copied that table row into a local value.
+An embedded slice then escaped into the caller after the local storage expired.
+The same getter and storage path existed in Omajot's older dependency pin.
+This finding identifies a pre-existing ownership defect, rather than changed `@bitCast` semantics.
+
+Libvaxis generates only four scalar Unicode fields in this graph.
+Those fields exclude the affected casing helper and other embedded-slice getters.
+Keep that boundary explicit when qualifying the application.
+Never report the whole unmodified helper suite as passing Safe.
+A separate diagnostic repair borrows static table rows instead of local copies.
+Its receipts identify the patch separately from the published dependency graph.
+
+Zigimg needs a separate fixture checkout beside its source checkout.
+Its tests read `../test-suite/fixtures/`.
+The selected fixture commit is `072fcaa45201a6c48d65a741881b8f3eab77412e` from `zigimg/test-suite`.
+Its immutable archive is:
+
+```text
+https://github.com/zigimg/test-suite/archive/072fcaa45201a6c48d65a741881b8f3eab77412e.tar.gz
+```
+
+Record fixture hashes before and after testing.
+Missing image files can silently skip tests.
+Missing PNG corpus directories can pass without examining images.
+Missing PNG reference files generate new references from actual decoder output.
+Require existing references and capture actual traversal and skips.
+The selected fixture tree includes references for all 168 valid PNG inputs.
+This inventory is not a count of executed tests.
+
+The selected zigimg GIF corpus loops omit newline consumption after `takeDelimiterExclusive`.
+Each loop therefore reads only the first of 79 fixture-list entries.
+Dedicated GIF tests remain available, but a passing suite cannot establish complete GIF corpus coverage.
+Zigimg's selected CI workflow still requests Zig 0.16 and floating fixtures.
+Keep direct 0.17 results separate from that upstream CI configuration.
+
+## Track and package embedded assets
+
+Use `b.root.openDir` for directories beneath a build root.
+The root is a `Cache.Path`; preserve its `sub_path` when another build consumes the package.
+Keeping only the underlying directory handle loses that package location.
+Omajot's removed `b.build_root.handle` access required this distinction.
+
+A configuration-time directory walker must declare `b.dependOnDirectoryContents(b.path("web/dist"))`.
+Copy path bytes with `b.allocator.dupe(u8, entry.path)` before normalizing separators.
+`b.dupe` returns immutable bytes in this release.
+Keep lazy file dependencies for embedded asset content.
+Include the directory in the package's `.paths`.
+Omajot previously omitted `web/dist` despite reading it during build configuration.
+Verify the immutable published package from a separate consumer.
+That consumer can exercise Omajot's full native/WASM verification graph.
+Check fetched assets against committed bytes and record the executed gate's result.
+
+Rebuild committed WASM before rebuilding the native binary that embeds it.
+Omajot's Linux gate checks that the hub serves current WASM bytes without a filesystem override.
+The unchanged result protocol explicitly encodes a little-endian `u32` length.
+JavaScript reads it with `DataView.getUint32(..., true)`.
+Do not replace that wire contract with a logical cast.
+
+An optional dependency can participate in build-script configuration when its feature is disabled.
+The first Omajot `-Dtui=false` attempt encountered the old libvaxis build script's reflection API.
+Audit dependency configuration as well as the selected executable imports.
+
+## Qualify platform paths and linking
+
+Keep checked-in text in LF form when a native Windows gate runs `zig fmt --check`.
+Omajot's first Windows checkout converted Zig files to CRLF.
+Formatting failed despite successful compilation.
+A tracked `* text=auto eol=lf` rule preserves canonical bytes across hosts.
+Its socket-path fixture also needed native Windows separator expectations.
+The fix changes expected paths; production path construction is unchanged.
+
+Do not infer libc-free linkage from `.link_libc = false` on the executable root.
+A dependency can require libc and propagate that requirement.
+Libvaxis does so in this graph; Omajot's Linux build is a static musl binary.
+Keep historical size measurements dated.
+Measure the new compiler separately before making new size or performance claims.
+
 ## Keep test budgets separate
 
 Distinguish the server request deadline, idle timeout, client timeout, and harness watchdog.
@@ -297,7 +441,8 @@ Cross-compilation remains separate from runtime evidence.
 
 Mustache's optional compile-time suite remains disabled in its established build configuration.
 Five historical sample/benchmark Zig files remain outside its exported package and verification graph.
-This migration covers the dependency graph consumed by Baz.
+This migration covers the dependency graphs consumed by Baz and Omajot.
+Separate helper failures and excluded fixture coverage retain their stated limits.
 It does not claim those excluded historical programs were ported.
 The engine's preserved benchmark preparation recipe also remains a historical
 0.16 reproducer outside the exported graph. Use an archived engine commit whose

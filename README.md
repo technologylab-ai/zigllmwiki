@@ -35,7 +35,7 @@ The active baseline is Zig 0.17.0, upgraded on 2026-10-04.
 Dated Zig 0.16 source records and runtime receipts preserve their original scope.
 
 The [Zig 0.16 to 0.17 migration guide](docs/zig-0.16-to-0.17-migration.md)
-records the Baz dependency ports, semantic traps, and native verification limits.
+records the Baz and Omajot dependency ports, semantic traps, and native verification limits.
 The upgrade ports current proofs and invalidates earlier verification labels before requalification.
 Default verification uses Debug for correctness proofs and ReleaseSafe for the timed fixture.
 The guide records the separate 0.16 ReleaseSafe macOS Dispatch baseline failure.

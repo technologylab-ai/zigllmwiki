@@ -27,9 +27,12 @@ Prior verification labels are invalidated before requalification.
 Full Debug/Safe Mac, Linux and Windows x64 gates passed, with retrieval/site checks.
 [[zig-0.17-final-verification-2026-10-04]] preserves final receipts and first failures.
 The user deferred the experimental ARM64 full gate; its separate Debug probes retain narrower scope.
+[[omajot-zig-0.17-2026-10-04]] adds consumer integration, dependency scope, and completed application merges.
+The broader helper casing defect remains separate from the qualified scalar dependency graph.
 Intentional Linux crash reproduction is opt-in and excluded from ordinary verification.
 The final evidence ingest passed structural, retrieval, workflow and full Mac verification checks.
-All five repository ports remain reviewable draft PRs.
+Five application ports are merged.
+The wiki integration lives in [PR #6](https://github.com/technologylab-ai/zigllmwiki/pull/6).
 Keep the shipped Dispatch/Uring/Kqueue compile blockers visible through their expected-error witnesses.
 Keep dated 0.16 platform receipts separate from current proof results.
 
@@ -314,7 +317,7 @@ hybrid search when thresholds fail or real agent queries demonstrate misses.
 - Completed the selected TigerBeetle storage/recovery/operations slice on
   2026-09-04 in [[durable-storage-and-recovery]], including focused implementation
   evidence. Future source selection remains question-driven; old Zig syntax
-  must not enter guidance without an exact 0.16 proof.
+  must not enter current guidance without an exact 0.17 proof.
 - Future deployment qualification can extend the three-platform matrix with
   workload-specific filesystem/device, cold-storage and durability evidence;
   Windows deployment work remains postponed. ARM64/WOW64 fixtures have named
