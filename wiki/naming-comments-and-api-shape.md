@@ -2,11 +2,12 @@
 id: naming-comments-and-api-shape
 title: TigerStyle naming, comments, and API shape
 kind: pattern
-status: source-verified
-zig: "0.16.0"
+status: draft
+zig: "0.17.0"
 summary: Make Zig systems code auditable through domain names, explicit options, callback order, top-down files, intentional comments, and a declared TigerStyle naming profile.
 updated: 2026-09-06
 sources:
+  - "[[zig-0.17.0-stdlib]]"
   - "[[source-tigerstyle]]"
   - "[[zig-0.16.0-style-guide]]"
   - "[[matklad-steering-zig-fmt]]"
@@ -34,8 +35,8 @@ APIs at their call sites to disguise the seam.
 
 | Layer | Guarantee or recommendation |
 | --- | --- |
-| Zig 0.16 compiler | Accepts identifiers and API shapes that obey the language grammar; it does not enforce the style guide. |
-| `zig fmt` 0.16.0 | Produces canonical whitespace and preserves supported layout cues; it does not choose names, comments, file order, API dimensions, or a hard line-length policy. |
+| Zig 0.17 compiler | Accepts identifiers and API shapes that obey the language grammar; it does not enforce the style guide. |
+| `zig fmt` 0.17.0 | Produces canonical whitespace and preserves supported layout cues; it does not choose names, comments, file order, API dimensions, or a hard line-length policy. |
 | Zig 0.16 style guide | Recommends namespace-aware, non-redundant names; casing by declaration kind; four-space indentation; and specific doc-comment vocabulary. |
 | Pinned TigerStyle | Adds stricter project rules for naming, API shape, callbacks, file order, comments, line length, and explicit call-site options. |
 
@@ -179,7 +180,7 @@ multi-line conditionals, and a single-line conditional only when its one
 statement fits on that line. Use trailing commas and deliberate expression
 boundaries to request readable wrapping; see [[steering-zig-fmt]].
 
-This repository runs Zig 0.16.0 formatting checks and separately rejects lines
+This repository runs Zig 0.17.0 formatting checks and separately rejects lines
 over 100 characters in maintained Zig sources. The separate check matters
 because the formatter's canonical output is not a promise to satisfy
 TigerStyle's hard limit.
@@ -206,7 +207,7 @@ and explicitly says those conventions are not compiler-enforced.
 The writing policy derives from the captured user instruction.
 The repository does not claim independently verified compliance with the complete ASD-STE100 standard.
 
-The [style fixture](../proofs/fmt_steering.zig) demonstrates a Zig 0.16.0 API
+The [style fixture](../proofs/fmt_steering.zig) demonstrates a Zig 0.17.0 API
 with same-typed and nullable choices in explicit options, positional unique
 dependencies, caller-prefixed callback naming, and the callback last. Its tests
 prove that the call preserves each named value and reaches the completion. The

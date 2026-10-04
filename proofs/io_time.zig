@@ -64,7 +64,39 @@ test "clock-tagged arithmetic and Timeout conversions retain their clock" {
         @as(?Io.Clock.Timestamp, null),
         no_timeout.toTimestamp(std.testing.io),
     );
-    try no_timeout.sleep(std.testing.io);
+    try std.testing.expectEqual(
+        @as(?Io.Clock.Duration, null),
+        no_timeout.toDurationFromNow(std.testing.io),
+    );
+    try std.testing.expectEqual(no_timeout, no_timeout.toDeadline(std.testing.io));
+}
+
+test "an infinite Timeout sleep delegates and propagates cancellation" {
+    // An infinite sleep has no success deadline. A deterministic backend
+    // witnesses the timeout and cancels without entering an OS sleep path.
+    // This interface proof does not qualify Threaded's infinite-sleep body.
+    const SleepOracle = struct {
+        calls: usize = 0,
+        observed: ?Io.Timeout = null,
+
+        fn sleep(userdata: ?*anyopaque, timeout: Io.Timeout) Io.Cancelable!void {
+            const oracle: *@This() = @ptrCast(@alignCast(userdata.?));
+            std.debug.assert(oracle.calls == 0);
+            oracle.calls += 1;
+            oracle.observed = timeout;
+            return error.Canceled;
+        }
+    };
+
+    var oracle: SleepOracle = .{};
+    var vtable = Io.failing.vtable.*;
+    vtable.sleep = SleepOracle.sleep;
+    const io: Io = .{ .userdata = &oracle, .vtable = &vtable };
+    const infinite: Io.Timeout = .none;
+
+    try std.testing.expectError(error.Canceled, infinite.sleep(io));
+    try std.testing.expectEqual(@as(usize, 1), oracle.calls);
+    try std.testing.expectEqual(infinite, oracle.observed.?);
 }
 
 test "one monotonic deadline survives elapsed work" {

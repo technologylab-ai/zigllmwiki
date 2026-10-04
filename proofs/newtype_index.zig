@@ -22,7 +22,7 @@ const Tree = struct {
     };
 
     fn get(tree: *const Tree, node: Node) Node.Data {
-        return tree.nodes[@intFromEnum(node)];
+        return tree.nodes[@backingInt(node)];
     }
 
     fn parent(tree: *const Tree, node: Node) ?Node {
@@ -33,10 +33,10 @@ const Tree = struct {
 
 test "non-exhaustive enum is a compact distinct index type" {
     const OtherIndex = enum(u32) { _ };
-    const node: Tree.Node = @enumFromInt(7);
-    const other: OtherIndex = @enumFromInt(7);
+    const node: Tree.Node = @fromBackingInt(7);
+    const other: OtherIndex = @fromBackingInt(7);
 
-    try std.testing.expectEqual(@as(u32, 7), @intFromEnum(node));
+    try std.testing.expectEqual(@as(u32, 7), @backingInt(node));
     try std.testing.expect(@TypeOf(node) != @TypeOf(other));
     try std.testing.expectEqual(@sizeOf(u32), @sizeOf(Tree.Node));
 }
@@ -55,5 +55,5 @@ test "the owning collection resolves an index" {
     const tree: Tree = .{ .nodes = &nodes };
 
     try std.testing.expectEqual(@as(?Tree.Node, null), tree.parent(.root));
-    try std.testing.expectEqual(Tree.Node.root, tree.parent(@enumFromInt(1)).?);
+    try std.testing.expectEqual(Tree.Node.root, tree.parent(@fromBackingInt(1)).?);
 }

@@ -2,11 +2,12 @@
 id: files-buffering-and-atomic-persistence
 title: Files, buffering, atomic publication, and durability
 kind: pattern
-status: runtime-verified
-zig: "0.16.0"
+status: draft
+zig: "0.17.0"
 summary: Treat writer flush, file synchronization, atomic namespace publication, and directory durability as separate steps with separate guarantees.
-updated: 2026-09-04
+updated: 2026-10-04
 sources:
+  - "[[zig-0.17.0-stdlib]]"
   - "[[zig-0.16.0-stdlib]]"
   - "[[fi-zig-0.16-migration]]"
 proofs:
@@ -24,7 +25,7 @@ successful flush does not mean the file reached stable storage. A successful
 atomic replacement does not mean the containing directory entry survived a
 crash. Model these as distinct transitions:
 
-| Transition | Zig 0.16 operation | What it establishes |
+| Transition | Zig 0.17 operation | What it establishes |
 | --- | --- | --- |
 | Application state → writer | `writer.interface.writeAll` | Bytes are accepted by the writer and may remain buffered. |
 | Writer → file | `File.Writer.flush` | Buffered bytes have been handed to the file operation; underlying write failures are reported. |
@@ -118,7 +119,7 @@ For replace-in-place data such as a generated manifest or configuration:
 6. For a crash-durable namespace change, perform the platform-specific
    containing-directory synchronization required by the target filesystem.
 
-Zig 0.16's `File.Atomic` performs the atomic namespace operation; it does not
+Zig 0.17's `File.Atomic` performs the atomic namespace operation; it does not
 implicitly call `File.sync`. The public `std.Io.Dir` surface also does not
 provide a portable directory-sync operation. That is a real portability seam,
 not permission to collapse atomic visibility and crash durability into one
@@ -147,7 +148,7 @@ synchronization protocol required for a stronger crash-durability claim.
 ## Evidence
 
 The [file and atomic-publication proof](../proofs/files_and_atomic_persistence.zig)
-runs three Zig 0.16 tests. It observes that a small buffered write leaves file
+runs three Zig 0.17 tests. It observes that a small buffered write leaves file
 length zero until flush, proves that flush retains an overwritten stale suffix
 until `end` truncates it, synchronizes and atomically replaces a temporary
 file, and checks the exclusive `readFileAlloc` limit boundary. It ran through

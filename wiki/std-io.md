@@ -3,10 +3,11 @@ id: std-io
 title: std.Io
 kind: concept
 status: source-verified
-zig: "0.16.0"
-summary: std.Io is an explicit capability interface for potentially blocking or nondeterministic operations, not a synonym for evented I/O.
-updated: 2026-09-04
+zig: "0.17.0"
+summary: std.Io supplies explicit capabilities; Zig 0.17 changes network operations and retains implementation-specific behavior.
+updated: 2026-10-04
 sources:
+  - "[[zig-0.17.0-stdlib]]"
   - "[[zig-0.16.0-release-notes]]"
   - "[[zig-0.16.0-stdlib]]"
   - "[[fi-zig-0.16-migration]]"
@@ -38,10 +39,25 @@ The interface defines futures, groups, selection, cancellation, synchronization,
 clocks, files, networking, processes, and entropy. Each implementation decides
 how to provide those operations within the interface contract.
 
-Zig 0.16 ships one feature-complete and well-tested implementation:
-`std.Io.Threaded`. The tree also contains experimental or proof-of-concept
-evented work. Presence in `std` must not be presented as production readiness;
+Zig 0.17 selects `std.Io.Threaded` in `lib/std/start.zig`.
+The tree also contains unfinished evented implementations. [[zig-0.17.0-stdlib]]
+Presence in `std` must not be presented as production readiness;
 see [[evented-io-backends]].
+
+## Zig 0.17 source review
+
+The review inspected `lib/std/Io.zig` and `lib/std/start.zig` at the exact release commit.
+`Io.Operation` now includes `net_send`, `net_read`, and `net_write` beside `net_receive`.
+Networking reaches those operations through `operate` and batch submission.
+A custom backend must implement the current operation tags and current vtable signatures.
+
+The release source still selects platform-specific `Io.Evented` types when fibers are supported.
+Type selection does not establish interface compatibility or runtime behavior.
+The shipped Dispatch initializer assigns `processReplacePath`, which the current `Io.VTable` lacks.
+See [[evented-io-backends]] for the exact backend gaps. [[zig-0.17.0-stdlib]]
+
+The old 0.16 records remain historical sources.
+Each maintained proof requires its own named 0.17 gate before runtime claims resume.
 
 ## Agent traps
 
@@ -84,7 +100,7 @@ Make the `std.Io` owner visible near the application's allocator and resource
 owners. State which implementation a behavioral claim assumes, and put limits,
 cancellation, allocation lifetime, and cleanup in the same design discussion.
 
-[[process-init-and-capabilities]] shows how a Zig 0.16 executable obtains that
+[[process-init-and-capabilities]] shows how a Zig executable obtains that
 capability from `std.process.Init` without coupling reusable libraries to the
 whole process initializer.
 

@@ -7,7 +7,7 @@ agents. Humans browse the same files in Obsidian.
 ## Non-negotiable baseline
 
 - Read `.zig-version`; it is the only active Zig target. It is currently
-  `0.16.0`. Do not introduce examples for master, 0.15, or an assumed future
+  `0.17.0`. Do not introduce examples for master, older releases, or an assumed future
   patch release.
 - Treat installed release source for that exact compiler as the API truth.
   Official versioned release notes and standard-library documentation come
@@ -58,7 +58,7 @@ id: stable-kebab-case-id
 title: Human title
 kind: concept | pattern | principle | platform | map
 status: stub | draft | source-verified | runtime-verified | superseded
-zig: "0.16.0" | "n/a"
+zig: "0.17.0" | "n/a"
 summary: One retrieval-oriented sentence.
 updated: YYYY-MM-DD
 sources:

@@ -1,4 +1,5 @@
 const std = @import("std");
+const builtin = @import("builtin");
 
 const batch_size_limit: u16 = 256;
 const request_count_limit: u32 = 100_000_000;
@@ -232,6 +233,7 @@ fn parse_options(init: std.process.Init) !WorkloadOptions {
 /// threshold: compare distributions only on a controlled runner. The timed
 /// region excludes argument parsing, warm-up, and reporting.
 pub fn main(init: std.process.Init) !void {
+    if (builtin.mode != .safe) return error.PerformanceRequiresReleaseSafe;
     const options = try parse_options(init);
     const warmup_options: WorkloadOptions = .{
         .request_count = @min(options.request_count, 10_000),

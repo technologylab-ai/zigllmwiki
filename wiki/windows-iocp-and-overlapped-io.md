@@ -1,12 +1,13 @@
 ---
 id: windows-iocp-and-overlapped-io
-title: Windows IOCP, overlapped I/O, and Zig 0.16 mapping
+title: Windows IOCP, overlapped I/O, and Zig 0.17 mapping
 kind: platform
 status: source-verified
-zig: "0.16.0"
-summary: Windows IOCP adapters require stable OVERLAPPED ownership and terminal cancellation reconciliation, while Zig 0.16 std.Io.Threaded instead mixes worker-blocking and APC-based NtDll paths and has no Windows Evented backend.
-updated: 2026-09-06
+zig: "0.17.0"
+summary: Zig 0.17 Windows Threaded uses NT/APC paths, fixes no-follow handle metadata, and retains the batch-cancellation progress defect.
+updated: 2026-10-04
 sources:
+  - "[[zig-0.17.0-stdlib]]"
   - "[[microsoft-windows-iocp]]"
   - "[[microsoft-windows-iocp-api]]"
   - "[[microsoft-windows-winsock-batched-file-io]]"
@@ -27,14 +28,14 @@ platforms:
   - windows
 ---
 
-# Windows IOCP, overlapped I/O, and Zig 0.16 mapping
+# Windows IOCP, overlapped I/O, and Zig 0.17 mapping
 
 ## Remember
 
-Do not call Zig 0.16 `std.Io.Threaded` an IOCP backend. On Windows it combines
+Do not call Zig 0.17 `std.Io.Threaded` an IOCP backend. On Windows it combines
 ordinary worker-thread execution, synchronous NT file handles, and alertable
 APC completion for selected asynchronous handles. `std.Io.Evented` resolves to
-`void` on Windows, and Zig 0.16's `std.os.windows` surface does not declare the
+`void` on Windows, and Zig 0.17's `std.os.windows` surface does not declare the
 Win32 `OVERLAPPED` or IOCP functions.
 
 A custom IOCP backend is a separate design. Open or create each file or socket
@@ -45,13 +46,13 @@ completion packet must never reclaim the same operation twice.
 
 ## Which Windows design is this?
 
-| Layer | Zig 0.16 mechanism | Completion identity | Production boundary |
+| Layer | Zig 0.17 mechanism | Completion identity | Production boundary |
 | --- | --- | --- | --- |
-| `std.Io.Threaded` task dispatch | Allocated futures and a growing worker pool | Future/group task record | This is Zig 0.16's feature-complete default implementation, but `async` may execute eagerly and is not an event loop. |
+| `std.Io.Threaded` task dispatch | Allocated futures and a growing worker pool | Future/group task record | This is the default implementation selected by Zig 0.17, but `async` may execute eagerly and is not an event loop. |
 | Default regular-file I/O | Handles opened `SYNCHRONOUS_NONALERT`; blocking `NtReadFile`/`NtWriteFile` on the executing thread | Call stack plus `IO_STATUS_BLOCK` | A blocked operation consumes its task thread. |
 | Selected asynchronous file/device paths | `NtReadFile`, `NtWriteFile`, `NtFsControlFile`, or `NtDeviceIoControlFile` with an APC routine | Stable `IO_STATUS_BLOCK` in the call or `Batch` slot | APC completion is not IOCP completion. Support depends on the handle mode and operation. |
 | `std.Io.Threaded` networking | Asynchronous AFD endpoint handles plus `NtDeviceIoControlFile` requests and APC waits | AFD request storage and `IO_STATUS_BLOCK` | This is stdlib implementation detail, not a stable AFD API for applications to copy. |
-| Custom/TigerBeetle-style backend | Win32 overlapped file/socket operations associated with IOCP | Caller-owned `OVERLAPPED`, completion key, and buffer | Outside the Zig 0.16 `std.Io.Threaded` implementation; must supply bindings, limits, cancellation, tests, and error mapping. |
+| Custom/TigerBeetle-style backend | Win32 overlapped file/socket operations associated with IOCP | Caller-owned `OVERLAPPED`, completion key, and buffer | Outside the Zig 0.17 `std.Io.Threaded` implementation; must supply bindings, limits, cancellation, tests, and error mapping. |
 
 The same word “asynchronous” appears in several rows, but the dispatch,
 wakeup, resource, and cancellation contracts are different.
@@ -62,7 +63,7 @@ already associated with an I/O completion object. Its `ApcContext` parameter
 has different roles in the callback and port cases. See
 [[microsoft-windows-nt-fs-control]].
 
-## Exact Zig 0.16 `std.Io.Threaded` behavior
+## Exact Zig 0.17 `std.Io.Threaded` behavior
 
 ### Regular files default to synchronous handles
 
@@ -74,13 +75,14 @@ that handle call `NtReadFile` or `NtWriteFile` without an APC routine. If such
 an operation runs in an `Io` task, concurrency comes from the Threaded worker,
 not from IOCP or kernel completion dispatch.
 
-There is an exact-release metadata seam for `follow_symlinks = false`:
-`dirOpenFileWtf16` requests `ASYNCHRONOUS` from `NtCreateFile`, but both its
-unlocked and locked return paths still set `File.flags.nonblocking = false`.
-Do not infer the underlying handle mode solely from that returned flag in this
-case. The first IOCP fixture run observed the false flag; source inspection
-establishes the differing creation argument. The custom proof instead opens
-its handle explicitly. See [[zig-0.16-windows-io-source]].
+Zig 0.17 fixes the old no-follow metadata inconsistency.
+`dirOpenFileWtf16` now requests `SYNCHRONOUS_NONALERT` for both values of `follow_symlinks`.
+Both returned paths still publish `File.flags.nonblocking = false`.
+The no-follow option controls `OPEN_REPARSE_POINT` independently. [[zig-0.17.0-stdlib]]
+
+The historical 0.16 source requested `ASYNCHRONOUS` for no-follow opens while publishing the false flag.
+The first IOCP fixture observed that flag under 0.16.
+The custom proof opens its overlapped handle explicitly. [[zig-0.16-windows-io-source]]
 
 Task cancellation of a worker blocked in this synchronous region uses
 `NtCancelSynchronousIoFile` against the worker thread. `NOT_FOUND` is treated
@@ -112,8 +114,8 @@ contract in [[select-and-batch]].
 
 - a streaming file read/write or device control on a synchronous handle
   returns `error.ConcurrencyUnavailable` instead of blocking;
-- Windows `net_receive` has an explicit source TODO to integrate overlapped or
-  equivalent I/O and returns `error.ConcurrencyUnavailable` in this mode;
+- Windows `net_receive`, `net_send`, `net_read`, and `net_write` each return `error.ConcurrencyUnavailable` in this mode;
+- those four branches retain TODO comments for integration with overlapped or equivalent I/O;
 - `awaitAsync` may perform the corresponding blocking path because its
   interface contract permits eager/non-concurrent progress.
 
@@ -122,12 +124,12 @@ These are backend-specific limits, not contradictions in the portable
 
 ### Pending batch cancellation has a progress defect
 
-In the exact 0.16.0 `Threaded.batchCancel` implementation, a nonempty pending
+In the exact 0.17.0 `Threaded.batchCancel` implementation, a nonempty pending
 list first calls `waitForApcOrAlert()` with no deadline, **before** issuing any
 `NtCancelIoFileEx` requests. It then requests cancellation and waits again
 until the pending list empties. With no queued APC or alert and no operation
 able to finish, that first wait can prevent cancellation from ever reaching
-the kernel. This follows directly from [[zig-0.16-windows-io-source]]; do not
+the kernel. This follows directly from `Threaded.zig:2992–2998` in [[zig-0.17.0-stdlib]]; do not
 mistake the public terminal-ownership contract for a backend progress proof.
 
 An ordinary `defer batch.cancel(io)` still describes who owns cleanup, but it
@@ -152,7 +154,7 @@ the pinned TigerBeetle backend.
 
 ## Zig error translation
 
-Zig 0.16 translates expected NTSTATUS values at each operation boundary rather
+Zig 0.17 translates expected NTSTATUS values at each operation boundary rather
 than leaking a universal Windows error code:
 
 - file reads map end-of-file/broken-pipe, invalid-handle, directory, lock, and
@@ -173,6 +175,18 @@ paths. Task cancellation becomes the portable `error.Canceled` protocol before
 result translation, and a successfully canceled batch operation is absent from
 the completion iteration. Do not invent a second error translation at a layer
 that no longer owns cancellation.
+
+## Zig 0.17 source review
+
+The review inspected `lib/std/Io/Threaded.zig`, `lib/std/Io.zig`, and `lib/std/os/windows.zig`.
+Those files match the exact immutable release commit. [[zig-0.17.0-stdlib]]
+`Threaded.batchDrainSubmittedWindows` contains the four concurrent-network restrictions described above.
+`Threaded.batchCancel` retains its initial unbounded alertable wait.
+`Threaded.dirOpenFileWtf16` removes the old no-follow handle-mode inconsistency.
+The standard Windows declarations still lack the Win32 `OVERLAPPED` type and IOCP functions.
+The `OVERLAPPED` field in creation flags is a flag, not the operation record.
+The dated proof receipts below used Zig 0.16.0.
+Those receipts do not renew native Windows runtime claims for 0.17.
 
 ## IOCP adapter contract
 
@@ -350,7 +364,7 @@ The packet supplies no Windows performance, ARM64, WOW64, service-control, or pr
 The older wiki architecture proofs below retain their separate scope.
 M3-006 physical deployment qualification remains postponed.
 
-## Runtime evidence and remaining limits
+## Historical Zig 0.16 runtime evidence and remaining limits
 
 The [mapping proof](../proofs/windows_io_mapping.zig) checks the exact Zig
 0.16 Windows type surface, confirms that `Io.Evented` is unavailable, confirms
@@ -602,8 +616,8 @@ the changed Intel Xeon/NVMe x64 host, Cobalt ARM64 host and exact new samples;
 sharing a runner image does not imply identical hardware. Known native ARM
 compiler diagnostics remain separate and were not enabled for that passing run.
 
-This page remains `source-verified` because its broad OS and implementation
-claims exceed the narrow runtime fixtures. M3-006 cannot be fully discharged
+The current 0.17 review establishes source facts only.
+The dated 0.16 fixtures retain their original OS and workload limits. M3-006 cannot be fully discharged
 by a hosted VM: physical power-loss persistence, controlled cold storage,
 deployment driver/error coverage, and a specified production workload/SLO
 require additional environments or requirements. ARM64 and WOW64 fixture

@@ -1,8 +1,13 @@
 const std = @import("std");
 
 pub fn build(b: *std.Build) void {
+    const required_version = std.mem.trim(u8, @embedFile(".zig-version"), " \r\n");
+    if (!std.mem.eql(u8, @import("builtin").zig_version_string, required_version))
+        @panic("Use exactly the Zig release in .zig-version");
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
+    if (optimize == .fast or optimize == .small)
+        @panic("Wiki proofs require Debug or ReleaseSafe with assertions");
 
     const lint_command = b.addSystemCommand(&.{
         "python3",
@@ -14,7 +19,7 @@ pub fn build(b: *std.Build) void {
         "--graph-report",
     });
     const fmt_command = b.addSystemCommand(&.{
-        "zig",
+        b.graph.zig_exe,
         "fmt",
         "--check",
         "build.zig",
@@ -43,11 +48,65 @@ pub fn build(b: *std.Build) void {
         "--output-dir",
         ".zig-cache/generated-code",
         "--optimize",
-        "ReleaseSafe",
+        "safe",
     });
     verify_step.dependOn(&generated_code_command.step);
 
+    const dispatch_compile_error = b.addSystemCommand(&.{
+        "python3",
+        "tools/verify_dispatch_compile_error.py",
+        b.graph.zig_exe,
+        "proofs/dispatch_017_io_compile_error.zig",
+        "aarch64-macos",
+        "no field named 'processReplacePath' in struct 'Io.VTable'",
+    });
+    verify_step.dependOn(&dispatch_compile_error.step);
+    const uring_compile_error = b.addSystemCommand(&.{
+        "python3",
+        "tools/verify_dispatch_compile_error.py",
+        b.graph.zig_exe,
+        "proofs/uring_017_io_compile_error.zig",
+        "x86_64-linux",
+        "no field named 'processReplacePath' in struct 'Io.VTable'",
+    });
+    verify_step.dependOn(&uring_compile_error.step);
+    const kqueue_compile_error = b.addSystemCommand(&.{
+        "python3",
+        "tools/verify_dispatch_compile_error.py",
+        b.graph.zig_exe,
+        "proofs/kqueue_017_io_compile_error.zig",
+        "aarch64-macos",
+        "no field named 'fileWriteStreaming' in struct 'Io.VTable'",
+    });
+    verify_step.dependOn(&kqueue_compile_error.step);
+
+    const none_sleep_module = b.createModule(.{
+        .root_source_file = b.path("proofs/threaded_none_sleep_linux_panic.zig"),
+        .target = target,
+        .optimize = .safe,
+    });
+    const none_sleep_executable = b.addExecutable(.{
+        .name = "threaded-none-sleep-linux-panic",
+        .root_module = none_sleep_module,
+    });
+    // Normal verification compiles this maintained file without intentionally
+    // crashing. The separate native Linux reproducer requires explicit use.
+    verify_step.dependOn(&none_sleep_executable.step);
+    if (b.graph.host.result.os.tag == .linux and target.query.isNative()) {
+        const defect_step = b.step(
+            "verify-linux-none-sleep-defect",
+            "Reproduce the known infinite-sleep panic (intentionally aborts a child)",
+        );
+        const none_sleep_panic = b.addSystemCommand(&.{
+            "python3",
+            "tools/verify_linux_none_sleep_panic.py",
+        });
+        none_sleep_panic.addFileArg2(none_sleep_executable.getEmittedBin(), .{});
+        defect_step.dependOn(&none_sleep_panic.step);
+    }
+
     const proof_sources = [_][]const u8{
+        "proofs/zig_017_semantics.zig",
         "proofs/async_vs_concurrent.zig",
         "proofs/bounded_retries.zig",
         "proofs/cancellation.zig",
@@ -153,7 +212,9 @@ pub fn build(b: *std.Build) void {
     const performance_module = b.createModule(.{
         .root_source_file = b.path("proofs/performance_sketch.zig"),
         .target = target,
-        .optimize = optimize,
+        // Verification can use Debug for correctness. Timed workloads, including
+        // their warmups, must retain ReleaseSafe optimization and assertions.
+        .optimize = .safe,
     });
     const performance_executable = b.addExecutable(.{
         .name = "performance-sketch",

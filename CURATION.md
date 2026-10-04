@@ -30,6 +30,16 @@ The official Zig 0.16 release notes are fully inventoried by named section in
 roadmap destination; it does not copy the release notes or claim that queued
 topics have already been synthesized.
 
+## Omajot compiler upgrade and final Baz integration — 2026-10-04
+
+[[omajot-zig-0.17-2026-10-04]] captures 695 files and immutable project revisions.
+The migration guide now includes current-main integration, embedded assets, Unicode changes, and native path checks.
+Direct dependency tests exposed a pre-existing borrowed-slice defect outside libvaxis's selected scalar table.
+The original Safe failure and passing isolated repair remain separately identified.
+Image fixtures, partial GIF coverage, and big-endian limits retain their exact scope.
+Five application PRs merged with qualified-tree equality; all earlier captures remain unchanged.
+The maintained wiki proof graph is unchanged by this ingest.
+
 ## Windows HTTP shard handoff — 2026-09-06
 
 [[bounded-http-windows-shards-2026-09-06]] pins the qualified feature and its identical-tree merge before synthesis.
@@ -339,3 +349,21 @@ std.Io's interface. All implementation/review/evidence agents and timed runners
 finished their selected work; remaining M4 work is queued. Windows tuning gates
 remain deferred, and M3-006 postponed. The wiki's complete local/retrieval and
 clean pushed Mac/Linux gates govern this publication.
+
+
+## Zig 0.17 project migration and explicit wiki upgrade — 2026-10-04
+
+[[zig-0.17.0-release-notes]], [[zig-0.17.0-stdlib]], and [[zig-0.17-project-ports-2026-10-04]] are new pinned records.
+The project snapshot preserves native receipts, exact source identities, first failures, and cleanup.
+The migration guide follows the Baz dependency ports and records their exclusions.
+The user then authorized the complete wiki upgrade.
+Current proofs and source guidance now target exact 0.17.0; earlier verification labels were invalidated.
+Backend source review exposes shipped Dispatch, Uring, and Kqueue vtable mismatches.
+Expected compiler-error witnesses keep those gaps active in verification.
+Historical source and snapshot bytes remain unchanged.
+[[zig-0.17-final-verification-2026-10-04]] adds the final immutable receipt.
+Full Mac/Linux/Windows x64 Debug/Safe, retrieval and tracked-site checks passed.
+The experimental full ARM64 gate is deferred by the user; five standalone Debug probes passed separately.
+The Linux infinite-sleep defect was reproduced, then moved to an explicit opt-in step.
+The final evidence ingest passed structural, retrieval, workflow and full Mac verification checks.
+The five repository ports are ready for draft-PR review. Historical source bytes remain unchanged.

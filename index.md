@@ -3,10 +3,11 @@ id: index
 title: Zig LLM Wiki index
 kind: map
 status: draft
-zig: "0.16.0"
+zig: "0.17.0"
 summary: Retrieval map for current Zig systems programming, std.Io, TigerStyle, and platform I/O.
-updated: 2026-09-28
-sources: []
+updated: 2026-10-04
+sources:
+  - "[[zig-0.17.0-stdlib]]"
 proofs: []
 platforms:
   - cross-platform
@@ -21,18 +22,21 @@ Read this page first, then follow only the pages needed for the task.
 
 ## Current Zig
 
-- [[zig-0.16-baseline]] — active version, evidence standard, and upgrade rule.
+- [[zig-0.17-baseline]] — active version, evidence standard, and upgrade rule.
+- [[zig-0.16-baseline]] — historical baseline and its dated evidence boundary.
+- [[zig-0.17-upgrade-assessment]] — explicit dependency upgrades, logical-bit casts,
+  reflection, embedded assets, Unicode, ownership defects, test budgets, and native port evidence.
 - [[zig-0.16-release-inventory]] — every named 0.16 release-note topic routed
   to current guidance, a numbered roadmap item, a watch, or an explicit
   out-of-scope decision.
-- [[zig-0.16-api-migration-traps]] — current replacements and ownership
+- [[zig-0.16-api-migration-traps]] — historical pre-0.16 replacements and ownership
   consequences for stale language, allocation, filesystem, build, diagnostic,
   path, reader/writer, and fuzzing examples.
 - [[process-init-and-capabilities]] — use `std.process.Init` at the executable
   root and thread narrower I/O, allocation, configuration, and authority into
   components.
 - [[std-io]] — the explicit I/O capability and implementation landscape.
-- [[io-threaded]] — how Zig 0.16 Threaded shares dispatch capacity, allocates
+- [[io-threaded]] — how Zig 0.17 Threaded shares dispatch capacity, allocates
   before admission, and cancels supported blocking calls.
 - [[async-vs-concurrent]] — the scheduling distinction most likely to produce
   subtly wrong code.
@@ -72,7 +76,7 @@ Read this page first, then follow only the pages needed for the task.
 - [[io-uring]] — Linux submission/completion ownership, finite rings, ordering,
   and cancellation races.
 - [[macos-kqueue-and-aio]] — `kqueue` readiness, Dispatch I/O/POSIX AIO
-  completion, exact Zig 0.16 backend gaps, and measured macOS evidence.
+  completion, exact Zig 0.17 backend gaps, and dated macOS evidence.
 - [[windows-iocp-and-overlapped-io]] — APC/batch/device cancellation, the
   Windows batch progress defect, AcceptEx handoff, final Winsock cleanup, and separate TCP-file/HTTP qualification.
 - [[tigerbeetle-io]] — source-verified comparison of TigerBeetle's Linux
@@ -85,7 +89,7 @@ Read this page first, then follow only the pages needed for the task.
 ## Engineering system
 
 - [[tigerstyle]] — safety-first design principles and their integration seams
-  with Zig 0.16.
+  with Zig 0.17.
 - [[tigerstyle-coverage]] — complete rule inventory with covered, partial, and
   missing guidance made explicit.
 - [[tigerstyle-seams-with-zig-and-os]] — strict-core versus exception labels

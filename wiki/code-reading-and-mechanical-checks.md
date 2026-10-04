@@ -2,11 +2,12 @@
 id: code-reading-and-mechanical-checks
 title: Code reading and mechanical checks
 kind: pattern
-status: source-verified
-zig: "0.16.0"
+status: draft
+zig: "0.17.0"
 summary: Review whole subsystems by tracing control flow and every state mutation, then turn stable discoveries into small automated repository invariants.
 updated: 2026-09-06
 sources:
+  - "[[zig-0.17.0-stdlib]]"
   - "[[matklad-look-for-bugs]]"
   - "[[matklad-mechanical-habits]]"
   - "[[matklad-always-be-blaming]]"

@@ -63,7 +63,7 @@ does not make guidance appear stale.
 
 - Blame identifies a commit, not necessarily the original motivation.
 - The latest edit to a line may be formatting or movement; inspect parents.
-- A historical workaround may no longer be required by Zig 0.16 or the current
+- A historical workaround may no longer be required by Zig 0.17 or the current
   kernel.
 - An author's rationale is evidence of intent, not proof that the design works.
 - A current behavior observed in one backend is not an interface guarantee.

@@ -111,7 +111,7 @@ unknown production boundary.
 ## This wiki's deliberate Python/Zig seam
 
 This repository has one explicit tooling deviation from TigerBeetle's
-Zig-primary preference. Zig 0.16 owns build orchestration, executable proofs,
+Zig-primary preference. Zig 0.17 owns build orchestration, executable proofs,
 target compilation, and runtime claims. Python 3.10 or newer, using only its
 standard library, owns Markdown parsing, graph analysis, source hashes, command
 reports, and generated-text inspection under `tools/`.

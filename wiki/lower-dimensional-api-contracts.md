@@ -2,11 +2,12 @@
 id: lower-dimensional-api-contracts
 title: Lower-dimensional API contracts
 kind: pattern
-status: source-verified
-zig: "0.16.0"
+status: draft
+zig: "0.17.0"
 summary: Return and accept only distinctions the caller must act on, while preserving ownership, absence, failure, cancellation, and partial-completion states that are semantically real.
-updated: 2026-09-04
+updated: 2026-10-04
 sources:
+  - "[[zig-0.17.0-stdlib]]"
   - "[[source-tigerstyle]]"
   - "[[zig-0.16.0-language-reference]]"
 proofs:

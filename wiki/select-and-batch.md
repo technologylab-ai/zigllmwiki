@@ -2,11 +2,12 @@
 id: select-and-batch
 title: std.Io Select and Batch ownership
 kind: pattern
-status: source-verified
-zig: "0.16.0"
+status: draft
+zig: "0.17.0"
 summary: Select owns typed task results, while fixed Batch slots still require backend allocation budgeting, cleanup after wait errors, and completion draining.
 updated: 2026-09-05
 sources:
+  - "[[zig-0.17.0-stdlib]]"
   - "[[zig-0.16.0-release-notes]]"
   - "[[zig-0.16.0-stdlib]]"
   - "[[zig-0.16-windows-io-source]]"
@@ -88,8 +89,16 @@ Once cancellation begins, do not call `await` or `awaitMany` again. Both
 
 ## `Batch`: fixed low-level operation slots
 
+Zig 0.17 adds message/datagram send (`net_send`) and stream read/write
+(`net_read`, `net_write`) operations alongside datagram receive.
+Inspect each operation's result and control-data contract before sharing a slot layout.
+Threaded's POSIX poll paths support their required read/write readiness.
+Windows concurrent batches reject all four network operation tags in the shipped source.
+The existing datagram proof does not qualify the three added operations on every platform.
+[[zig-0.17.0-stdlib]]
+
 `Batch.init` takes a preallocated slice of `Operation.Storage`. That slice is
-the exact maximum number of active operations; Zig 0.16's initializer requires
+the exact maximum number of active operations; Zig 0.17's initializer requires
 at least one slot and fewer than `maxInt(u32)` slots: initialization temporarily
 converts `index + 1` to an index whose maximum value is reserved for `.none`.
 Choose a much smaller application limit and assert it before allocation. After
@@ -159,7 +168,7 @@ not itself guarantee a shutdown time bound on that implementation.
 
 ## Evidence
 
-The [Select/Batch proof](../proofs/select_and_batch.zig) now runs three Zig 0.16
+The [Select/Batch proof](../proofs/select_and_batch.zig) now runs three Zig 0.17
 tests. The original select test puts owned allocations in task results, consumes one
 through `await`, then loops over `cancel` until all remaining ownership is
 released. The batch test supplies exactly two fixed operation slots, reads two
@@ -176,7 +185,7 @@ only the returned prefix is released, the unused output slot retains its
 sentinel, and `checkCancel` observes the re-armed request. It uses two result
 slots, one result producer, one consumer and one watchdog, with at most 5,000
 witness attempts and a process exit after 3,000 ten-millisecond watchdog sleeps.
-The queue-state witness is specific to the exact 0.16 implementation; the
+The queue-state witness is specific to the exact 0.17 implementation; the
 watchdog is a scheduler-dependent diagnostic budget, not a real-time guarantee.
 
 All three current tests passed with exact Zig 0.16.0 on 2026-09-04 at
@@ -192,8 +201,9 @@ Zig 0.16.0 on x86_64 Windows Server 2025 build 26100.33296 on 2026-09-04.
 It preserves completed results, reconciles 32 cancellation/write races, and
 observes the initial-wait defect before an explicit NT alert releases it.
 The exact environment and scope are in [[windows-iocp-and-overlapped-io]].
-This page is now `source-verified`: the added Windows progress analysis must
-not inherit the earlier macOS-only runtime label as a portable guarantee.
+This page remains draft during 0.17 requalification. The Windows progress
+analysis and the dated runtime receipts have separate compiler and platform
+scopes; neither establishes portable progress for every 0.17 operation.
 
 ## Review checklist
 

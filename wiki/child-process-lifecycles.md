@@ -2,11 +2,12 @@
 id: child-process-lifecycles
 title: Child processes, output limits, and terminal ownership
 kind: pattern
-status: runtime-verified
-zig: "0.16.0"
+status: draft
+zig: "0.17.0"
 summary: Choose run for bounded collected output or spawn for explicit pipe ownership, use one absolute deadline, and terminate every child through wait or kill.
-updated: 2026-09-04
+updated: 2026-10-04
 sources:
+  - "[[zig-0.17.0-stdlib]]"
   - "[[zig-0.16.0-stdlib]]"
   - "[[zig-0.16.0-release-notes]]"
   - "[[fi-zig-0.16-migration]]"
@@ -37,7 +38,7 @@ bounded service.
 
 `RunOptions` has separate `stdout_limit` and `stderr_limit`, both
 `std.Io.Limit` and both unlimited by default. Unlike `Dir.readFileAlloc`, these
-are inclusive maximums in the Zig 0.16 implementation: output equal to the
+are inclusive maximums in the Zig 0.17 implementation: output equal to the
 limit succeeds and output beyond it returns `error.StreamTooLong`.
 `reserve_amount` is only initial allocation capacity; it is not a limit.
 

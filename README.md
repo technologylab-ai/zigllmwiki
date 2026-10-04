@@ -1,7 +1,7 @@
 # Zig LLM Wiki
 
 A source-driven, LLM-maintained knowledge base for writing robust systems
-software with Zig 0.16.x.
+software with exact Zig 0.17.0.
 
 The wiki is optimized for coding agents first and humans second. It combines
 current Zig APIs, `std.Io` semantics, concurrency and cancellation, operating
@@ -17,7 +17,8 @@ proofs.
 - Run `zig build verify` before accepting content changes.
 - Run `tools/verify_linux_ssh.sh omarx1` for the complete Linux runtime suite.
 - Dispatch `Windows runtime verification` in GitHub Actions for the exact
-  Windows host/proof suite and retained evidence packet.
+  Windows x64 host/proof suite and retained evidence packet. ARM64 is an
+  experimental opt-in (`native_arm64_runtime=true`); its 0.17 qualification is deferred.
 - Use `python3 tools/wiki.py query ...`, `lint`, plan-only `ingest`/`upgrade`,
   and read-only `review` as documented in [AGENTS.md](AGENTS.md).
 - Use [ROADMAP.md](ROADMAP.md) as the persistent project plan.
@@ -30,8 +31,14 @@ proofs.
   macOS, Linux, Windows, cancellation, timing, or hosted-verification claims.
 
 The required compiler version is recorded in [.zig-version](.zig-version).
-The initial baseline is Zig 0.16.0, the current stable 0.16.x release as of
-2026-09-04.
+The active baseline is Zig 0.17.0, upgraded on 2026-10-04.
+Dated Zig 0.16 source records and runtime receipts preserve their original scope.
+
+The [Zig 0.16 to 0.17 migration guide](docs/zig-0.16-to-0.17-migration.md)
+records the Baz and Omajot dependency ports, semantic traps, and native verification limits.
+The upgrade ports current proofs and invalidates earlier verification labels before requalification.
+Default verification uses Debug for correctness proofs and ReleaseSafe for the timed fixture.
+The guide records the separate 0.16 ReleaseSafe macOS Dispatch baseline failure.
 
 ## Repository shape
 

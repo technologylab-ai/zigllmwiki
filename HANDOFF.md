@@ -1,4 +1,65 @@
-# Project handoff — 2026-09-28
+# Project handoff — Zig 0.17 upgrade, 2026-10-04
+
+## Omajot and completed application merges — 2026-10-04
+
+[[omajot-zig-0.17-2026-10-04]] adds the final consumer and dependency evidence.
+Baz's current-main integration retains route deadlines and optional libc linkage.
+Native omarx1 gates passed 251 Baz tests, five consumer tests, and 556 Python groups.
+Omajot passed its complete native/WASM graph, Qt, web, CLI, sync, TUI, and browser gates.
+Final hosted Linux/macOS/Windows checks passed for both projects.
+Direct libvaxis and image gates passed in Debug/Safe with their recorded skips and fixture limits.
+The unmodified broader uucode Safe suite failed one optional casing test.
+An isolated static-row repair passed all 167 tests in both modes.
+Libvaxis's consumed four scalar fields exclude that pre-existing lifetime defect.
+The published dependency graph remains on audited upstream pins.
+
+Engine, Mustache, zli, Baz, and Omajot PRs are merged.
+The source record preserves merge commits and qualified-tree equality.
+[Wiki integration PR #6](https://github.com/technologylab-ai/zigllmwiki/pull/6) includes this final ingest.
+The new source packet preserves 695 files; earlier captures remain byte-identical.
+No application performance comparison or deliberate crash reproduction ran.
+The experimental Windows ARM64 full gate remains deferred.
+Use exact 0.17 through the task PATH; the omarx1 system default stays 0.16.
+
+## Earlier compiler upgrade checkpoint
+
+The user explicitly authorized the full wiki upgrade after the Baz dependency ports.
+The active compiler is exact Zig 0.17.0.
+Current pages cite new release sources; historical records retain their original bytes and compiler scope.
+Prior 0.16 verification labels were invalidated before source review and new native gates.
+The three old 0.16 baseline/migration maps are superseded and route to the current baseline.
+
+The [migration guide](docs/zig-0.16-to-0.17-migration.md) captures cast semantics, reflection, package caches, fixtures, and test budgets.
+[[zig-0.17-project-ports-2026-10-04]] preserves the project packet and its exclusions.
+The proof graph adds five independent semantic oracles and three expected compiler-error witnesses.
+Dispatch and Uring fail on removed process vtable members; Kqueue fails on a removed write member.
+Dispatch initialization also fails through its interface constructor.
+The Apple C-shim proof remains separate; no current std.Dispatch instance is qualified.
+
+[[zig-0.17-final-verification-2026-10-04]] preserves the final receipt and all first failures.
+The ordinary graph at `4fee1f67df666a27980d7eef0653699ddb242d8f` passed full
+Debug/Safe on Mac and native omarx1: 93/93 steps per mode, with exact-input caches identified.
+Fresh Linux Safe execution passed 80/88 tests with eight platform skips.
+Windows x64 passed both modes: 93/93 steps and 81/88 tests, seven skips.
+The user deferred the long-running experimental ARM64 full gate; the run is canceled overall.
+Its five separate native ARM64 Debug probes passed and retain their narrower scope.
+Windows ARM64 runtime is now opt-in, distinct from native compiler diagnostics.
+All owned Mac/Linux reservations and children were cleaned.
+
+The revised time proof checks infinite-sleep delegation through an injected oracle.
+A separate Linux subprocess reproduced the exact shipped integer-overflow SIGABRT.
+Normal verification only compiles that program; intentional reproduction requires
+`zig build verify-linux-none-sleep-defect` and can activate OS crash monitors.
+Three evented backend compile blockers remain explicit, separate from working application OS adapters.
+Python tooling passed 42 tests; all 25 retrieval queries met policy.
+The tracked 206-document site and deterministic comparison passed before final evidence ingestion.
+The final evidence ingest passed structural lint across 53 pages and 88 sources,
+retrieval policy, workflow validation, and full Mac Debug/Safe verification.
+The five repository ports are reviewable draft PRs; no owned background gate remains.
+Earlier run identities are not renamed.
+Timing entry points require Safe; the timed verification executable always uses Safe.
+Application performance comparisons were not run.
+Earlier checkpoints below preserve their original evidence limits.
 
 ## Bounded curation review — 2026-09-28
 

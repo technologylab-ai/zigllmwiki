@@ -2,11 +2,12 @@
 id: invariants-and-assertions
 title: Invariants and assertion placement
 kind: principle
-status: source-verified
-zig: "0.16.0"
+status: draft
+zig: "0.17.0"
 summary: State the property preserved across every transition, assert it at ownership boundaries and independent paths, and test both the valid and forbidden state space.
-updated: 2026-09-04
+updated: 2026-10-04
 sources:
+  - "[[zig-0.17.0-stdlib]]"
   - "[[source-tigerstyle]]"
   - "[[matklad-what-is-an-invariant]]"
   - "[[matklad-look-for-bugs]]"
@@ -99,7 +100,7 @@ permits, and lock/queue terminal states are applied in
 invariant instead of from example-by-example fixes. It asserts a bounded loop,
 preservation of the search partition, and the return postcondition. Its test
 checks every candidate position for small arrays with duplicates, so both the
-unique valid answer and the negative space are exercised under Zig 0.16.0.
+unique valid answer and the negative space are exercised under Zig 0.17.0.
 
 ### Persistence assertion pair
 

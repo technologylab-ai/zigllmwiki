@@ -1296,3 +1296,75 @@ The sandbox denied process inspection required before the shared-host runtime su
 Therefore `zig build verify` was not started; the report records the exact preflight errors.
 The caller owns the full trusted gate and publication.
 No M4 work, subagent, remote runner, commit, push, PR, or external message occurred.
+
+
+## 2026-10-04 — Explicit Zig 0.17 upgrade and project migration ingest
+
+The user authorized the active wiki upgrade after the Baz, bounded/http, Mustache, and zli ports.
+Added exact release records and a hashed project packet before migration synthesis.
+Current guidance moves to exact 0.17.0; old verification labels are invalidated before requalification.
+The 0.16 maps become superseded historical routes.
+Maintained proofs gain five independent semantic tests and three expected backend compile failures.
+The shipped evented vtables fail before usable initialization; native Apple C-shim evidence remains separate.
+README, build setup, workflows, metadata, query baseline, and the agent contract use the new target.
+Timing entry points and verification timing use Safe with assertions.
+The proof-only Mac Debug/Safe gates and structural checks passed.
+Full native verification and retrieval/site qualification follow as separate named receipts.
+No prior source record or historical snapshot was rewritten.
+
+## 2026-10-04 — Completed Zig 0.17 qualification and final evidence
+
+Added [[zig-0.17-final-verification-2026-10-04]] with an immutable 344-file packet.
+All 126 historical source, snapshot and report files remain byte-identical.
+The packet preserves exact compiler, proof and application revision identities.
+The [migration guide](docs/zig-0.16-to-0.17-migration.md) now includes the completed dependency ports and subsequent wiki findings.
+The README audit covers Baz, [bounded/http](https://technologylab-ai.github.io/bounded-http/), Mustache, zli and this independent wiki.
+
+Application gates passed native Mac, omarx1 and Windows x64.
+The ordinary wiki graph passed Debug/Safe on Mac and omarx1, with 93/93 steps per mode.
+Fresh Linux Safe execution passed 80/88 tests and eight platform skips.
+Windows x64 passed both modes, with 93/93 steps and 81/88 tests, seven skips.
+Earlier and later receipts keep their original revisions; byte identity does not rename runs.
+The user canceled and deferred the experimental full Windows ARM64 gate.
+Five separate native ARM64 Debug probes passed; Safe ARM64 runtime remains unqualified.
+The workflow now defaults to x64 and makes ARM64 runtime opt-in.
+Cold two-mode builds and emulated compiler execution receive a 90-minute job watchdog.
+
+The revised time proof checks infinite-sleep delegation without triggering a crash.
+A separate witness reproduced the shipped Linux Threaded integer-overflow SIGABRT.
+Normal verification only compiles that witness; intentional execution requires an explicit opt-in step.
+The first Linux quota failure and the overly strict panic-checker failure remain in the packet.
+Task-owned cache cleanup preserved sources, outputs, compiler archives and unrelated caches.
+Shipped Dispatch, Uring and Kqueue vtable compile blockers retain exact negative witnesses.
+The tested application graph uses its own OS transport adapters.
+
+The final evidence ingest passed full Mac Debug/Safe verification, 93/93 steps per mode.
+Structural lint passed across 53 pages and 88 sources; all three workflows passed validation.
+All 25 retrieval queries met policy: MRR 0.98, hit@3 1.0 and recall@5 0.96.
+The unchanged Python tooling had already passed 42 tests.
+Positive proof executions reused their exact-input caches in the final documentation gates.
+The tracked 206-document site had passed before this final source ingest.
+All owned host reservations and children were cleaned.
+The five repository ports remain draft PRs; no merge or application performance comparison is claimed.
+
+## 2026-10-04 — Omajot upgrade and completed application merges
+
+Captured [[omajot-zig-0.17-2026-10-04]] before updating current migration guidance.
+The new immutable packet preserves 695 files; all earlier captures retain their original bytes.
+Baz now integrates current main and passes fresh native and hosted gates at its resulting revision.
+Omajot passed native omarx1 correctness, WASM/Qt/web, CLI/sync, TUI, browser, and package-consumer gates.
+Hosted Linux/macOS/Windows passed both modes at its final port revision.
+Current README, site, build, package, and workflow guidance now targets exact 0.17.
+Historical 0.16 spike and size evidence remains dated.
+
+Direct libvaxis and image tests passed with explicitly recorded skips and corpus limits.
+Uucode's unmodified Debug suite passed 167 tests; Safe failed one optional casing test.
+Source comparison identifies a pre-existing escaped embedded-slice borrow, outside the consumed scalar graph.
+An isolated static-row diagnostic repair passed all 167 tests in both modes.
+The original failed suite remains failed in the evidence record.
+The guide includes dependency-mode testing, Unicode behavior, asset packaging, and native separator lessons.
+
+Five application PRs merged with merge commits and qualified-tree equality.
+The ordinary wiki proof inputs remain unchanged by this content ingest.
+The experimental full Windows ARM64 gate remains deferred.
+No intentional crash reproduction or application performance comparison ran.

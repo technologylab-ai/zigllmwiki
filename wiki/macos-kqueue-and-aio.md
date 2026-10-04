@@ -3,10 +3,11 @@ id: macos-kqueue-and-aio
 title: macOS kqueue, Dispatch, and asynchronous file I/O
 kind: platform
 status: source-verified
-zig: "0.16.0"
-summary: On macOS, separate kqueue readiness, Apple Dispatch I/O completion, POSIX AIO, and Zig 0.16's unfinished Dispatch backend before choosing a bounded file or network design.
-updated: 2026-09-05
+zig: "0.17.0"
+summary: macOS readiness and file completion have distinct contracts; Zig 0.17 Dispatch has a shipped vtable mismatch.
+updated: 2026-10-04
 sources:
+  - "[[zig-0.17.0-stdlib]]"
   - "[[zig-http-arena-adoption-2026-09-05]]"
   - "[[apple-xnu-kqueue-aio]]"
   - "[[zig-http-arena-shards-2026-09-05]]"
@@ -17,6 +18,8 @@ sources:
 proofs:
   - proofs/macos_dispatch_io.zig
   - proofs/macos_dispatch_io_shim.c
+  - proofs/dispatch_017_io_compile_error.zig
+  - proofs/kqueue_017_io_compile_error.zig
 platforms:
   - macos
 ---
@@ -31,11 +34,11 @@ callbacks. POSIX AIO has yet another request/completion lifecycle. A bounded
 worker queue can isolate synchronous calls. These are different designs; none
 is a drop-in macOS spelling of Linux `io_uring`.
 
-For Zig 0.16 specifically, `std.Io.Evented` resolves to `std.Io.Dispatch` on
+For Zig 0.17 specifically, `std.Io.Evented` resolves to `std.Io.Dispatch` on
 Apple targets, not `std.Io.Kqueue`. The name does not mean that its regular-file
 path uses Apple's Dispatch I/O channel API: it calls `preadv`, `pwritev`, and
-`fsync` directly. The release notes identify evented implementations as
-experimental while the default `main` capability remains `std.Io.Threaded`.
+`fsync` directly. The source retains unfinished evented paths.
+The default `main` capability remains `std.Io.Threaded`. [[zig-0.17.0-stdlib]]
 
 ## `kqueue` contract
 
@@ -119,36 +122,47 @@ disk requests are documented as non-cancellable. As with `std.Io` and
 `io_uring`, the cancellation request does not transfer buffer ownership back;
 terminal completion does.
 
-## Exact Zig 0.16 mapping
+## Exact Zig 0.17 mapping
 
 The release source establishes these boundaries:
 
-| Zig surface | What the 0.16.0 source does | Do not infer |
+| Zig surface | What the 0.17.0 source does | Do not infer |
 | --- | --- | --- |
 | `std.Io.Evented` on Apple targets | Aliases `std.Io.Dispatch` when fibers are supported. | That `std.Io.Kqueue` is the selected macOS backend. |
 | `std.Io.Dispatch` task execution | Allocates stackful fibers and schedules them on a concurrent GCD queue. | That every operation is a kernel-completion operation or allocation-free. |
 | Streaming descriptor read/write | Tries `readv`/`writev`; after `WouldBlock`, waits with Dispatch read/write sources and retries. | That readiness itself transferred bytes. |
 | Positional file read/write and sync | Calls `preadv`, `pwritev`, and `fsync` directly in the running fiber. | That naming the backend `Dispatch` makes regular-file calls use `dispatch_io_*`. |
-| Networking | The `Dispatch` vtable installs unavailable stubs in this release. | Feature parity with `Threaded`, or suitability as an HTTP-server backend. |
+| Networking | Socket creation uses unavailable stubs. Receive, send, read, and write operations panic. | Feature parity with `Threaded`, or an HTTP-server backend. |
 | `std.Io.Kqueue` | Directly importable proof-of-concept with many panicking `TODO` paths; selected for four BSD targets, not Apple targets. | A supported general-purpose macOS wrapper. |
 
-The concrete `std.c.dispatch` bindings used by Zig 0.16 expose queues, sources,
+The concrete `std.c.dispatch` bindings used by Zig 0.17 expose queues, sources,
 semaphores, and data objects but not `dispatch_io_*`. Calling Dispatch I/O from
 Zig therefore currently needs an additional C/Objective-C Blocks boundary or
 new standard-library bindings.
 
-Two additional release-source seams are too large to ignore:
+The review inspected `lib/std/Io/Dispatch.zig`, `Io/Kqueue.zig`, `Io.zig`, and `c/darwin/dispatch.zig`.
+These source files match the exact immutable release commit. [[zig-0.17.0-stdlib]]
 
-- each allocated `std.Io.Dispatch` fiber reserves a 60 MiB minimum stack;
-- `std.Io.Dispatch.deinit()` does not compile under the same Zig 0.16.0
-  compiler because its fixed-size slice expression is passed to
-  `Allocator.free` as a pointer-to-array.
+Three current boundaries require separate evidence:
 
-The proof runs the backend in an isolated process and lets process exit reclaim
-its initialization resources. That is proof of a current limitation, not an
-endorsed teardown pattern.
+- Each allocated `std.Io.Dispatch` fiber reserves a minimum 60 MiB stack.
+- `Dispatch.io()` initializes `processReplacePath`, which `Io.VTable` no longer contains.
+  The exact shipped compiler rejects this interface before the fiber proof can run.
+- Networking remains incomplete.
+  `operate` and batch paths panic for `net_receive`, `net_send`, `net_read`, and `net_write`.
 
-## Runnable Zig wrapper and macOS evidence
+The old `Dispatch.deinit` allocator failure no longer applies to Zig 0.17.
+`Allocator.free` now accepts pointer-to-array arguments, including the fixed-size stack expression in `deinit`.
+The maintained 0.17 proof checks type identity and public signatures without initializing the backend.
+`Dispatch.init` also calls the blocked `io()` constructor.
+The [compile-failure witness](../proofs/dispatch_017_io_compile_error.zig) checks both entry points.
+These checks do not establish fiber execution or repair any historical Safe crash. [[zig-0.17.0-stdlib]]
+
+The 0.16 proof omitted backend teardown because its allocator rejected that argument.
+Its dated execution and crash observations remain historical evidence below.
+New 0.17 runtime claims require their own named native gates.
+
+## Historical Zig 0.16 wrapper and macOS evidence
 
 The [Zig proof](../proofs/macos_dispatch_io.zig) and its
 [Blocks shim](../proofs/macos_dispatch_io_shim.c) provide a deliberately narrow
@@ -184,11 +198,22 @@ Before a product decision, measure bounded concurrent queue depths, cold and
 warm files, representative sizes, tail latency, cancellation, writes, and
 durability on the deployment hardware.
 
+### Historical 0.16 Safe failure reproduced during migration
+
+On 2026-10-04, the curator retested clean wiki commit `935a97bf160ea085d9ba36ed24f5948efeeae82f`.
+The host was arm64 macOS 26.6.2, build 25G83, using exact Zig 0.16.0.
+Matched Debug runs passed the experimental Dispatch positional-read fixture.
+Matched ReleaseSafe runs reported a bus error in `__platform_memmove` and terminated with signal ABRT.
+The separate Apple C-shim read passed in both modes.
+The [migration guide](../docs/zig-0.16-to-0.17-migration.md) preserves this separate baseline diagnosis.
+The 0.17 interface blocker prevents repeating that backend workload through the shipped interface.
+No 0.17 crash fix follows from the allocator change.
+
 ## Design choices for a macOS server
 
 | Work | Candidate | Current evidence boundary |
 | --- | --- | --- |
-| TCP accept/read/write | A product-owned nonblocking `kqueue`/Dispatch-source reactor, or `std.Io.Threaded` while bounded | `std.Io.Dispatch` networking is unavailable in 0.16. A production reactor and load proof still belong to the application. |
+| TCP accept/read/write | A product-owned nonblocking `kqueue`/Dispatch-source reactor, or `std.Io.Threaded` while bounded | The shipped 0.17 Dispatch I/O interface fails compilation and its networking remains incomplete. A production reactor and load proof still belong to the application. |
 | Regular-file read/write | Dispatch I/O, POSIX AIO, memory mapping for a proven access pattern, or a bounded worker backend | Dispatch I/O and POSIX AIO lifecycles are sourced; the proof establishes integration and one hot-cache baseline, not production superiority. |
 | File metadata change | `EVFILT_VNODE` | Notification only; it is not data-operation completion. |
 | Timers/process events | `EVFILT_TIMER` / `EVFILT_PROC`, Dispatch sources, or explicit deadlines | Match the facility's guarantee to the loop; do not treat all event records as I/O completion. |

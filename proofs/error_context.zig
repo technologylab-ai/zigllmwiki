@@ -15,7 +15,7 @@ fn loadFile(diagnostics: *Diagnostics, path: []const u8) !void {
     try readRecord(diagnostics);
 }
 
-test "errdefer captures telescoping context without changing the error" {
+test "errdefer records telescoping context without changing the error" {
     var diagnostics: Diagnostics = .{};
 
     try std.testing.expectError(

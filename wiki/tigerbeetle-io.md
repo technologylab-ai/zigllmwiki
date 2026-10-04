@@ -24,7 +24,7 @@ platforms:
 ## Remember
 
 TigerBeetle's `IO` is an application-specific callback interface, not an
-implementation of Zig 0.16 `std.Io`. Its value here is architectural: the same
+implementation of Zig 0.17 `std.Io`. Its value here is architectural: the same
 operation vocabulary is mapped deliberately onto different operating-system
 mechanisms, while operation state stays owned by the calling component.
 
@@ -126,7 +126,7 @@ reuse or shutdown rule from this source.
 
 For Linux cancellation lifecycle, use [[io-uring]] and primary liburing
 documentation. The parallel Apple and Windows lifecycle rules are in
-[[macos-kqueue-and-aio]] and [[windows-iocp-and-overlapped-io]]. For Zig 0.16
+[[macos-kqueue-and-aio]] and [[windows-iocp-and-overlapped-io]]. For Zig 0.17
 task cancellation, use [[cancellation]]. A future portable adapter must specify
 how cancellation reaches each backend and when the caller regains ownership of
 every completion record and buffer.
@@ -141,7 +141,7 @@ every completion record and buffer.
 - Preserve platform-specific truth beneath a shared vocabulary.
 - Test cross-platform semantic parity and record deliberate exceptions.
 
-Do not copy current TigerBeetle syntax into Zig 0.16 code without a separate
+Do not copy current TigerBeetle syntax into Zig 0.17 code without a separate
 proof. This page is source-verified design guidance; it has no Zig 0.16 runtime
 proof or cross-platform behavioral evidence yet.
 

@@ -3,6 +3,11 @@ name: Windows runtime verification
 on:
   workflow_dispatch:
     inputs:
+      native_arm64_runtime:
+        description: Include the experimental ARM64 proof suite (x64 compiler emulation)
+        type: boolean
+        required: false
+        default: false
       native_arm64_diagnostics:
         description: Reproduce known native ARM64 compiler failures separately from runtime qualification
         type: boolean
@@ -22,17 +27,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - arch: x86_64
-            runner: windows-latest
-            os_arch: X64
-            pe_machine: "8664"
-          - arch: aarch64
-            runner: windows-11-arm
-            os_arch: Arm64
-            pe_machine: "aa64"
-    runs-on: ${{ matrix.runner }}
-    timeout-minutes: 45
+        arch: ${{ fromJSON((inputs.native_arm64_runtime || inputs.native_arm64_diagnostics) && '["x86_64","aarch64"]' || '["x86_64"]') }}
+    runs-on: ${{ matrix.arch == 'aarch64' && 'windows-11-arm' || 'windows-latest' }}
+    # Cold Debug/Safe builds under compiler emulation and the separate native
+    # proof probes need headroom beyond the previous one-mode qualification.
+    timeout-minutes: 90
     env:
       PYTHONDONTWRITEBYTECODE: "1"
       ZIG_PLATFORM: ${{ matrix.arch }}-windows
@@ -40,8 +39,8 @@ jobs:
       # run 33921810785. Its x64 compiler built ARM64 binaries that then passed
       # on the ARM64 OS. Compiler emulation and test execution remain distinct.
       COMPILER_PLATFORM: x86_64-windows
-      EXPECTED_OS_ARCH: ${{ matrix.os_arch }}
-      EXPECTED_PE_MACHINE: ${{ matrix.pe_machine }}
+      EXPECTED_OS_ARCH: ${{ matrix.arch == 'aarch64' && 'Arm64' || 'X64' }}
+      EXPECTED_PE_MACHINE: ${{ matrix.arch == 'aarch64' && 'aa64' || '8664' }}
 
     steps:
       - name: Prepare the out-of-tree evidence packet
@@ -54,7 +53,7 @@ jobs:
       - name: Check out the reviewed revision
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Install the exact Zig baseline from the official index
+      - name: Install the exact checksum-verified Zig baseline
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
@@ -64,17 +63,11 @@ jobs:
           }
 
           $headers = @{ "User-Agent" = "zigllmwiki-windows-verification/1" }
-          $indexUrl = "https://ziglang.org/download/index.json"
-          $index = Invoke-RestMethod -Uri $indexUrl -Headers $headers -TimeoutSec 30
-          $releaseProperty = $index.PSObject.Properties[$baseline]
-          if ($null -eq $releaseProperty) {
-            throw "official download index has no release '$baseline'"
-          }
-          $artifactProperty = $releaseProperty.Value.PSObject.Properties[$env:COMPILER_PLATFORM]
-          if ($null -eq $artifactProperty) {
-            throw "release '$baseline' has no $env:COMPILER_PLATFORM artifact"
-          }
-          $artifact = $artifactProperty.Value
+          $metadataPath = ".github/zig-release.json"
+          $metadata = Get-Content -Raw $metadataPath | ConvertFrom-Json
+          if ($metadata.version -cne $baseline) { throw "Compiler metadata version mismatch" }
+          $artifact = $metadata.artifacts.PSObject.Properties[$env:COMPILER_PLATFORM].Value
+          if ($null -eq $artifact) { throw "Missing exact compiler artifact" }
           $url = [string] $artifact.tarball
           $expectedSha256 = ([string] $artifact.shasum).ToLowerInvariant()
           if ([string]::IsNullOrWhiteSpace($url) -or
@@ -113,7 +106,7 @@ jobs:
 
           $actualBytes = (Get-Item -LiteralPath $archive).Length
           [ordered]@{
-            index_url = $indexUrl
+            metadata_path = $metadataPath
             zig_version = $baseline
             platform = $env:COMPILER_PLATFORM
             zig_pe_machine = $peMachine
@@ -183,25 +176,28 @@ jobs:
       - name: Run full exact-baseline verification for the host OS architecture
         shell: pwsh
         run: |
-          $arguments = @("build", "verify", "--summary", "all")
-          if ($env:ZIG_PLATFORM -eq "aarch64-windows") {
-            $arguments += @("-Dtarget=aarch64-windows", "-Dcpu=baseline")
-          }
-          $log = Join-Path $env:REVIEW_PACKET "zig-build-verify.log"
-          Set-Content -Path $log -Value ("Compiler $env:COMPILER_PLATFORM; project target $env:ZIG_PLATFORM; zig " + ($arguments -join " ")) -Encoding utf8
-          & zig @arguments 2>&1 | Tee-Object -FilePath $log -Append
-          $verifyExit = $LASTEXITCODE
-          [ordered]@{
-            compiler_platform = $env:COMPILER_PLATFORM
-            project_target = $env:ZIG_PLATFORM
-            project_cpu = $(if ($env:ZIG_PLATFORM -eq "aarch64-windows") { "baseline" } else { "compiler-default native" })
-            compiler_execution = $(if ($env:ZIG_PLATFORM -eq "aarch64-windows") { "x64 compiler under ARM64 emulation; native ARM64 proof execution" } else { "native x64" })
-            generated_code_inspector_target = "compiler-default x64; ARM64 job adds explicit ARM64 assembly inspection"
-            arguments = $arguments
-            exit_code = $verifyExit
-          } | ConvertTo-Json | Set-Content -Path (Join-Path $env:REVIEW_PACKET "full-verify.json") -Encoding utf8
-          if ($verifyExit -ne 0) {
-            throw "zig build verify failed with exit code $verifyExit"
+          $ErrorActionPreference = "Stop"
+          $results = @()
+          foreach ($mode in @("debug", "safe")) {
+            $arguments = @("build", "verify", "-Doptimize=$mode", "-j2", "--summary", "all")
+            if ($env:ZIG_PLATFORM -eq "aarch64-windows") {
+              $arguments += @("-Dtarget=aarch64-windows", "-Dcpu=baseline")
+            }
+            $log = Join-Path $env:REVIEW_PACKET "zig-build-verify-$mode.log"
+            Set-Content -Path $log -Value ("Compiler $env:COMPILER_PLATFORM; project target $env:ZIG_PLATFORM; zig " + ($arguments -join " ")) -Encoding utf8
+            & zig @arguments 2>&1 | Tee-Object -FilePath $log -Append
+            $verifyExit = $LASTEXITCODE
+            $results += [ordered]@{
+              compiler_platform = $env:COMPILER_PLATFORM
+              project_target = $env:ZIG_PLATFORM
+              project_cpu = $(if ($env:ZIG_PLATFORM -eq "aarch64-windows") { "baseline" } else { "compiler-default native" })
+              mode = $mode
+              compiler_execution = $(if ($env:ZIG_PLATFORM -eq "aarch64-windows") { "x64 compiler under ARM64 emulation; native ARM64 proof execution" } else { "native x64" })
+              arguments = $arguments
+              exit_code = $verifyExit
+            }
+            ConvertTo-Json -InputObject @($results) -Depth 4 | Set-Content -Path (Join-Path $env:REVIEW_PACKET "full-verify.json") -Encoding utf8
+            if ($verifyExit -ne 0) { throw "$mode verification failed with exit code $verifyExit" }
           }
 
       - name: Compile then execute each Windows proof on its native OS architecture
@@ -270,7 +266,7 @@ jobs:
         if: always() && matrix.arch == 'aarch64'
         shell: pwsh
         run: |
-          & python3 tools/inspect_generated_code.py --source proofs/error_path_catalog.zig --symbol bounded_sum_u32 --output-dir .zig-cache/generated-code-arm64 --optimize ReleaseSafe --target aarch64-windows --cpu baseline 2>&1 | Tee-Object -FilePath (Join-Path $env:REVIEW_PACKET "arm64-generated-code.json")
+          & python3 tools/inspect_generated_code.py --source proofs/error_path_catalog.zig --symbol bounded_sum_u32 --output-dir .zig-cache/generated-code-arm64 --optimize safe --target aarch64-windows --cpu baseline 2>&1 | Tee-Object -FilePath (Join-Path $env:REVIEW_PACKET "arm64-generated-code.json")
           if ($LASTEXITCODE -ne 0) { throw "explicit ARM64 generated-code inspection failed" }
 
       - name: Run all five x86 Windows proofs under WOW64 on the x64 host
@@ -295,7 +291,7 @@ jobs:
             $binary = Join-Path $binaryDirectory "$proof.exe"
             $compileLog = Join-Path $env:REVIEW_PACKET "$proof-x86-compile.log"
             $runtimeLog = Join-Path $env:REVIEW_PACKET "$proof-wow64-runtime.log"
-            # Exact Zig 0.16 --test-no-exec links the test without executing it.
+            # Exact Zig --test-no-exec links the test without executing it.
             # The following explicit process launch supplies the runtime evidence.
             Set-Content -Path $compileLog -Value "zig test proofs/$proof.zig -target x86-windows -femit-bin=$binary --test-no-exec" -Encoding utf8
             & zig test "proofs/$proof.zig" -target x86-windows "-femit-bin=$binary" --test-no-exec 2>&1 | Tee-Object -FilePath $compileLog -Append
@@ -346,8 +342,9 @@ jobs:
         run: |
           $ErrorActionPreference = "Stop"
           $baseline = (Get-Content -Raw ".zig-version").Trim()
-          $index = Invoke-RestMethod -Uri "https://ziglang.org/download/index.json" -TimeoutSec 30
-          $artifact = $index.PSObject.Properties[$baseline].Value.PSObject.Properties["aarch64-windows"].Value
+          $metadata = Get-Content -Raw ".github/zig-release.json" | ConvertFrom-Json
+          if ($metadata.version -cne $baseline) { throw "Compiler metadata version mismatch" }
+          $artifact = $metadata.artifacts.PSObject.Properties["aarch64-windows"].Value
           $expected = ([string] $artifact.shasum).ToLowerInvariant()
           if ($expected -notmatch '^[0-9a-f]{64}$') { throw "invalid native-arm64 compiler checksum" }
           $archive = Join-Path $env:RUNNER_TEMP "zig-native-arm64-diagnostic.zip"

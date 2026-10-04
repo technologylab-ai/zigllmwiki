@@ -2,11 +2,12 @@
 id: io-time-clocks-and-deadlines
 title: std.Io clocks, durations, deadlines, timeouts, and sleeping
 kind: pattern
-status: runtime-verified
-zig: "0.16.0"
+status: draft
+zig: "0.17.0"
 summary: Choose a clock by suspend and wall-time semantics, capture one absolute deadline for a multi-step budget, and treat sleeping as cancelable I/O whose progress depends on the implementation.
-updated: 2026-09-04
+updated: 2026-10-04
 sources:
+  - "[[zig-0.17.0-stdlib]]"
   - "[[zig-0.16.0-stdlib]]"
   - "[[zig-0.16.0-release-notes]]"
   - "[[fi-zig-0.16-migration]]"
@@ -14,6 +15,7 @@ sources:
   - "[[hermit-io-timeout-proof]]"
 proofs:
   - proofs/io_time.zig
+  - proofs/threaded_none_sleep_linux_panic.zig
 platforms:
   - macos
   - linux
@@ -62,7 +64,7 @@ Do not mistake nanosecond storage for nanosecond clock resolution.
 `Io.Timestamp` and `Io.Duration` each store a signed `i96` nanosecond count.
 They provide explicit constructors/conversions; conversions to seconds,
 milliseconds, and microseconds truncate toward zero and return `i64`.
-`Io.Duration` formats through `{f}` in Zig 0.16; the old `{D}` format is gone.
+`Io.Duration` formats through `{f}` in Zig 0.17; the old `{D}` format is gone.
 
 Prefer `Clock.Timestamp` and `Clock.Duration` inside deadline logic. These wrap
 the raw value together with its clock. Their comparison and arithmetic methods
@@ -102,9 +104,18 @@ choice for elapsed work.
 `Timeout` describes when an operation that supports timeouts should return
 `error.Timeout`. Calling `Timeout.sleep` instead waits until the timeout has
 passed and returns only success or `error.Canceled`; it does not return
-`error.Timeout`. Sleeping on `.none` is a no-op in the shipped
-`std.Io.Threaded` implementation, matching the absence of a timeout rather
-than meaning “sleep forever.”
+`error.Timeout`. In Zig 0.17, sleeping on `.none` means waiting forever until
+canceled. Zig 0.16's Threaded implementation returned immediately for this
+case; carrying that expectation into a 0.17 test changes its meaning.
+
+The shipped 0.17 Threaded implementations do not consistently realize this
+contract. Linux converts `maxInt(i96)` nanoseconds to POSIX seconds before
+checking cancellation and panics because the value does not fit `time_t`.
+The macOS nanosleep path constructs an invalid maximal timespec and can return
+immediately after the OS rejects it. A passing immediate-return assertion on
+macOS therefore concealed the Linux defect. Avoid `.none.sleep` in code that
+requires a qualified infinite wait; use a suitable cancellation primitive or
+bounded finite waits after reviewing ownership. [[zig-0.17.0-stdlib]]
 
 ## Sleeping, scheduling, and cancellation
 
@@ -122,7 +133,7 @@ A timeout racing a successful operation has the same terminal race as any
 other cancellation: reconcile the actual completion before releasing buffers
 or handles.
 
-The production Zig 0.16 `std.Io.Threaded` implementation sleeps through
+The production Zig 0.17 `std.Io.Threaded` implementation sleeps through
 platform blocking/parking facilities. A direct sleep occupies the current
 thread. If scheduled with `async`, resource saturation may execute that sleep
 inline before the caller can reach its selection logic. Request `concurrent`
@@ -137,6 +148,14 @@ same absolute deadline with a bounded attempt count. This is an observed Zig
 0.16 `Io.Threaded`/Windows timer seam, not a relaxation of the interface's
 “until the timestamp” contract. Never replace the recheck with a fresh relative
 duration, which would extend the original budget.
+
+## Separate behavior deadlines from observation budgets
+
+A server request deadline, idle timeout, client timeout, and test watchdog serve different purposes.
+Give the observation and cleanup budgets enough slack for scheduling and terminal evidence.
+Use bounded condition polling when the test depends on progress.
+Keep deliberately short behavior deadlines when those deadlines define the tested policy.
+[[zig-0.17-upgrade-assessment]] records a fixture with unchanged request deadlines and a separate generous idle limit.
 
 ## Strictly monotonic application time
 
@@ -154,11 +173,25 @@ guard to timestamp external facts or replace wall-clock chronology.
 
 ## Evidence and review checklist
 
-The [time proof](../proofs/io_time.zig) verifies Zig 0.16 duration conversion
+The [time proof](../proofs/io_time.zig) verifies Zig 0.17 duration conversion
 and `{f}` formatting, clock-tagged deadline arithmetic, timeout conversion,
 bounded rechecking of one absolute deadline, cancellation of a
-`std.Io.Threaded` sleep, and the pure strict-guard transition. It ran with Zig
-0.16.0 on aarch64 macOS 26.6.2, x86_64 Linux 7.1.9, and x86_64 Windows Server
+`std.Io.Threaded` finite sleep, and the pure strict-guard transition. An injected
+sleep vtable separately checks that `.none` is delegated unchanged and that
+`error.Canceled` propagates. That deterministic oracle qualifies the interface
+call, not a real infinite Threaded wait.
+
+The [Linux witness](../proofs/threaded_none_sleep_linux_panic.zig) runs in a
+separate Safe subprocess on native Linux. Verification requires SIGABRT, the
+exact integer-conversion panic, and the `timestampToPosix` trace. Unexpected
+success, hanging, or a different crash fails verification and requires review.
+Run this intentionally aborting child only through the explicit native Linux
+step `zig build verify-linux-none-sleep-defect`. Normal `zig build verify`
+compiles the file without running it. Core dumps are disabled, but OS crash
+monitors can still report its deliberate SIGABRT.
+
+The earlier version of the time proof ran with Zig 0.16.0 on aarch64 macOS
+26.6.2, x86_64 Linux 7.1.9, and x86_64 Windows Server
 2025 build 26100.33296 on 2026-09-04. The Windows run is retained in
 [Actions run 33911991858](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33911991858).
 

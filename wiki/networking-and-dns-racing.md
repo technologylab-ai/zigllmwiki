@@ -2,11 +2,12 @@
 id: networking-and-dns-racing
 title: Networking, DNS, and connection racing
 kind: pattern
-status: runtime-verified
-zig: "0.16.0"
+status: draft
+zig: "0.17.0"
 summary: Bound DNS and connection-result queues, use one absolute deadline, drain and close losing connections, and keep stream and datagram ownership distinct.
-updated: 2026-09-04
+updated: 2026-10-04
 sources:
+  - "[[zig-0.17.0-stdlib]]"
   - "[[zig-0.16.0-stdlib]]"
   - "[[zig-0.16.0-release-notes]]"
   - "[[fi-zig-0.16-migration]]"
@@ -22,7 +23,7 @@ platforms:
 
 ## Remember
 
-Zig 0.16 networking is under `std.Io.net` and every operation that can consult
+Zig 0.17 networking is under `std.Io.net` and every operation that can consult
 the OS or wait for the network receives `std.Io`. The interface supplies
 addresses, hostname lookup, connection racing, stream sockets, datagram
 sockets, listeners, deadlines, and explicit close/shutdown operations. It does
@@ -78,6 +79,12 @@ needs an owning task whose cancellation and result-drain protocol covers both
 lookup and connection work.
 
 ## Streams
+
+The 0.17 stream-read interface includes ancillary control storage and a structured read result.
+Track both data and control lengths, including the `control_truncated` flag.
+Windows stream writes ignore ancillary control in the shipped Threaded implementation.
+Do not infer portable control-message behavior from a plain-byte loopback proof.
+[[zig-0.17.0-stdlib]]
 
 `IpAddress.listen` creates a `Server` and resolves an ephemeral port into
 `server.socket.address` when port zero was requested. Always call

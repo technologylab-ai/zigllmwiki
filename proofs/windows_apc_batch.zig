@@ -212,7 +212,7 @@ fn checkDirectCancel(threaded: *Io.Threaded) !void {
     );
 }
 
-// Zig 0.16 Threaded.batchCancel first waits indefinitely for an APC/alert,
+// Zig 0.17 Threaded.batchCancel first waits indefinitely for an APC/alert,
 // before requesting cancellation. This test-only NT wake makes that initial
 // wait progress. It is not a std.Io interface feature or production adapter.
 fn cancelWithAlert(batch: *Io.Batch, io: Io) void {

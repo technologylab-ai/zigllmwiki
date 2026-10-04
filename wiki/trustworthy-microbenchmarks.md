@@ -2,11 +2,12 @@
 id: trustworthy-microbenchmarks
 title: Trustworthy microbenchmarks
 kind: pattern
-status: source-verified
-zig: "0.16.0"
+status: draft
+zig: "0.17.0"
 summary: A benchmark needs runtime-variable inputs, an externally consumed correctness witness, explicit build mode, and one maintained test/build entry point before its timing means anything.
 updated: 2026-09-05
 sources:
+  - "[[zig-0.17.0-stdlib]]"
   - "[[zig-http-arena-adoption-2026-09-05]]"
   - "[[matklad-do-not-optimize-away]]"
   - "[[matklad-mechanical-habits]]"
@@ -73,7 +74,7 @@ controlled conditions.
 - Is architecture-level arithmetic consistent with the measured result?
 
 The harness in [[performance-sketches-and-batching]] now proves these mechanics
-with Zig 0.16: runtime parameters, an untimed warm-up, separately reported
+with Zig 0.17: runtime parameters, an untimed warm-up, separately reported
 samples, a consumed digest, and deterministic CI witnesses. Its local timings
 are deliberately not promoted to portable performance evidence.
 

@@ -49,7 +49,7 @@ const ReadSectorAudit = struct {
 };
 
 const ReadSectorCompletion = struct {
-    sector_id: SectorID = @enumFromInt(0),
+    sector_id: SectorID = @fromBackingInt(0),
     offset_bytes: u64 = 0,
     size_bytes: u64 = 0,
     checksum_actual: u64 = 0,
@@ -82,7 +82,7 @@ test "explicit options preserve call-site meaning and callback order" {
 
     read_sector(
         &audit,
-        @enumFromInt(7),
+        @fromBackingInt(7),
         .{
             .offset_bytes = 4_096,
             .size_bytes = 512,
@@ -93,7 +93,7 @@ test "explicit options preserve call-site meaning and callback order" {
     );
 
     try std.testing.expectEqual(@as(u32, 1), audit.attempts_count);
-    try std.testing.expectEqual(@as(SectorID, @enumFromInt(7)), completion.sector_id);
+    try std.testing.expectEqual(@as(SectorID, @fromBackingInt(7)), completion.sector_id);
     try std.testing.expectEqual(@as(u64, 4_096), completion.offset_bytes);
     try std.testing.expectEqual(@as(u64, 512), completion.size_bytes);
     try std.testing.expectEqual(@as(u64, 0), completion.checksum_actual);

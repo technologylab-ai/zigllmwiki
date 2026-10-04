@@ -2,11 +2,12 @@
 id: integer-widths-and-boundaries
 title: Integer widths, layout, and serialization boundaries
 kind: pattern
-status: source-verified
-zig: "0.16.0"
+status: draft
+zig: "0.17.0"
 summary: Give domain values explicit widths, check every narrowing and arithmetic boundary, and keep native memory layout separate from stable wire or disk formats.
-updated: 2026-09-04
+updated: 2026-10-04
 sources:
+  - "[[zig-0.17.0-stdlib]]"
   - "[[source-tigerstyle]]"
   - "[[zig-0.16.0-language-reference]]"
   - "[[zig-0.16.0-release-notes]]"
@@ -53,6 +54,13 @@ viewing that integer as bytes still involves target endianness. A stable
 protocol should use an explicit byte encoding such as `std.mem.writeInt` and
 `std.mem.readInt`.
 
+In Zig 0.17, `@bitCast` converts logical bits instead of reinterpreting object memory.
+Array or vector element zero becomes the least significant bits on every target.
+Use explicit native-memory access when an ABI field must retain the same object bytes.
+Use literal byte or scalar oracles; inverse casts can conceal the same representation error.
+The [0.17 semantic proof](../proofs/zig_017_semantics.zig) checks these distinct contracts.
+[[zig-0.17-upgrade-assessment]] records the IPv4 and parser migration examples.
+
 Never write a live struct by copying all of its bytes unless the external
 contract is explicitly that exact target ABI and every padding/disclosure rule
 has been addressed. Otherwise field order, padding, native endianness, pointer
@@ -82,7 +90,7 @@ Multiplication and addition need their own checks. Proving that an item count
 fits `u32` does not prove that `count * item_size + header_size` fits `u32`,
 `usize`, an allocator limit, or the maximum protocol frame.
 
-## Zig 0.16 packed and extern boundaries
+## Zig 0.17 packed and extern boundaries
 
 Zig 0.16.0 tightened explicit-representation rules:
 

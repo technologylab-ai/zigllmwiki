@@ -2,11 +2,12 @@
 id: bounded-retries-and-cleanup
 title: Bounded retries, deadlines, and cleanup
 kind: pattern
-status: runtime-verified
-zig: "0.16.0"
+status: draft
+zig: "0.17.0"
 summary: Classify retryable failures, bound total attempts and elapsed time independently, preserve the terminal cause, and install cleanup at each ownership acquisition.
-updated: 2026-09-04
+updated: 2026-10-04
 sources:
+  - "[[zig-0.17.0-stdlib]]"
   - "[[matklad-retry-loop]]"
   - "[[matklad-retry-loop-retry]]"
   - "[[matklad-zig-defer-patterns]]"

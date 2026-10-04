@@ -2,11 +2,12 @@
 id: io-uring
 title: io_uring interface and operation lifecycle
 kind: platform
-status: runtime-verified
-zig: "0.16.0"
-summary: io_uring is a Linux-specific batched asynchronous syscall interface whose out-of-order completions, retained resources, finite rings, and cancellation races must shape the owner model.
-updated: 2026-09-05
+status: source-verified
+zig: "0.17.0"
+summary: io_uring retains finite-ring and terminal-completion ownership; Zig 0.17 high-level Uring has interface and networking gaps.
+updated: 2026-10-04
 sources:
+  - "[[zig-0.17.0-stdlib]]"
   - "[[zig-http-arena-adoption-2026-09-05]]"
   - "[[liburing-interface-and-cancellation]]"
   - "[[zig-http-arena-shards-2026-09-05]]"
@@ -20,6 +21,7 @@ sources:
   - "[[zig-0.16.0-stdlib]]"
 proofs:
   - proofs/linux_io_uring.zig
+  - proofs/uring_017_io_compile_error.zig
 platforms:
   - linux
 ---
@@ -49,8 +51,8 @@ required opcodes, and exercise the actual workload.
 
 | Released kernel | Capability relevant here | Consequence |
 | --- | --- | --- |
-| 5.1 | Base SQ/CQ ABI, fixed files and buffers, fixed reads/writes | Historical ABI floor, not a Zig 0.16 backend floor. |
-| 5.4 | `IORING_FEAT_SINGLE_MMAP` | Minimum accepted by Zig 0.16's low-level `std.os.linux.IoUring` wrapper. |
+| 5.1 | Base SQ/CQ ABI, fixed files and buffers, fixed reads/writes | Historical ABI floor, not a Zig 0.17 backend floor. |
+| 5.4 | `IORING_FEAT_SINGLE_MMAP` | Minimum accepted by Zig 0.17's low-level `std.os.linux.IoUring` wrapper. |
 | 5.5 | `IORING_OP_ASYNC_CANCEL` | Cancellation by target `user_data` becomes available. |
 | 5.6 | `IORING_REGISTER_PROBE` | Opcode detection is available; use it instead of version-only dispatch. |
 | 5.7 | `IORING_FEAT_FAST_POLL` | Useful networking capability signal, not a promise for regular files. |
@@ -59,9 +61,9 @@ required opcodes, and exercise the actual workload.
 | 5.17 | `IOSQE_CQE_SKIP_SUCCESS` | Successful helper operations may deliberately omit CQEs. |
 | 5.18 | `IORING_OP_MSG_RING` | Rings can wake or message one another. |
 | 5.19 | Cooperative task running, provided-buffer rings, multishot accept | Adds important server and scheduler building blocks. |
-| 6.0 | Single-issuer setup and fixed-file cancellation matching | Effective source-derived floor for Zig 0.16 `std.Io.Uring`, which unconditionally requests single-issuer mode. |
+| 6.0 | Single-issuer setup and fixed-file cancellation matching | Effective source-derived floor for Zig 0.17 `std.Io.Uring`, which unconditionally requests single-issuer mode. |
 
-That last row is an inference from the exact Zig 0.16 implementation and the
+That last row is an inference from the exact Zig 0.17 implementation and the
 pinned Linux UAPI history, not a Zig stability or production-support promise.
 The backend also depends on earlier CQE-skip and message-ring facilities for
 its task scheduling and cross-ring cancellation paths.
@@ -188,24 +190,41 @@ a strong [[static-allocation-and-constant-work|startup-allocation]] pattern for
 this interface. See [[tigerbeetle-io]] for the exact cross-platform comparison;
 it remains implementation evidence, not a drop-in `std.Io` API.
 
-## Zig 0.16 status
+## Zig 0.17 source review
 
-Keep two Zig layers distinct:
+Keep the two Zig layers distinct:
 
-- `std.os.linux.IoUring` is a low-level Zig wrapper around rings, SQEs, CQEs,
-  registration, probing, and many opcodes. The proof on this page uses it
-  directly.
-- `std.Io.Uring` is the high-level experimental `std.Io` implementation. Its
-  Zig 0.16 vtable deliberately reports the networking operations as
-  unavailable even though the low-level wrapper can prepare networking SQEs.
+- `std.os.linux.IoUring` wraps rings, SQEs, CQEs, registration, probing, and kernel opcodes.
+  The maintained proof uses this wrapper directly.
+- `std.Io.Uring` implements the high-level capability interface with fibers and ring-backed operations.
+  The low-level proof does not qualify this backend.
 
-The release notes classify the high-level implementation as a proof of concept
-with missing networking, error handling, test coverage, and task-stack work.
-Do not select it for a production server merely because `std.Io` presents a
-portable interface. The low-level wrapper passing focused tests also does not
-upgrade the high-level backend's readiness.
+The review inspected `lib/std/os/linux/IoUring.zig`, `lib/std/Io/Uring.zig`, and `lib/std/Io.zig`.
+The exact 0.17 wrapper still requires `IORING_FEAT_SINGLE_MMAP`.
+The high-level setup still requests `COOP_TASKRUN` and `SINGLE_ISSUER` unconditionally.
+The kernel-floor table describes source requirements, not a runtime support matrix. [[zig-0.17.0-stdlib]]
 
-## Runtime evidence and remaining gaps
+The high-level `io()` initializer assigns `processReplacePath`, absent from the current `Io.VTable`.
+The registered [compile-failure witness](../proofs/uring_017_io_compile_error.zig) requires that specific shipped-source failure.
+That blocker prevents runtime qualification of the following operation paths.
+Its networking implementations are partial:
+
+| Surface | Exact 0.17 source behavior |
+| --- | --- |
+| IP bind, message receive, close, shutdown | Have implementations; receive submits `RECVMSG`. |
+| IP listen, accept, connect | Return `error.NetworkDown` from unavailable stubs. |
+| Unix listen/connect and socket pair | Return unsupported-family or unsupported-operation errors. |
+| `operate(.net_send)` and `operate(.net_read)` | Return `error.NetworkDown` with TODO comments. |
+| `operate(.net_write)` | Panics with a TODO message. |
+| Network batch operations | Receive, send, read, and write paths panic with TODO messages. |
+| `netWriteFile` | Returns `error.Unimplemented`. |
+
+These facts come from `io`, `operate`, `batchDrainSubmitted`, and the named networking functions.
+Each allocated fiber reserves a minimum 60 MiB stack. [[zig-0.17.0-stdlib]]
+The dated 0.16 runtime receipt below remains historical evidence.
+No current high-level Uring runtime claim follows from that receipt.
+
+## Historical Zig 0.16 runtime evidence and remaining gaps
 
 The [Linux proof](../proofs/linux_io_uring.zig) ran with Zig 0.16.0 on x86_64
 Omarchy 4.0.2, Linux `7.1.9-arch1-2`, on 2026-09-04. The host reported

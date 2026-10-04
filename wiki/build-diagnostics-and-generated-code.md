@@ -2,11 +2,12 @@
 id: build-diagnostics-and-generated-code
 title: Build diagnostics and generated-code inspection
 kind: pattern
-status: source-verified
-zig: "0.16.0"
-summary: Zig 0.16 has no general strict-warning level for Zig source, so enforce all compile errors, safety-aware build modes, explicit foreign-source warnings, repository lint, and reproducible emitted-code review.
+status: draft
+zig: "0.17.0"
+summary: Zig 0.17 has no general strict-warning level for Zig source, so enforce all compile errors, safety-aware build modes, explicit foreign-source warnings, repository lint, and reproducible emitted-code review.
 updated: 2026-09-05
 sources:
+  - "[[zig-0.17.0-stdlib]]"
   - "[[source-tigerstyle]]"
   - "[[zig-0.16.0-build-diagnostics]]"
   - "[[zig-0.16.0-language-reference]]"
@@ -24,16 +25,18 @@ platforms:
 ## Remember
 
 Do not translate “strictest compiler warnings” into a fictional Zig flag. The
-Zig 0.16 frontend does not expose a general `-Wall`/`-Wextra` warning-level
+Zig 0.17 frontend does not expose a general `-Wall`/`-Wextra` warning-level
 switch for Zig source. Its rejected language conditions are compile errors.
 
 The applied rule is broader: make every available diagnostic and safety layer
 deliberate, never discard a failure, compile every maintained target and mode,
 and supplement the compiler with project checks for policies it cannot know.
 
-## What Zig 0.16 guarantees and exposes
+## What Zig 0.17 guarantees and exposes
 
-The exact 0.16 compiler help and build source establish these separate knobs:
+The exact 0.17 compiler help and build source establish these separate knobs.
+The current source is [[zig-0.17.0-stdlib]]; the older diagnostic source below
+retains the historical 0.16 investigation.
 
 | Mechanism | Exact applicability |
 | --- | --- |

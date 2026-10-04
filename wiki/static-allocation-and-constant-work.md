@@ -2,11 +2,12 @@
 id: static-allocation-and-constant-work
 title: Static allocation and constant work
 kind: principle
-status: source-verified
-zig: "0.16.0"
+status: draft
+zig: "0.17.0"
 summary: Size capacity at startup, reject excess load explicitly, and consider conserved fixed-slot state when predictable maximum-load work matters.
 updated: 2026-09-05
 sources:
+  - "[[zig-0.17.0-stdlib]]"
   - "[[source-tigerstyle]]"
   - "[[tigerbeetle-architecture]]"
   - "[[tigerbeetle-performance]]"
@@ -98,7 +99,7 @@ Choose it after a performance sketch and measurement at the configured maximum.
 
 ## The `std.Io.Threaded` seam
 
-In the ordinary multithreaded Zig 0.16 implementation,
+In the ordinary multithreaded Zig 0.17 implementation,
 [[io-threaded|`std.Io.Threaded`]] calls `Future.create` for `async`/`concurrent`
 and `Group.Task.create` for group dispatch; terminal cleanup destroys those
 records. Prewarming worker threads may avoid thread growth, but does not remove

@@ -2,11 +2,12 @@
 id: process-init-and-capabilities
 title: std.process.Init and capability threading
 kind: pattern
-status: source-verified
-zig: "0.16.0"
+status: draft
+zig: "0.17.0"
 summary: Keep std.process.Init at the executable composition root, extract its I/O, allocation, argument, environment, and preopen capabilities, and pass narrower dependencies to libraries.
-updated: 2026-09-04
+updated: 2026-10-04
 sources:
+  - "[[zig-0.17.0-stdlib]]"
   - "[[zig-0.16.0-release-notes]]"
   - "[[zig-0.16.0-stdlib]]"
   - "[[fi-zig-0.16-migration]]"
@@ -20,7 +21,7 @@ platforms:
 
 ## Remember
 
-For a normal Zig 0.16 command, prefer `main(init: std.process.Init)`. The
+For a normal Zig 0.17 command, prefer `main(init: std.process.Init)`. The
 runtime constructs a coherent process environment and gives the executable
 explicit access to its default `std.Io`, allocators, arguments, environment
 map, and preopened files.
@@ -37,7 +38,7 @@ state or accepting the entire initializer.
 | `minimal` | Raw `Args` and `Environ` supplied by the process. | Use for argument iteration or custom initialization. |
 | `arena` | Thread-safe process-lifetime `*ArenaAllocator`, automatically deinitialized on exit. | Call `.allocator()`; do not deinitialize it. Allocation from it during service is still allocation, not TigerStyle startup reservation. |
 | `gpa` | Thread-safe default allocator for temporary heap allocations; debug configurations enable leak checking when possible. | Do not wrap it in a redundant process GPA; free ordinary owned results according to their API. |
-| `io` | Target-appropriate default `std.Io`; the ordinary 0.16 startup path constructs `std.Io.Threaded`. | Pass the interface onward and label behavior that depends on [[io-threaded|the implementation]]. |
+| `io` | Target-appropriate default `std.Io`; the ordinary 0.17 startup path constructs `std.Io.Threaded`. | Pass the interface onward and label behavior that depends on [[io-threaded|the implementation]]. |
 | `environ_map` | Map initialized with `gpa`; explicitly not thread-safe and owned by startup. | Treat it as read-only after startup or copy selected values into owned immutable configuration before concurrency begins. |
 | `preopens` | Named files supplied by the parent, especially relevant to WASI/capability-style execution. | Prefer provided authority over rediscovering global filesystem access. |
 
@@ -47,7 +48,7 @@ tied to its map; do not free or mutate it as if it were caller-owned storage.
 
 ## Accepted entry-point shapes
 
-Zig 0.16 startup accepts a zero-parameter `main`, a first parameter of
+Zig 0.17 startup accepts a zero-parameter `main`, a first parameter of
 `std.process.Init.Minimal`, or the full `std.process.Init`. A zero-parameter
 entry point is still valid, but it deliberately declines the prepared
 capabilities. `Minimal` supplies only raw arguments and environment; choose it

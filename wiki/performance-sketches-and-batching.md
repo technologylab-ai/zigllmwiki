@@ -2,11 +2,12 @@
 id: performance-sketches-and-batching
 title: Performance sketches, control planes, and batching
 kind: pattern
-status: source-verified
-zig: "0.16.0"
+status: draft
+zig: "0.17.0"
 summary: Quantify resource demand before coding, weight costs by frequency, and use bounded control-plane batches to feed regular data-plane work without hiding latency or overload.
 updated: 2026-09-05
 sources:
+  - "[[zig-0.17.0-stdlib]]"
   - "[[zig-http-arena-adoption-2026-09-05]]"
   - "[[source-tigerstyle]]"
   - "[[tigerbeetle-performance]]"
@@ -154,7 +155,7 @@ it; safety remains TigerStyle's first goal.
 
 ## Executable sketch and harness
 
-The [Zig 0.16 proof](../proofs/performance_sketch.zig) models a finite
+The [Zig 0.17 proof](../proofs/performance_sketch.zig) models a finite
 256-request batch buffer. Its control plane owns admission and flushes; its
 data plane accepts two dense slices, allocates nothing, and returns a consumed
 digest. Tests prove that batch sizes 1 and 128 produce the same witness while

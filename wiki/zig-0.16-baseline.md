@@ -2,10 +2,10 @@
 id: zig-0-16-baseline
 title: Zig 0.16 baseline
 kind: concept
-status: source-verified
-zig: "0.16.0"
-summary: All active guidance and executable examples target the exact stable compiler recorded in .zig-version.
-updated: 2026-09-04
+status: superseded
+zig: "n/a"
+summary: Preserve the previous 0.16 baseline and route current guidance to exact Zig 0.17.0.
+updated: 2026-10-04
 sources:
   - "[[zig-0.16.0-release-notes]]"
   - "[[zig-0.16.0-stdlib]]"
@@ -17,11 +17,15 @@ platforms:
 
 # Zig 0.16 baseline
 
+This page preserves the dated 0.16 migration context.
+Current guidance targets [[zig-0.17-baseline]] and [[zig-0.17-upgrade-assessment]].
+Do not use this historical map as the current API reference.
+
 ## Remember
 
-The active target is the exact version in `.zig-version`: currently Zig
-0.16.0. The official downloads index lists 0.16.0 as the stable release and
-0.17.0-dev as master. This wiki targets stable 0.16.x, not master.
+Zig 0.16.0 was the active target before the explicit upgrade on 2026-10-04.
+The current target is [[zig-0.17-baseline]].
+See [[zig-0.17-upgrade-assessment]] for project migration findings and their evidence limits.
 
 Old material is useful only as source evidence. Before an older technique
 becomes guidance, port it to the active release, place runnable code in

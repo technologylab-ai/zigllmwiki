@@ -42,14 +42,14 @@ const BoundaryError = error{
 fn byteCountFromUsize(value: usize) BoundaryError!ByteCount {
     const narrowed = std.math.cast(u32, value) orelse
         return error.IntegerOutOfRange;
-    return @enumFromInt(narrowed);
+    return @fromBackingInt(narrowed);
 }
 
 fn totalWireBytes(payload_bytes: ByteCount) BoundaryError!u32 {
     return std.math.add(
         u32,
         @intCast(wire_record_size),
-        @intFromEnum(payload_bytes),
+        @backingInt(payload_bytes),
     ) catch error.IntegerOutOfRange;
 }
 
@@ -60,19 +60,19 @@ fn encode(record: WireRecord) [wire_record_size]u8 {
     std.mem.writeInt(
         u32,
         bytes[request_index_offset..item_count_offset],
-        @intFromEnum(record.request_index),
+        @backingInt(record.request_index),
         .little,
     );
     std.mem.writeInt(
         u32,
         bytes[item_count_offset..payload_bytes_offset],
-        @intFromEnum(record.item_count),
+        @backingInt(record.item_count),
         .little,
     );
     std.mem.writeInt(
         u32,
         bytes[payload_bytes_offset..flags_offset],
-        @intFromEnum(record.payload_bytes),
+        @backingInt(record.payload_bytes),
         .little,
     );
     std.mem.writeInt(
@@ -95,17 +95,17 @@ fn decode(bytes: []const u8) BoundaryError!WireRecord {
     if (flags.reserved != 0) return error.ReservedBitsSet;
 
     return .{
-        .request_index = @enumFromInt(std.mem.readInt(
+        .request_index = @fromBackingInt(std.mem.readInt(
             u32,
             bytes[request_index_offset..item_count_offset],
             .little,
         )),
-        .item_count = @enumFromInt(std.mem.readInt(
+        .item_count = @fromBackingInt(std.mem.readInt(
             u32,
             bytes[item_count_offset..payload_bytes_offset],
             .little,
         )),
-        .payload_bytes = @enumFromInt(std.mem.readInt(
+        .payload_bytes = @fromBackingInt(std.mem.readInt(
             u32,
             bytes[payload_bytes_offset..flags_offset],
             .little,
@@ -115,11 +115,11 @@ fn decode(bytes: []const u8) BoundaryError!WireRecord {
 }
 
 test "domain integers stay distinct and narrowing is checked" {
-    const count: ItemCount = @enumFromInt(7);
+    const count: ItemCount = @fromBackingInt(7);
     const bytes: ByteCount = try byteCountFromUsize(7);
 
     try std.testing.expect(@TypeOf(count) != @TypeOf(bytes));
-    try std.testing.expectEqual(@as(u32, 7), @intFromEnum(bytes));
+    try std.testing.expectEqual(@as(u32, 7), @backingInt(bytes));
 
     if (@bitSizeOf(usize) > @bitSizeOf(u32)) {
         try std.testing.expectError(
@@ -128,7 +128,7 @@ test "domain integers stay distinct and narrowing is checked" {
         );
     }
 
-    const maximum_payload: ByteCount = @enumFromInt(std.math.maxInt(u32));
+    const maximum_payload: ByteCount = @fromBackingInt(std.math.maxInt(u32));
     try std.testing.expectError(
         error.IntegerOutOfRange,
         totalWireBytes(maximum_payload),
@@ -137,9 +137,9 @@ test "domain integers stay distinct and narrowing is checked" {
 
 test "wire representation has explicit widths and little endian order" {
     const record: WireRecord = .{
-        .request_index = @enumFromInt(0x0102_0304),
-        .item_count = @enumFromInt(0x0506_0708),
-        .payload_bytes = @enumFromInt(0x090a_0b0c),
+        .request_index = @fromBackingInt(0x0102_0304),
+        .item_count = @fromBackingInt(0x0506_0708),
+        .payload_bytes = @fromBackingInt(0x090a_0b0c),
         .flags = .{ .urgent = true, .compressed = false, .kind = 2 },
     };
 
@@ -153,16 +153,16 @@ test "wire representation has explicit widths and little endian order" {
 
     const decoded = try decode(&bytes);
     try std.testing.expectEqual(
-        @intFromEnum(record.request_index),
-        @intFromEnum(decoded.request_index),
+        @backingInt(record.request_index),
+        @backingInt(decoded.request_index),
     );
     try std.testing.expectEqual(
-        @intFromEnum(record.item_count),
-        @intFromEnum(decoded.item_count),
+        @backingInt(record.item_count),
+        @backingInt(decoded.item_count),
     );
     try std.testing.expectEqual(
-        @intFromEnum(record.payload_bytes),
-        @intFromEnum(decoded.payload_bytes),
+        @backingInt(record.payload_bytes),
+        @backingInt(decoded.payload_bytes),
     );
     try std.testing.expectEqual(record.flags, decoded.flags);
 }
@@ -171,9 +171,9 @@ test "wire decoder rejects size and reserved-bit violations" {
     try std.testing.expectError(error.InvalidLength, decode(&.{0}));
 
     var bytes = encode(.{
-        .request_index = @enumFromInt(0),
-        .item_count = @enumFromInt(0),
-        .payload_bytes = @enumFromInt(0),
+        .request_index = @fromBackingInt(0),
+        .item_count = @fromBackingInt(0),
+        .payload_bytes = @fromBackingInt(0),
         .flags = .{ .urgent = false, .compressed = false, .kind = 0 },
     });
     bytes[wire_record_size - 1] = 0x80;
