@@ -13,6 +13,7 @@ The [project evidence record](../sources/zig-0.17-project-ports-2026-10-04.md) i
 The [final verification record](../sources/zig-0.17-final-verification-2026-10-04.md)
 closes the initial application and ordinary wiki gates, with the experimental full ARM64 gate deferred.
 The [Omajot follow-up record](../sources/omajot-zig-0.17-2026-10-04.md) adds final Baz integration and consumer evidence.
+The [Omagma follow-up record](../sources/omagma-zig-0.17-stdlib-followup-2026-10-05.md) adds descriptor-flag and HTTP-header findings.
 
 ## Port the complete dependency graph
 
@@ -354,6 +355,36 @@ A dependency can require libc and propagate that requirement.
 Libvaxis does so in this graph; Omajot's Linux build is a static musl binary.
 Keep historical size measurements dated.
 Measure the new compiler separately before making new size or performance claims.
+
+### Recheck OS flag layouts and comments
+
+Exact Zig 0.17 fixes `std.os.linux.CLOSE_RANGE` by adding its leading reserved bit.
+`UNSHARE` now has backing value two; `CLOEXEC` has backing value four.
+The adjacent numeric comments still show the old values one and two.
+Compare declarations and literal backing values with Linux UAPI before replacing a numeric workaround with typed flags.
+Then check the intended kernel behavior independently.
+`CLOEXEC` marks descriptors for closure at exec; it does not immediately close them.
+Omagma's native Linux probes check marking, successful pre-exec I/O, post-exec closure, and an unflagged positive control.
+Those probes do not exercise runtime `UNSHARE` behavior.
+The typed wrapper still returns a raw Linux syscall result; use its matching error decoder.
+The [pinned follow-up](../sources/omagma-zig-0.17-stdlib-followup-2026-10-05.md) preserves source and hosted qualification boundaries.
+
+### Retain qualified HTTP header workarounds
+
+Exact Zig 0.17 `std.http.Client.Request.sendHead` still does not emit `privileged_headers`.
+The same omission exists in exact 0.16.
+The public field, validation, and retained request storage do not prove wire emission.
+The standard `headers.authorization` override is emitted.
+Omagma retains that override, explicit destination restrictions, and `.redirect_behavior = .unhandled`.
+Its synthetic peer checks the literal bearer on the wire and verifies that redirects receive no followed request.
+
+The redirect code can clear `privileged_headers`, but retains `headers.authorization`.
+Do not assume privileged-header stripping protects an authorization override.
+Disable automatic redirects or enforce an explicit credential-forwarding policy.
+Keep borrowed header bytes valid through every send or resend.
+The omission and override retention are source conclusions; the application tests qualify the workaround and redirect rejection.
+A credential-free TLS/401 check does not prove bearer transmission or stripping.
+Read [[networking-and-dns-racing]] and the [pinned follow-up](../sources/omagma-zig-0.17-stdlib-followup-2026-10-05.md).
 
 ## Keep test budgets separate
 

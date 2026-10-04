@@ -1,4 +1,23 @@
-# Project handoff — Zig 0.17 upgrade, 2026-10-04
+# Project handoff — Zig 0.17 follow-up, 2026-10-05
+
+## Omagma standard-library follow-up — 2026-10-05
+
+[[omagma-zig-0.17-stdlib-followup-2026-10-05]] pins selected release-source findings before synthesis.
+The migration guide now covers corrected `CLOSE_RANGE` flags and their stale numeric comments.
+Networking guidance records privileged-header omission and authorization overrides retained during redirects.
+The synthesis qualifies the workaround with explicit destination restrictions and rejected automatic redirects.
+Native Linux fixture evidence does not qualify `UNSHARE`, cross-host stripping, or privileged-header omission.
+Application bug histories remain in Omagma; private receipts were not copied.
+The maintained proof graph is unchanged.
+Independent semantic review passed.
+Clean Mac Debug/Safe gates passed at `b0c5723e140cfcdb4d8f7b99cdaebf44f5a0c78b`.
+Both modes passed 93 steps, 79 tests, and nine explicit skips.
+All 42 tooling/site tests, 25 retrieval cases, and deterministic site checks passed.
+The [hosted Linux review](https://github.com/technologylab-ai/zigllmwiki/actions/runs/37243615479) passed that same revision.
+Both Linux modes passed 93 steps, 80 tests, and eight explicit skips.
+The hosted packet also passed 28 tooling tests, source review, retrieval policy, and checkout cleanliness.
+No new omarx1 gate ran because Omagma held its reservation.
+The prepared native scope closed without acquiring or changing that lock.
 
 ## Omajot and completed application merges — 2026-10-04
 
@@ -552,7 +571,7 @@ Read AGENTS.md, the zig-wiki skill, .zig-version, ROADMAP.md, CURATION.md,
 [the platform runbook](docs/platform-testing.md), and index.md before editing.
 Check worktree state, fetch origin, compare main with origin/main, then run
 `zig version` and `zig build verify --summary all` before relying on claims.
-The only active compiler is **0.16.0**, from `.zig-version`; installed release
+The only active compiler is **0.17.0**, from `.zig-version`; installed release
 source is API truth. Never silently follow master or a nearby patch release.
 
 Pin sources before synthesis; preserve cited source records. Runnable Zig

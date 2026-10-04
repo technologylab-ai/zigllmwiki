@@ -30,6 +30,15 @@ The official Zig 0.16 release notes are fully inventoried by named section in
 roadmap destination; it does not copy the release notes or claim that queued
 topics have already been synthesized.
 
+## Omagma standard-library follow-up — 2026-10-05
+
+[[omagma-zig-0.17-stdlib-followup-2026-10-05]] captures 14 source and hosted-metadata files before synthesis.
+The guide now distinguishes corrected Linux descriptor flags from their stale numeric comments.
+Networking guidance records unchanged privileged-header omission and authorization overrides retained during redirects.
+The synthesis separates source conclusions from native Linux fixture evidence.
+The source packet excludes private receipts and application bug histories.
+The selected findings reached synthesis without changing the maintained proof graph.
+
 ## Omajot compiler upgrade and final Baz integration — 2026-10-04
 
 [[omajot-zig-0.17-2026-10-04]] captures 695 files and immutable project revisions.

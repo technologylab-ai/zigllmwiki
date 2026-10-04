@@ -1368,3 +1368,35 @@ Five application PRs merged with merge commits and qualified-tree equality.
 The ordinary wiki proof inputs remain unchanged by this content ingest.
 The experimental full Windows ARM64 gate remains deferred.
 No intentional crash reproduction or application performance comparison ran.
+
+## 2026-10-05 — Omagma standard-library follow-up
+
+Captured [[omagma-zig-0.17-stdlib-followup-2026-10-05]] before updating migration and networking guidance.
+The snapshot preserves 14 selected files and exact compiler, Linux UAPI, project, and hosted run identities.
+Zig 0.17 corrects the Linux descriptor flag layout, while nearby numeric comments retain older values.
+The HTTP client still omits privileged headers and retains authorization overrides during redirects.
+The guidance requires explicit credential-forwarding controls and borrowed header storage through every send.
+The synthesis separates source conclusions from native Linux fixture evidence.
+Application bug histories and private receipts remain in Omagma.
+The maintained proof graph and historical source records remain unchanged.
+The handoff's active compiler instruction now matches the exact 0.17 baseline.
+
+## 2026-10-05 — Omagma follow-up verification
+
+Independent semantic review passed the selected synthesis and its 14-file source capture.
+Clean revision `b0c5723e140cfcdb4d8f7b99cdaebf44f5a0c78b` passed Mac Debug and ReleaseSafe verification with exact Zig 0.17.0.
+Each mode passed 93 steps, 79 tests, and nine explicit skips on arm64 macOS 26.6.2, build 25G83.
+All 42 tooling/site tests, 25 retrieval cases, and deterministic site checks passed.
+Retrieval scores were MRR 0.98, hit@3 1.0, and recall@5 0.96.
+The first canonical lint failed because an ignored archived worktree duplicated the wiki.
+That failed receipt remains preserved; the archive remained untouched and clean isolated gates passed.
+
+The [hosted Linux review](https://github.com/technologylab-ai/zigllmwiki/actions/runs/37243615479) passed the same revision.
+The x86_64 runner used Ubuntu 24.04.5, image `20260927.320.1`, and checksum-verified Zig 0.17.0.
+Both modes passed 93 steps, 80 tests, and eight explicit skips.
+All 28 tooling tests, bounded source review, retrieval policy, and checkout cleanliness passed.
+The packet did not capture the kernel; it establishes no new kernel-specific claim.
+No new omarx1 gate ran because Omagma held its live reservation.
+The prepared native scope closed without acquiring or changing that lock.
+No intentional crash witness or new Windows runtime gate ran.
+These completion records change no proof, compiler, build, or captured source input.
