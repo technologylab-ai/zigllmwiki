@@ -70,7 +70,7 @@ their own admission limits.
 
 The slice APIs accept `min`, bounded by the supplied slice length. With
 `min == 0`, they transfer what is available without waiting for more elements
-or space. The public comments call this nonblocking, but the installed 0.16.0
+or space. The public comments call this nonblocking, but the installed 0.17.0
 `TypeErasedQueue.put/get` first acquire an internal `Mutex` for nonempty
 slices. Contention can therefore still wait or return `error.Canceled`.
 The uncancelable variants acquire that mutex uncancelably. A zero minimum is
@@ -194,8 +194,9 @@ Six baseline tests in the [synchronization proof](../proofs/io_sync_primitives.z
 use Zig 0.17 `std.testing.io`: event cancellation/reset after join; canceled
 mutex acquisition and reuse; condition predicate handoff; queue capacity,
 close, and drain; shared/exclusive lock and semaphore balance; and an atomic
-futex predicate loop. It ran on aarch64 macOS on 2026-09-04. Interface claims
-are source-verified cross-platform. The same six tests ran with Zig 0.16.0 on
+futex predicate loop. The historical six-test version ran with Zig 0.16.0 on
+aarch64 macOS on 2026-09-04. Those receipts do not qualify the current compiler.
+The same historical six tests ran with Zig 0.16.0 on
 x86_64 Linux 7.1.9 and x86_64 Windows Server 2025 build 26100.33296 on
 2026-09-04; the Windows evidence is retained in
 [Actions run 33911991858](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33911991858).
@@ -208,7 +209,7 @@ with witnessed blocked producers and consumers. A separate release barrier
 shows that `close` has returned before the participant finishes; explicit join
 precedes storage reclamation.
 
-The new fixtures inspect exact 0.16 queue mutex/pending-list state under that
+The current fixtures inspect exact 0.17 queue mutex/pending-list state under that
 mutex. This is an implementation witness, not a portable inspection API. Each
 case has at most one worker and a native watchdog thread, one or two element
 slots, at most 5,000 witness attempts, and a watchdog that exits the process
@@ -224,8 +225,7 @@ explicit ARM64 target and native ARM64 execution. The
 [publication receipt](../reports/2026-09-04-publication-verification.md) retains
 commands, environments and [Windows run 33922946389](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33922946389).
 The older six-test results are not enlarged retroactively. The page remains
-`source-verified` for its broader synchronization contracts and implementation
-qualifications.
+draft while its broader contracts and current implementation are requalified.
 
 ## Review checklist
 

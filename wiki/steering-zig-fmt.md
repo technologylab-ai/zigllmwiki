@@ -50,7 +50,7 @@ need a clearer boundary.
 The [style fixture](../proofs/fmt_steering.zig) is compiled and included in the
 repository-wide `zig fmt --check`. A separate deterministic lint rejects lines
 over 100 characters in maintained Zig sources. Together they prove that Zig
-0.16.0 accepts and preserves the checked-in shape; they do not claim that
+0.17.0 accepts and preserves the checked-in shape; they do not claim that
 future versions make the same formatting choices or that formatting proves
 good naming and API design.
 

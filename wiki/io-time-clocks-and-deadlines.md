@@ -15,6 +15,7 @@ sources:
   - "[[hermit-io-timeout-proof]]"
 proofs:
   - proofs/io_time.zig
+  - proofs/threaded_none_sleep_linux_panic.zig
 platforms:
   - macos
   - linux
@@ -103,9 +104,18 @@ choice for elapsed work.
 `Timeout` describes when an operation that supports timeouts should return
 `error.Timeout`. Calling `Timeout.sleep` instead waits until the timeout has
 passed and returns only success or `error.Canceled`; it does not return
-`error.Timeout`. Sleeping on `.none` is a no-op in the shipped
-`std.Io.Threaded` implementation, matching the absence of a timeout rather
-than meaning “sleep forever.”
+`error.Timeout`. In Zig 0.17, sleeping on `.none` means waiting forever until
+canceled. Zig 0.16's Threaded implementation returned immediately for this
+case; carrying that expectation into a 0.17 test changes its meaning.
+
+The shipped 0.17 Threaded implementations do not consistently realize this
+contract. Linux converts `maxInt(i96)` nanoseconds to POSIX seconds before
+checking cancellation and panics because the value does not fit `time_t`.
+The macOS nanosleep path constructs an invalid maximal timespec and can return
+immediately after the OS rejects it. A passing immediate-return assertion on
+macOS therefore concealed the Linux defect. Avoid `.none.sleep` in code that
+requires a qualified infinite wait; use a suitable cancellation primitive or
+bounded finite waits after reviewing ownership. [[zig-0.17.0-stdlib]]
 
 ## Sleeping, scheduling, and cancellation
 
@@ -166,8 +176,19 @@ guard to timestamp external facts or replace wall-clock chronology.
 The [time proof](../proofs/io_time.zig) verifies Zig 0.17 duration conversion
 and `{f}` formatting, clock-tagged deadline arithmetic, timeout conversion,
 bounded rechecking of one absolute deadline, cancellation of a
-`std.Io.Threaded` sleep, and the pure strict-guard transition. It ran with Zig
-0.16.0 on aarch64 macOS 26.6.2, x86_64 Linux 7.1.9, and x86_64 Windows Server
+`std.Io.Threaded` finite sleep, and the pure strict-guard transition. An injected
+sleep vtable separately checks that `.none` is delegated unchanged and that
+`error.Canceled` propagates. That deterministic oracle qualifies the interface
+call, not a real infinite Threaded wait.
+
+The [Linux witness](../proofs/threaded_none_sleep_linux_panic.zig) runs in a
+separate Safe subprocess on native Linux. Verification requires SIGABRT, the
+exact integer-conversion panic, and the `timestampToPosix` trace. Unexpected
+success, hanging, or a different crash fails verification and requires review.
+Other hosts compile the file without executing this platform-specific witness.
+
+The earlier version of the time proof ran with Zig 0.16.0 on aarch64 macOS
+26.6.2, x86_64 Linux 7.1.9, and x86_64 Windows Server
 2025 build 26100.33296 on 2026-09-04. The Windows run is retained in
 [Actions run 33911991858](https://github.com/technologylab-ai/zigllmwiki/actions/runs/33911991858).
 

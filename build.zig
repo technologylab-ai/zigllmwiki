@@ -80,6 +80,27 @@ pub fn build(b: *std.Build) void {
     });
     verify_step.dependOn(&kqueue_compile_error.step);
 
+    const none_sleep_module = b.createModule(.{
+        .root_source_file = b.path("proofs/threaded_none_sleep_linux_panic.zig"),
+        .target = target,
+        .optimize = .safe,
+    });
+    const none_sleep_executable = b.addExecutable(.{
+        .name = "threaded-none-sleep-linux-panic",
+        .root_module = none_sleep_module,
+    });
+    // All hosts compile the maintained file. Only native Linux executes the
+    // release-specific panic witness; a changed outcome requires review.
+    verify_step.dependOn(&none_sleep_executable.step);
+    if (b.graph.host.result.os.tag == .linux and target.query.isNative()) {
+        const none_sleep_panic = b.addSystemCommand(&.{
+            "python3",
+            "tools/verify_linux_none_sleep_panic.py",
+        });
+        none_sleep_panic.addFileArg2(none_sleep_executable.getEmittedBin(), .{});
+        verify_step.dependOn(&none_sleep_panic.step);
+    }
+
     const proof_sources = [_][]const u8{
         "proofs/zig_017_semantics.zig",
         "proofs/async_vs_concurrent.zig",

@@ -82,6 +82,13 @@ Test lengths across vector widths and every possible delimiter lane.
 Baz had no direct `@bitCast` calls before this migration.
 That fact did not exempt its dependencies or fixtures from inspection.
 
+Use `@backingInt` and `@fromBackingInt` for enum backing values and packed
+types with explicit backing integers. The old enum builtin names are deprecated.
+The constructor requires the exact backing integer type; `zig fmt` may insert
+an `@intCast` while porting it. Check ranges and valid enum tags before accepting
+that rewrite. The engine uses `@backingInt` for explicit packed OS flags,
+keeping their numeric representation intent clear.
+
 ## Preserve array and string meaning
 
 Array repetition with `**` is removed. `zig fmt` does not port it.
@@ -233,6 +240,31 @@ Preserve preallocation and the absence of blocking work on the request I/O loop.
 A compiler upgrade does not establish backend progress or resource guarantees.
 Unchanged public `std.Io`, thread, or atomic signatures do not prove unchanged runtime behavior.
 
+### Inspect infinite waits and ancillary data
+
+In 0.17, `Io.Timeout.none.sleep` means wait forever until cancellation.
+The old Threaded implementation treated it as an immediate return.
+A mechanical test port can hang or exercise an entirely different behavior.
+The shipped Linux Threaded body instead panics while converting its maximal
+timestamp to POSIX seconds, before checking cancellation.
+Its macOS nanosleep path can return immediately after an invalid timespec is
+rejected, concealing the changed contract in a test that expects a no-op.
+
+The wiki now tests delegation and cancellation with an injected sleep oracle.
+A separate native Linux subprocess requires the exact shipped overflow panic.
+That witness documents a defect; it does not qualify infinite Threaded sleep.
+Use a suitable cancellation primitive or finite waits where ownership and
+shutdown require reliable progress. Baz and [bounded/http](https://technologylab-ai.github.io/bounded-http/)'s passing native
+gates do not instantiate the experimental evented backends discussed below.
+
+Review new socket control-data contracts even when a method keeps its name.
+Threaded stream reads now accept ancillary storage and return `control_len`
+and `control_truncated` alongside data length. Retain both data and control
+buffers through completion, and handle truncation explicitly. Stream writes
+clear control data after a successful write so it is delivered once; preserve
+that state across partial progress instead of resending the control message.
+`net_send` is message/datagram sending; `net_read` and `net_write` are streams.
+
 ## Record native evidence and exclusions
 
 The [project evidence record](../sources/zig-0.17-project-ports-2026-10-04.md) names commits and captured receipts.
@@ -260,6 +292,12 @@ The full wiki upgrade found stale vtable assignments in the shipped evented back
 Dispatch and Uring still assign removed process-path members.
 Kqueue also assigns removed network members.
 Declaring a backend type does not prove that its method bodies compile.
+
+These blockers do not affect the tested Baz dependency graph.
+The engine owns its io_uring, kqueue, and IOCP transport adapters, using
+low-level OS interfaces rather than those experimental `std.Io` backends.
+Baz's service examples receive the default Threaded-backed process `Init.io`.
+The native application gates qualify that specific graph and its exercised paths.
 
 Dispatch initialization calls its broken `io()` method.
 The active proof therefore cannot claim initialization or a positional read through that backend.

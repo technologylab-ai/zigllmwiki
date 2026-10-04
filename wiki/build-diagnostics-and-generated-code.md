@@ -34,7 +34,9 @@ and supplement the compiler with project checks for policies it cannot know.
 
 ## What Zig 0.17 guarantees and exposes
 
-The exact 0.16 compiler help and build source establish these separate knobs:
+The exact 0.17 compiler help and build source establish these separate knobs.
+The current source is [[zig-0.17.0-stdlib]]; the older diagnostic source below
+retains the historical 0.16 investigation.
 
 | Mechanism | Exact applicability |
 | --- | --- |

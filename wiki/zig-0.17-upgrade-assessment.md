@@ -21,7 +21,7 @@ platforms:
 ## Remember
 
 Read the [migration guide](../docs/zig-0.16-to-0.17-migration.md) before porting a complete dependency graph.
-The guide incorporates the Baz, bounded/http, Mustache, and zli ports.
+The guide incorporates the Baz, [bounded/http](https://technologylab-ai.github.io/bounded-http/), Mustache, and zli ports.
 The wiki's active baseline is [[zig-0.17-baseline]].
 The upgrade invalidates prior labels before requalifying current pages and proofs.
 
@@ -32,6 +32,7 @@ The upgrade invalidates prior labels before requalifying current pages and proof
 - Preserve string and sentinel behavior when replacing removed array repetition.
 - Update build APIs, final dependency pins, and machine-readable optimization tags.
 - Separate request deadlines from idle limits and test watchdogs.
+- Recheck infinite-sleep semantics and distinguish experimental std.Io backend blockers from OS adapters.
 - Record native verification and excluded historical dependency samples.
 
 [[zig-0.17.0-stdlib]] provides exact compiler and library semantics.

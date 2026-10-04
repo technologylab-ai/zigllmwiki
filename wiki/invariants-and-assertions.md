@@ -100,7 +100,7 @@ permits, and lock/queue terminal states are applied in
 invariant instead of from example-by-example fixes. It asserts a bounded loop,
 preservation of the search partition, and the return postcondition. Its test
 checks every candidate position for small arrays with duplicates, so both the
-unique valid answer and the negative space are exercised under Zig 0.16.0.
+unique valid answer and the negative space are exercised under Zig 0.17.0.
 
 ### Persistence assertion pair
 

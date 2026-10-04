@@ -36,7 +36,7 @@ for the requirements of such a backend.
 
 ## `std.testing.io` uses the host
 
-In Zig 0.16.0, `std.testing.io` is an `std.Io` whose implementation value is
+In Zig 0.17.0, `std.testing.io` is an `std.Io` whose implementation value is
 the mutable `std.testing.io_instance`. The default test runner initializes that
 instance as `std.Io.Threaded` before each test, passing `std.testing.allocator`
 and the runner's arguments and environment, then deinitializes it after the
@@ -90,7 +90,7 @@ requires caller/task overlap, propagate or handle it; switching the call to
 
 `std.Io.failing` is useful for proving that a path does not need ambient
 capabilities, and for exercising representative hard failures without touching
-the host. Its exact Zig 0.16.0 profile includes:
+the host. Its exact Zig 0.17.0 profile includes:
 
 - `async` runs eagerly, while `concurrent` returns
   `error.ConcurrencyUnavailable`;
@@ -106,11 +106,11 @@ the host. Its exact Zig 0.16.0 profile includes:
 
 Do not generalize this profile into “all operations fail.” Several operations
 deliberately succeed or return inert values. Most importantly, the installed
-0.16.0 implementation returns the zero timestamp from `now`, makes `sleep` a
+0.17.0 implementation returns the zero timestamp from `now`, makes `sleep` a
 no-op that succeeds, and reports `error.ClockUnavailable` from clock
 `resolution`. This implementation behavior contradicts the broader prose above
 `Io.failing`, which says clock calls return `error.UnsupportedClock`; the exact
-vtable functions and the executable proof are the guidance for 0.16.0.
+vtable functions and the executable proof are the guidance for 0.17.0. [[zig-0.17.0-stdlib]]
 
 Also do not use `Io.failing` as a programmable fault campaign. It cannot choose
 “fail the third write,” advance virtual time, reorder completions, or model a

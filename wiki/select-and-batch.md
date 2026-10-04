@@ -89,11 +89,12 @@ Once cancellation begins, do not call `await` or `awaitMany` again. Both
 
 ## `Batch`: fixed low-level operation slots
 
-Zig 0.17 adds stream send, read, and write operations alongside datagram receive.
+Zig 0.17 adds message/datagram send (`net_send`) and stream read/write
+(`net_read`, `net_write`) operations alongside datagram receive.
 Inspect each operation's result and control-data contract before sharing a slot layout.
 Threaded's POSIX poll paths support their required read/write readiness.
 Windows concurrent batches reject all four network operation tags in the shipped source.
-The existing datagram proof does not qualify the three new stream operations on every platform.
+The existing datagram proof does not qualify the three added operations on every platform.
 [[zig-0.17.0-stdlib]]
 
 `Batch.init` takes a preallocated slice of `Operation.Storage`. That slice is
@@ -200,8 +201,9 @@ Zig 0.16.0 on x86_64 Windows Server 2025 build 26100.33296 on 2026-09-04.
 It preserves completed results, reconciles 32 cancellation/write races, and
 observes the initial-wait defect before an explicit NT alert releases it.
 The exact environment and scope are in [[windows-iocp-and-overlapped-io]].
-This page is now `source-verified`: the added Windows progress analysis must
-not inherit the earlier macOS-only runtime label as a portable guarantee.
+This page remains draft during 0.17 requalification. The Windows progress
+analysis and the dated runtime receipts have separate compiler and platform
+scopes; neither establishes portable progress for every 0.17 operation.
 
 ## Review checklist
 
