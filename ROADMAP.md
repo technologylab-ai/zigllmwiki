@@ -38,11 +38,12 @@ Keep dated 0.16 platform receipts separate from current proof results.
 
 ## Omagma standard-library follow-up — 2026-10-05
 
-Status: done for source capture and synthesis; verification is running.
+Status: done for source capture, synthesis, semantic review, and Mac/hosted-Linux verification.
 [[omagma-zig-0.17-stdlib-followup-2026-10-05]] pins corrected descriptor flags and unchanged HTTP header behavior.
 The migration map and networking guide expose stale numeric comments and explicit credential-forwarding controls.
 Application bug histories remain in Omagma.
 The maintained proof graph is unchanged; the experimental Windows ARM64 gate remains deferred.
+The handoff records exact verification scope and the unavailable omarx1 gate.
 
 ## Windows HTTP implementation — 2026-09-06
 
