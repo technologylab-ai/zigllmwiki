@@ -57,15 +57,20 @@ def main() -> None:
         if child.poll() is None:
             print(stop_child(child), end="")
     print(output, end="")
+    print(f"Witness return code: {child.returncode}")
     normalized = output.replace("\\", "/")
+    binary_name = re.escape(Path(executable).name)
+    # Safe inlining removes sleepPosix and the fixture's main from the trace.
+    # Bind the retained frames to the precise shipped conversion site and this
+    # executable rather than requiring frames the optimizer does not preserve.
     required_frames = (
-        r"std/Io/Threaded\.zig:\d+:\d+:.* in timestampToPosix\b",
-        r"std/Io/Threaded\.zig:\d+:\d+:.* in sleepPosix\b",
-        r"proofs/threaded_none_sleep_linux_panic\.zig:\d+:\d+:.* in main\b",
+        rf"/lib/std/Io/Threaded\.zig:14634:16:.* in timestampToPosix \({binary_name}\)",
+        rf"/lib/std/Io\.zig:1290:31:.* in sleep \({binary_name}\)",
     )
     if not (
         child.returncode == -signal.SIGABRT
         and "panic: integer does not fit in destination type" in output
+        and ".sec = @intCast(@divFloor(nanoseconds, std.time.ns_per_s))," in output
         and all(re.search(frame, normalized) for frame in required_frames)
     ):
         raise SystemExit("Expected the exact Threaded time_t overflow panic; requalify this backend")

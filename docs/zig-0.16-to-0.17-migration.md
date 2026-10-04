@@ -253,6 +253,10 @@ rejected, concealing the changed contract in a test that expects a no-op.
 The wiki now tests delegation and cancellation with an injected sleep oracle.
 A separate native Linux subprocess requires the exact shipped overflow panic.
 That witness documents a defect; it does not qualify infinite Threaded sleep.
+Safe optimization omitted internal and caller frames from the witness trace.
+Match the exact retained panic site and originating executable, rather than
+assuming Debug and Safe preserve the same call frames. Keep the first overly
+strict checker failure as evidence when correcting the harness.
 Use a suitable cancellation primitive or finite waits where ownership and
 shutdown require reliable progress. Baz and [bounded/http](https://technologylab-ai.github.io/bounded-http/)'s passing native
 gates do not instantiate the experimental evented backends discussed below.
