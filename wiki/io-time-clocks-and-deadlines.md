@@ -185,7 +185,10 @@ The [Linux witness](../proofs/threaded_none_sleep_linux_panic.zig) runs in a
 separate Safe subprocess on native Linux. Verification requires SIGABRT, the
 exact integer-conversion panic, and the `timestampToPosix` trace. Unexpected
 success, hanging, or a different crash fails verification and requires review.
-Other hosts compile the file without executing this platform-specific witness.
+Run this intentionally aborting child only through the explicit native Linux
+step `zig build verify-linux-none-sleep-defect`. Normal `zig build verify`
+compiles the file without running it. Core dumps are disabled, but OS crash
+monitors can still report its deliberate SIGABRT.
 
 The earlier version of the time proof ran with Zig 0.16.0 on aarch64 macOS
 26.6.2, x86_64 Linux 7.1.9, and x86_64 Windows Server

@@ -89,16 +89,20 @@ pub fn build(b: *std.Build) void {
         .name = "threaded-none-sleep-linux-panic",
         .root_module = none_sleep_module,
     });
-    // All hosts compile the maintained file. Only native Linux executes the
-    // release-specific panic witness; a changed outcome requires review.
+    // Normal verification compiles this maintained file without intentionally
+    // crashing. The separate native Linux reproducer requires explicit use.
     verify_step.dependOn(&none_sleep_executable.step);
     if (b.graph.host.result.os.tag == .linux and target.query.isNative()) {
+        const defect_step = b.step(
+            "verify-linux-none-sleep-defect",
+            "Reproduce the known infinite-sleep panic (intentionally aborts a child)",
+        );
         const none_sleep_panic = b.addSystemCommand(&.{
             "python3",
             "tools/verify_linux_none_sleep_panic.py",
         });
         none_sleep_panic.addFileArg2(none_sleep_executable.getEmittedBin(), .{});
-        verify_step.dependOn(&none_sleep_panic.step);
+        defect_step.dependOn(&none_sleep_panic.step);
     }
 
     const proof_sources = [_][]const u8{
