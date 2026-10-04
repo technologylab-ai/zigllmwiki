@@ -2,11 +2,12 @@
 id: error-context
 title: Error context and diagnostics
 kind: pattern
-status: source-verified
-zig: "0.16.0"
+status: draft
+zig: "0.17.0"
 summary: Keep typed errors for control flow, accumulate structured context along the happy path, and emit diagnostics only at the boundary that knows an error is unhandled.
-updated: 2026-09-04
+updated: 2026-10-04
 sources:
+  - "[[zig-0.17.0-stdlib]]"
   - "[[matklad-zig-error-context]]"
   - "[[matklad-error-codes-for-control-flow]]"
   - "[[matklad-diagnostics-factory]]"
@@ -49,7 +50,7 @@ decided the error is fatal or even noteworthy. An outer retry, optional lookup,
 or cancellation owner may handle it normally. Logging in the lower layer then
 creates a scary but false diagnostic.
 
-This matters throughout Zig 0.16 I/O because `error.Canceled` is intended
+This matters throughout Zig 0.17 I/O because `error.Canceled` is intended
 control flow at cancellation points. Capture context if useful, propagate the
 error, and let the future/group owner decide whether it represents expected
 cancellation, an operational failure, or a programmer invariant violation.

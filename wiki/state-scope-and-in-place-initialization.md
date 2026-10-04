@@ -2,11 +2,12 @@
 id: state-scope-and-in-place-initialization
 title: State scope and in-place initialization
 kind: pattern
-status: source-verified
-zig: "0.16.0"
+status: draft
+zig: "0.17.0"
 summary: Keep one authoritative state value near its use, borrow large read-only values, initialize address-sensitive objects in their final storage, and revalidate invariants across suspension.
-updated: 2026-09-04
+updated: 2026-10-04
 sources:
+  - "[[zig-0.17.0-stdlib]]"
   - "[[source-tigerstyle]]"
   - "[[zig-0.16.0-language-reference]]"
 proofs:
@@ -52,7 +53,7 @@ not fewer types or weaker contracts.
 
 TigerStyle uses 16 bytes as a review threshold: a read-only argument larger
 than that should normally be passed by `*const T` if the callee does not need a
-copy. This is a project design rule, **not** a Zig 0.16 ABI guarantee. Target,
+copy. This is a project design rule, **not** a Zig 0.17 ABI guarantee. Target,
 calling convention, optimization, and type layout still determine generated
 code.
 

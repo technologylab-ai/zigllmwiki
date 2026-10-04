@@ -1,7 +1,7 @@
 const std = @import("std");
 const builtin = @import("builtin");
 
-test "Zig 0.16 Windows std.Io surface maps to NT status blocks, not IOCP" {
+test "Zig 0.17 Windows std.Io surface maps to NT status blocks, not IOCP" {
     if (builtin.os.tag == .windows) {
         try checkWindowsMapping();
     } else {
@@ -23,7 +23,7 @@ fn checkWindowsMapping() !void {
         std.debug.assert(@hasDecl(windows.ntdll, "NtCancelSynchronousIoFile"));
         std.debug.assert(@hasDecl(std.Io.Threaded, "waitForApcOrAlert"));
 
-        // Zig 0.16's std.os.windows surface does not provide the Win32 IOCP
+        // Zig 0.17's std.os.windows surface does not provide the Win32 IOCP
         // and OVERLAPPED declarations. An IOCP adapter therefore needs its own
         // bindings; std.Io.Threaded is not that adapter.
         std.debug.assert(!@hasDecl(windows, "OVERLAPPED"));

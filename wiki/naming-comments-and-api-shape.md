@@ -2,11 +2,12 @@
 id: naming-comments-and-api-shape
 title: TigerStyle naming, comments, and API shape
 kind: pattern
-status: source-verified
-zig: "0.16.0"
+status: draft
+zig: "0.17.0"
 summary: Make Zig systems code auditable through domain names, explicit options, callback order, top-down files, intentional comments, and a declared TigerStyle naming profile.
 updated: 2026-09-06
 sources:
+  - "[[zig-0.17.0-stdlib]]"
   - "[[source-tigerstyle]]"
   - "[[zig-0.16.0-style-guide]]"
   - "[[matklad-steering-zig-fmt]]"

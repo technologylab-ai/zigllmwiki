@@ -2,11 +2,12 @@
 id: tigerstyle-coverage
 title: TigerStyle principle coverage
 kind: map
-status: source-verified
-zig: "0.16.0"
-summary: Rule-by-rule inventory showing which TigerStyle principles have focused Zig 0.16 guidance and which still need synthesis or proof.
-updated: 2026-09-04
+status: draft
+zig: "0.17.0"
+summary: Rule-by-rule inventory showing which TigerStyle principles have focused Zig 0.17 guidance and which still need synthesis or proof.
+updated: 2026-10-04
 sources:
+  - "[[zig-0.17.0-stdlib]]"
   - "[[source-tigerstyle]]"
   - "[[matklad-size-matters]]"
 proofs: []
@@ -19,7 +20,7 @@ platforms:
 ## Status meaning
 
 - **Covered:** focused guidance exists and any code claim has an executable
-  Zig 0.16 proof.
+  Zig 0.17 proof.
 - **Partial:** the rule is represented, but an applied page, counterexample, or
   proof named in the target column is still required.
 - **Missing:** only the pinned source currently explains the rule. The target
@@ -47,12 +48,12 @@ missing principles.
 | Put a fixed upper bound on loops, queues, and real resources; assert intentionally infinite loops. | covered | [[static-allocation-and-constant-work]] and the bounded-progress proof in [[invariants-and-assertions]]. |
 | Prefer explicitly sized domain integers and avoid automatic `usize` modeling. | covered | [[integer-widths-and-boundaries]] and its checked-conversion proof; [[newtype-indexes]] for typed handles. |
 | Separate expected operational errors from programmer defects; stop on corrupt invariants. | covered | [[error-handling-and-diagnostics]]. |
-| Assert arguments, returns, preconditions, postconditions, and invariants; maintain high assertion density. | covered | [[invariants-and-assertions]] and its Zig 0.16 proof. |
+| Assert arguments, returns, preconditions, postconditions, and invariants; maintain high assertion density. | covered | [[invariants-and-assertions]] and its Zig 0.17 proof. |
 | Pair one property's assertions on independent paths, such as before write and after read. | covered | [[invariants-and-assertions]] and its persistence-boundary proof. |
 | Use a blatantly true assertion as executable documentation only for a critical surprising fact. | covered | [[invariants-and-assertions]]. |
 | Split compound assertions for simpler reasoning and precise failure location. | covered | [[invariants-and-assertions]]. |
 | Express implication as a single-line conditional assertion. | covered | [[invariants-and-assertions]]. |
-| Assert relationships among compile-time constants and important type sizes. | covered | [[newtype-indexes]] and its Zig 0.16 size proof. |
+| Assert relationships among compile-time constants and important type sizes. | covered | [[newtype-indexes]] and its Zig 0.17 size proof. |
 | Assert positive and negative spaces; test valid, invalid, and valid-to-invalid transitions. | covered | [[invariants-and-assertions]] proves a unique valid result and every invalid candidate; [[deterministic-simulation-testing]] scales the technique. |
 | Build the mental model first; assertions and fuzzing test understanding but cannot prove absence of bugs. | covered | [[deterministic-simulation-testing]]. |
 | Allocate all memory at startup; do not allocate, free, and reuse dynamically afterward. | covered | [[static-allocation-and-constant-work]]. |
@@ -60,13 +61,13 @@ missing principles.
 | Limit functions to 70 lines and prefer an inverse-hourglass shape. | covered | [[function-shape-and-control-flow]] combines the hard review bound, architectural-size caveat, applied decomposition, and review checklist. |
 | Centralize branches and push repetitive mechanics into non-branching leaves. | covered | [[function-shape-and-control-flow]] and its parent/leaf batch transition proof. |
 | Centralize state mutation; keep parent state local and leaf computations pure where practical. | covered | [[function-shape-and-control-flow]] keeps mutation in the controller after a narrow leaf computes its candidate delta. |
-| Enable and respect the strictest compiler warnings from day one. | covered | [[build-diagnostics-and-generated-code]] records that Zig 0.16 has no general Zig-source warning level, then maps the rule to compile errors, safety modes, explicit foreign-source flags, sanitizers, target/mode matrices, and repository checks. |
+| Enable and respect the strictest compiler warnings from day one. | covered | [[build-diagnostics-and-generated-code]] records that Zig 0.17 has no general Zig-source warning level, then maps the rule to compile errors, safety modes, explicit foreign-source flags, sanitizers, target/mode matrices, and repository checks. |
 | Decouple external event arrival from internal work cadence to preserve batching and work bounds. | covered | [[performance-sketches-and-batching]] gives external callbacks an eligibility role while a bounded control plane owns cadence and flush triggers. |
 | Replace compound conditions and long `else if` chains with explicit nested cases. | covered | [[function-shape-and-control-flow]] and its exhaustively tested nested admission tree. |
 | State invariants positively; prefer `index < count` over reasoning through negation. | covered | [[invariants-and-assertions]]. |
-| Handle every error path and test non-fatal errors explicitly. | covered | [[error-path-catalogs-and-fault-injection]] defines producer/state/ownership/retry/bound/observation rows and proves exhaustive Zig 0.16 fault-tag traversal across four non-fatal paths. |
+| Handle every error path and test non-fatal errors explicitly. | covered | [[error-path-catalogs-and-fault-injection]] defines producer/state/ownership/retry/bound/observation rows and proves exhaustive Zig 0.17 fault-tag traversal across four non-fatal paths. |
 | Always record why a decision exists. | covered | [[source-archaeology]] and the source-record contract. |
-| Pass library options explicitly rather than inheriting defaults that may change. | covered | [[naming-comments-and-api-shape]] and its Zig 0.16 explicit-options fixture. |
+| Pass library options explicitly rather than inheriting defaults that may change. | covered | [[naming-comments-and-api-shape]] and its Zig 0.17 explicit-options fixture. |
 
 ## Performance
 
@@ -75,7 +76,7 @@ missing principles.
 | Consider architecture-level performance before profiling can exist. | covered | [[performance-sketches-and-batching]] supplies a falsifiable pre-implementation worksheet and worked server sketch. |
 | Sketch network, disk, memory, and CPU bandwidth and latency. | covered | [[performance-sketches-and-batching]] keeps bandwidth, serialized latency, queue memory, CPU cycles, and tail latency as separate constraints. |
 | Optimize slow resources first after weighting access frequency. | covered | [[performance-sketches-and-batching]] demonstrates that durability-call frequency dominates comfortable disk bandwidth. |
-| Separate control and data planes so expensive assertions stay off regular hot loops. | covered | [[performance-sketches-and-batching]] defines the ownership split while retaining entry, local, and return-path invariants; its Zig 0.16 proof separates the loops. |
+| Separate control and data planes so expensive assertions stay off regular hot loops. | covered | [[performance-sketches-and-batching]] defines the ownership split while retaining entry, local, and return-path invariants; its Zig 0.17 proof separates the loops. |
 | Batch network, disk, memory, and CPU work to amortize overhead. | covered | [[performance-sketches-and-batching]] models each resource, finite queues, backpressure, and size/deadline/shutdown flush triggers. |
 | Give CPUs predictable, sufficiently large, branch-light chunks of work. | covered | [[performance-sketches-and-batching]] and its proof feed dense bounded slices to a stand-alone data-plane loop. |
 | Make machine-code intent explicit rather than depending blindly on optimization. | covered | [[build-diagnostics-and-generated-code]] provides an exact-version/target/CPU/mode inspection workflow and a reporting tool against a proved stand-alone symbol; [[trustworthy-microbenchmarks]] retains correctness and measurement boundaries. |
@@ -94,11 +95,11 @@ missing principles.
 | Name allocator strategy and lifetime, such as `gpa` or `arena`, not merely its interface type. | covered | [[naming-comments-and-api-shape]] gives the naming rule; [[static-allocation-and-constant-work]] gives the lifetime consequence. |
 | Prefer symmetrical related names that align visually when meaning is preserved. | covered | [[naming-comments-and-api-shape]] makes semantic precision the constraint on symmetry. |
 | Prefix a unique helper/callback with its caller's name to expose call history. | covered | [[naming-comments-and-api-shape]] and the `read_sector_callback` style fixture. |
-| Put callback parameters last to mirror invocation order. | covered | [[naming-comments-and-api-shape]] and the Zig 0.16 style fixture. |
+| Put callback parameters last to mirror invocation order. | covered | [[naming-comments-and-api-shape]] and the Zig 0.17 style fixture. |
 | Order files top-down; put important entry points first and struct fields before nested types and methods. | covered | [[naming-comments-and-api-shape]] states the navigation rule and the style fixture follows it. |
 | Do not overload one term with multiple domain meanings. | covered | [[naming-comments-and-api-shape]] gives the naming rule; [[cancellation]] applies it to cancellation, shutdown, and crash recovery. |
 | Prefer names that compose naturally in documentation and derived identifiers. | covered | [[naming-comments-and-api-shape]]. |
-| Use an options struct for confusable same-typed arguments and nullable literals; thread unique dependencies positionally. | covered | [[naming-comments-and-api-shape]] and the executable Zig 0.16 style fixture. |
+| Use an options struct for confusable same-typed arguments and nullable literals; thread unique dependencies positionally. | covered | [[naming-comments-and-api-shape]] and the executable Zig 0.17 style fixture. |
 | Write descriptive commit messages; a PR description is not durable Git history. | covered | [[source-archaeology]]. |
 | Comments explain why and show the reasoning. | covered | [[naming-comments-and-api-shape]] gives the convention; [[source-archaeology]] preserves longer-lived rationale. |
 | Tests explain their goal and methodology. | covered | [[naming-comments-and-api-shape]] gives the convention and its style fixture applies it. |
@@ -122,10 +123,10 @@ missing principles.
 
 | Principle | Coverage | Current guidance / target |
 | --- | --- | --- |
-| Treat index, count, and byte size as distinct domains with explicit conversions. | covered | [[integer-widths-and-boundaries]] and its Zig 0.16 checked-arithmetic proof; [[newtype-indexes]] for compact handle types. |
-| Express division rounding intent with exact, floor, or ceiling operations. | covered | [[buffer-hygiene-and-division-intent]] and its Zig 0.16 proof distinguish rounding, remainders, zero, signed values, and overflow. |
+| Treat index, count, and byte size as distinct domains with explicit conversions. | covered | [[integer-widths-and-boundaries]] and its Zig 0.17 checked-arithmetic proof; [[newtype-indexes]] for compact handle types. |
+| Express division rounding intent with exact, floor, or ceiling operations. | covered | [[buffer-hygiene-and-division-intent]] and its Zig 0.17 proof distinguish rounding, remainders, zero, signed values, and overflow. |
 | Run `zig fmt`. | covered | [[steering-zig-fmt]], [[naming-comments-and-api-shape]], and repository format verification. |
-| Use four-space indentation. | covered | [[naming-comments-and-api-shape]] and Zig 0.16 formatting enforce canonical indentation. |
+| Use four-space indentation. | covered | [[naming-comments-and-api-shape]] and Zig 0.17 formatting enforce canonical indentation. |
 | Limit code to 100 columns and use trailing commas to request canonical wrapping. | covered | [[steering-zig-fmt]] covers layout steering; repository lint separately enforces TigerStyle's hard 100-character ceiling for maintained Zig sources. |
 | Use braces for multi-line conditionals; omit only for a single-line statement. | covered | [[naming-comments-and-api-shape]] states the strict rule and its style fixture demonstrates the braced form. |
 
@@ -138,8 +139,10 @@ missing principles.
 
 ## Closure and continuing audit
 
-All 71 principles in the pinned TigerStyle revision now have focused guidance
-and every local Zig code claim has Zig 0.16 evidence. This closes inventory coverage,
+All 71 principles in the pinned TigerStyle revision have focused guidance.
+Maintained proofs now target Zig 0.17; historical runtime receipts retain their original compiler scope.
+The upgrade invalidates earlier verification labels before requalification.
+This closes inventory coverage,
 not automatic conformance: each concrete subsystem must still apply the design
 sketch, exception/dependency gates, error catalog, platform runtime matrix, and
 review checklist to its own workload and fault model.

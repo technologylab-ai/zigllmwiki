@@ -9,13 +9,24 @@ resumed. Update this file when ownership, completion, or scope changes.
 ## North star
 
 A coding agent designing Zig systems software can consult this repository and
-produce Zig 0.16.0 code that:
+produce Zig 0.17.0 code that:
 
 - compiles under the pinned compiler;
 - models `std.Io`, scheduling, cancellation, and limits correctly;
 - makes platform-specific I/O choices without pretending they are portable;
 - applies TigerStyle as concrete engineering constraints;
 - can trace important recommendations to primary sources and runnable proofs.
+
+## Zig 0.17 upgrade — 2026-10-04
+
+Status: running verification.
+The user authorized the full compiler, proof, current-guidance, workflow, and README upgrade.
+[[zig-0.17-baseline]] owns the active target; [[zig-0.17-upgrade-assessment]] routes migration findings.
+New source records preserve exact release and project identities without rewriting older evidence.
+Prior verification labels are invalidated before requalification.
+Complete the full Debug/Safe Mac and Linux gates, retrieval/site checks, and native Windows qualification.
+Keep the shipped Dispatch/Uring/Kqueue compile blockers visible through their expected-error witnesses.
+Keep dated 0.16 platform receipts separate from current proof results.
 
 ## Windows HTTP implementation — 2026-09-06
 

@@ -2,11 +2,12 @@
 id: async-vs-concurrent
 title: std.Io async versus concurrent
 kind: pattern
-status: runtime-verified
-zig: "0.16.0"
+status: draft
+zig: "0.17.0"
 summary: async may execute work inline, while concurrent requires independent caller progress or returns ConcurrencyUnavailable.
 updated: 2026-09-28
 sources:
+  - "[[zig-0.17.0-stdlib]]"
   - "[[zig-0.16.0-stdlib]]"
   - "[[zig-0.16.0-release-notes]]"
   - "[[hermit-io-timeout-proof]]"

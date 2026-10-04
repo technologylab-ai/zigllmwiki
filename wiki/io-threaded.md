@@ -3,10 +3,11 @@ id: io-threaded
 title: std.Io.Threaded implementation guide
 kind: concept
 status: source-verified
-zig: "0.16.0"
-summary: Zig 0.16 Threaded shares task capacity across dispatch paths, allocates before admission checks, and cancels supported blocking calls.
-updated: 2026-09-28
+zig: "0.17.0"
+summary: Zig 0.17 Threaded shares task capacity, allocates before admission checks, and retains backend-specific cancellation limits.
+updated: 2026-10-04
 sources:
+  - "[[zig-0.17.0-stdlib]]"
   - "[[zig-0.16.0-release-notes]]"
   - "[[zig-0.16.0-stdlib]]"
   - "[[matklad-neat-io-threaded]]"
@@ -24,8 +25,9 @@ platforms:
 
 ## Remember
 
-In Zig 0.16.0, `std.Io.Threaded` is the feature-complete, tested implementation
-used by the default `main` runtime. It provides the `std.Io` interface with
+Zig 0.17.0 uses `std.Io.Threaded` in the default `main` runtime.
+`lib/std/start.zig` constructs that implementation. [[zig-0.17.0-stdlib]]
+It provides the `std.Io` interface with
 blocking OS operations plus task threads. It is not an event loop disguised by
 the word `async`.
 
@@ -34,8 +36,8 @@ on this page.
 
 ## Task dispatch and allocation
 
-The following dispatch details come from the installed multithreaded Zig 0.16.0 source.
-[[zig-0.16.0-stdlib]]
+The following dispatch details come from the exact multithreaded Zig 0.17.0 source.
+[[zig-0.17.0-stdlib]]
 Admission means assigning a task to the worker pool.
 
 When CPU discovery succeeds, the default `async_limit` equals the logical CPU count minus one.
@@ -62,7 +64,7 @@ Choose both limits within one application budget, and handle `ConcurrencyUnavail
 
 `setAsyncLimit` changes the limit for later admission checks.
 The setter does not cancel existing tasks or remove worker threads.
-These conclusions follow from `async`, `concurrent`, `groupAsync`, `groupConcurrent`, `worker`, and `setAsyncLimit` in [[zig-0.16.0-stdlib]].
+These conclusions follow from `async`, `concurrent`, `groupAsync`, `groupConcurrent`, `worker`, and `setAsyncLimit` in [[zig-0.17.0-stdlib]].
 
 ### Allocation before admission
 
@@ -71,7 +73,7 @@ Individual dispatch uses `Future.create`; group dispatch uses `Group.Task.create
 A zero limit therefore does not remove these allocation attempts.
 After limit rejection, async dispatch frees the temporary record before running the task inline.
 Concurrent dispatch frees the temporary record before returning `error.ConcurrencyUnavailable`.
-The compile-time `builtin.single_threaded` branches bypass these allocation paths. [[zig-0.16.0-stdlib]]
+The compile-time `builtin.single_threaded` branches bypass these allocation paths. [[zig-0.17.0-stdlib]]
 
 [[static-allocation-and-constant-work]] explains why prewarming threads or bounding allocator storage does not establish allocation-free dispatch.
 
@@ -80,7 +82,7 @@ uses it for task dispatch and some operation paths. Avoiding task dispatch
 alone does not establish that a failing allocator is sufficient; inspect the
 operations and their capacity thresholds too.
 
-For [[select-and-batch|Batch]], the exact 0.16.0 poll-based
+For [[select-and-batch|Batch]], the exact 0.17.0 poll-based
 `batchAwaitConcurrent` path has a 64-entry stack `pollfd` buffer. At the 65th
 poll descriptor it uses a slice sized to the batch's entire operation-storage
 capacity, allocating it with the Threaded allocator if no slice is retained
@@ -90,8 +92,19 @@ from an earlier wait. Allocation failure returns
 have been drained. Caller-provided operation slots therefore bound admission
 without guaranteeing allocation-free waits. This is source evidence from
 `poll_buffer_len`, `batchAwaitConcurrent`, and `batchCancel` in
-[[zig-0.16.0-stdlib]], not a portable `std.Io` allocation contract or a Windows
+[[zig-0.17.0-stdlib]], not a portable `std.Io` allocation contract or a Windows
 implementation rule.
+
+## Zig 0.17 source review
+
+The review inspected `lib/std/Io/Threaded.zig` at the exact release commit.
+The dispatch functions retain the shared admission count and allocation order described above.
+`batchAwaitConcurrent` retains the 64-descriptor stack buffer and allocator-backed overflow storage.
+Windows concurrent batches reject all four network operation tags.
+Windows `batchCancel` still waits for an APC or alert before requesting cancellation.
+See [[windows-iocp-and-overlapped-io]] for those source limits.
+The dated runtime receipts below used Zig 0.16.0.
+The 0.17 source review does not renew those receipts. [[zig-0.17.0-stdlib]]
 
 ## Cancellation of blocking calls
 
@@ -122,10 +135,10 @@ The public result remains the portable `error.Canceled` protocol described in
 - Thread counts, stack sizes, descriptor limits, buffers, and cancellation
   latency belong in the same capacity model.
 
-The [dispatch proof](../proofs/async_vs_concurrent.zig) covers inline execution and explicit failure with zero limits.
+The historical Zig 0.16 [dispatch proof](../proofs/async_vs_concurrent.zig) covers inline execution and explicit failure with zero limits.
 The proof does not test mixed dispatch, idle-worker admission, limit changes, or allocator-call counts.
 Those details remain source evidence; this review adds no runtime evidence.
-The [cancellation proof](../proofs/cancellation.zig) covers task
+The historical Zig 0.16 [cancellation proof](../proofs/cancellation.zig) covers task
 cancellation points and ownership on aarch64 macOS. The
 [blocked-read proof](../proofs/threaded_blocked_read_cancel_macos.zig) verifies
 actual syscall interruption for a macOS pipe. The corresponding

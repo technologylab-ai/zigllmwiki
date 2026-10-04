@@ -189,7 +189,7 @@ const Harness = struct {
     fn initFiles(self: *Harness, dir: std.Io.Dir) !void {
         try self.initPort();
         for (&self.slots, 0..) |*slot, index| {
-            // Select the actual NT handle mode explicitly. Zig 0.16's
+            // Select the actual NT handle mode explicitly. Zig 0.17's
             // dirOpenFileWtf16 no-follow path chooses ASYNCHRONOUS but still
             // reports File.flags.nonblocking=false, so do not use that
             // wrapper's metadata as an asynchronous fixture witness.

@@ -2,11 +2,12 @@
 id: tigerstyle-seams-with-zig-and-os
 title: TigerStyle seams with Zig and operating systems
 kind: map
-status: source-verified
-zig: "0.16.0"
+status: draft
+zig: "0.17.0"
 summary: Label where strict TigerStyle ends at Zig integer/API boundaries, allocator-using standard-library implementations, concurrency runtimes, and finite OS resources.
-updated: 2026-09-04
+updated: 2026-10-04
 sources:
+  - "[[zig-0.17.0-stdlib]]"
   - "[[source-tigerstyle]]"
   - "[[zig-0.16.0-stdlib]]"
   - "[[zig-0.16.0-language-reference]]"
@@ -50,7 +51,7 @@ hiding an unbounded runtime underneath.
 
 ## Seam map
 
-| Seam | What Zig 0.16 guarantees | What strict TigerStyle still requires |
+| Seam | What Zig 0.17 guarantees | What strict TigerStyle still requires |
 | --- | --- | --- |
 | Domain integer ↔ `usize` | Slices, indexes, allocator sizes, and many APIs use target-sized `usize`. Checked conversions and explicit-width integers are available. | Keep protocol/count/offset domains explicitly sized; validate arithmetic and narrowing at the boundary. |
 | Explicit allocator ↔ allocation lifetime | Allocation is visible in many APIs, and `process.Init` supplies a GPA and process arena. | Prove which phase may allocate; an allocator argument or process-lifetime arena is not startup reservation. |
@@ -98,7 +99,7 @@ prevent allocator fragmentation/failure.
 ## Concurrency runtime seam
 
 `std.Io` is a valuable dependency boundary because libraries can accept the
-caller's implementation. The production 0.16 implementation is
+caller's implementation. The production 0.17 implementation is
 `std.Io.Threaded`, not an evented readiness/completion reactor.
 
 Its `async` operation may execute eagerly when its async limit or allocation

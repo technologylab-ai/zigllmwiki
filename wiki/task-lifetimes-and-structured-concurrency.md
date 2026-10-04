@@ -2,11 +2,12 @@
 id: task-lifetimes-and-structured-concurrency
 title: Task lifetimes and structured concurrency
 kind: pattern
-status: source-verified
-zig: "0.16.0"
+status: draft
+zig: "0.17.0"
 summary: Bind every task, operation, snapshot, and child process to an owner whose scope cannot finish before its dependents have completed or acknowledged cancellation.
 updated: 2026-09-05
 sources:
+  - "[[zig-0.17.0-stdlib]]"
   - "[[zig-0.16.0-stdlib]]"
   - "[[matklad-cancelation-terminology]]"
   - "[[matklad-unix-structured-concurrency]]"
@@ -33,7 +34,7 @@ syntax. [[async-vs-concurrent|`std.Io.async`]] may execute eagerly, and an
 operating-system process can survive the parent scope whose `defer` intended to
 kill it.
 
-## `Future` and `Group` in Zig 0.16
+## `Future` and `Group` in Zig 0.17
 
 A `Future` owns one result and a possible implementation resource. End its
 lifecycle exactly once with `await` or `cancel`; both operations are idempotent
@@ -52,7 +53,7 @@ futures when individual results or cancellation decisions have distinct owners.
 Neither replaces capacity limits on the task records or their downstream I/O.
 
 The [cancellation proof](../proofs/cancellation.zig) exercises `Future` and
-`Group` terminal paths on `std.Io.Threaded` with Zig 0.16.0.
+`Group` terminal paths on `std.Io.Threaded` with the active Zig 0.17.0 compiler.
 
 ## Mutable state: three valid shapes
 
@@ -100,7 +101,7 @@ tests, not true structured ownership: stdin may be `/dev/null`, an unrelated
 process may retain the pipe, and the parent does not wait for descendant exit.
 
 Linux, macOS, and Windows have different stronger lifetime facilities. This
-wiki will recommend them only after primary OS evidence and Zig 0.16 proofs are
+wiki will recommend them only after primary OS evidence and Zig 0.17 proofs are
 added to the platform matrix.
 
 ## Review questions

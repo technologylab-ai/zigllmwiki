@@ -2,11 +2,12 @@
 id: deterministic-simulation-testing
 title: Deterministic simulation testing
 kind: principle
-status: source-verified
-zig: "0.16.0"
+status: draft
+zig: "0.17.0"
 summary: Put production logic behind deterministic clock, network, disk, and scheduler boundaries so seeded fault campaigns are fast, replayable, and assertion-rich.
 updated: 2026-09-05
 sources:
+  - "[[zig-0.17.0-stdlib]]"
   - "[[tigerbeetle-vopr]]"
   - "[[tigerbeetle-architecture]]"
   - "[[tigerbeetle-safety]]"
@@ -34,7 +35,7 @@ and checks both safety and liveness.
 ## Why it changes architecture
 
 DST is not a test added after implementation. Time reads, randomness, I/O,
-scheduling, and crash boundaries must be explicit inputs. Zig 0.16's explicit
+scheduling, and crash boundaries must be explicit inputs. Zig 0.17's explicit
 `std.Io` capability is promising for this separation, but passing an `Io` alone
 does not make a program deterministic: the chosen implementation and every
 remaining nondeterministic dependency must be controlled.

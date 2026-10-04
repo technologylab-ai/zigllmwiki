@@ -30,7 +30,7 @@ jobs:
           mkdir -p "$review_packet"
           printf 'REVIEW_PACKET=%s\n' "$review_packet" >> "$GITHUB_ENV"
 
-      - name: Install the exact Zig baseline from the official index
+      - name: Install the exact checksum-verified Zig baseline
         shell: bash
         run: |
           python3 - <<'PY'
@@ -41,15 +41,10 @@ jobs:
           from urllib.request import Request, urlopen
 
           baseline = Path(".zig-version").read_text(encoding="utf-8").strip()
-          index_request = Request(
-              "https://ziglang.org/download/index.json",
-              headers={"User-Agent": "zigllmwiki-verification/1"},
-          )
-          with urlopen(index_request, timeout=30) as response:
-              index = json.load(response)
-          release = index.get(baseline)
-          if not isinstance(release, dict):
-              raise SystemExit(f"official download index has no release {baseline!r}")
+          metadata = json.loads(Path(".github/zig-release.json").read_text())
+          if metadata["version"] != baseline:
+              raise SystemExit("Compiler metadata version mismatch")
+          release = metadata["artifacts"]
           artifact = release.get("x86_64-linux")
           if not isinstance(artifact, dict):
               raise SystemExit(f"release {baseline!r} has no x86_64-linux artifact")
@@ -102,7 +97,9 @@ jobs:
             echo "expected Zig $expected, got $actual" >&2
             exit 1
           fi
-          zig build verify --summary all 2>&1 | tee "$REVIEW_PACKET/zig-build-verify.log"
+          set -euo pipefail
+          zig build verify -Doptimize=debug -j2 --summary all 2>&1 | tee "$REVIEW_PACKET/zig-build-verify-debug.log"
+          zig build verify -Doptimize=safe -j2 --summary all 2>&1 | tee "$REVIEW_PACKET/zig-build-verify-safe.log"
 
       - name: Run deterministic command and benchmark tests
         if: always()

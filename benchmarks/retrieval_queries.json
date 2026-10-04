@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "dataset_version": "2026-09-04.1",
-  "zig_baseline": "0.16.0",
+  "zig_baseline": "0.17.0",
   "query_limit": 10,
   "description": "Representative agent questions spanning std.Io, platform I/O, TigerStyle, diagnostics, testing, and current Zig mechanics.",
   "decision_policy": {

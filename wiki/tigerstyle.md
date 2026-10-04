@@ -3,10 +3,11 @@ id: tigerstyle
 title: TigerStyle for Zig systems software
 kind: principle
 status: draft
-zig: "0.16.0"
+zig: "0.17.0"
 summary: Apply TigerStyle as linked constraints on safety, performance, and developer experience rather than as isolated slogans.
-updated: 2026-09-04
+updated: 2026-10-04
 sources:
+  - "[[zig-0.17.0-stdlib]]"
   - "[[source-tigerstyle]]"
   - "[[matklad-push-ifs-up-fors-down]]"
   - "[[matklad-static-allocation-constant-work]]"
@@ -61,7 +62,7 @@ worksheet, bounded server example, and Zig harness are in
 Microbenchmarks need runtime-variable inputs and a consumed correctness witness
 before timing is credible. See [[trustworthy-microbenchmarks]].
 
-## Integration seams with Zig 0.16
+## Integration seams with Zig 0.17
 
 `std.Io` makes ownership, cancellation, nondeterminism, and blocking explicit,
 which helps a TigerStyle review. It does not automatically make an
@@ -99,7 +100,7 @@ seam.
 Make every non-fatal branch reviewable with
 [[error-path-catalogs-and-fault-injection]], and reduce caller state spaces
 without hiding ownership or cancellation using
-[[lower-dimensional-api-contracts]]. Apply Zig 0.16 diagnostics and emitted-code
+[[lower-dimensional-api-contracts]]. Apply Zig 0.17 diagnostics and emitted-code
 inspection according to [[build-diagnostics-and-generated-code]]; there is no
 fictional general “strict warnings” switch for Zig source.
 

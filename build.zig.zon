@@ -2,7 +2,7 @@
     .name = .zigllmwiki,
     .version = "0.1.0",
     .fingerprint = 0x7904ba2cd463a593,
-    .minimum_zig_version = "0.16.0",
+    .minimum_zig_version = "0.17.0",
     .dependencies = .{},
     .paths = .{
         ".zig-version",

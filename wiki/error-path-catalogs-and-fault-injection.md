@@ -2,11 +2,12 @@
 id: error-path-catalogs-and-fault-injection
 title: Error-path catalogs and fault injection
 kind: pattern
-status: source-verified
-zig: "0.16.0"
+status: draft
+zig: "0.17.0"
 summary: Catalog each expected terminal error with ownership and side-effect state, then use bounded deterministic injection to prove every non-fatal path rather than merely propagating it.
-updated: 2026-09-04
+updated: 2026-10-04
 sources:
+  - "[[zig-0.17.0-stdlib]]"
   - "[[source-tigerstyle]]"
   - "[[tigerbeetle-safety]]"
   - "[[tigerbeetle-vopr]]"
@@ -102,7 +103,7 @@ assert.
 
 ## Evidence boundary
 
-The local proof establishes the Zig 0.16 harness pattern on the host test
+The local proof establishes the Zig 0.17 harness pattern on the host test
 runtime. OS-specific interruption, completion, and durability rows still need
 runtime evidence on every named platform; source inspection and cross-target
 compilation do not close those rows.

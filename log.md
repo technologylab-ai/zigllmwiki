@@ -1296,3 +1296,18 @@ The sandbox denied process inspection required before the shared-host runtime su
 Therefore `zig build verify` was not started; the report records the exact preflight errors.
 The caller owns the full trusted gate and publication.
 No M4 work, subagent, remote runner, commit, push, PR, or external message occurred.
+
+
+## 2026-10-04 — Explicit Zig 0.17 upgrade and project migration ingest
+
+The user authorized the active wiki upgrade after the Baz, bounded/http, Mustache, and zli ports.
+Added exact release records and a hashed project packet before migration synthesis.
+Current guidance moves to exact 0.17.0; old verification labels are invalidated before requalification.
+The 0.16 maps become superseded historical routes.
+Maintained proofs gain five independent semantic tests and three expected backend compile failures.
+The shipped evented vtables fail before usable initialization; native Apple C-shim evidence remains separate.
+README, build setup, workflows, metadata, query baseline, and the agent contract use the new target.
+Timing entry points and verification timing use Safe with assertions.
+The proof-only Mac Debug/Safe gates and structural checks passed.
+Full native verification and retrieval/site qualification follow as separate named receipts.
+No prior source record or historical snapshot was rewritten.

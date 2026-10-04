@@ -2,11 +2,12 @@
 id: newtype-indexes
 title: Newtype indexes with non-exhaustive enums
 kind: pattern
-status: source-verified
-zig: "0.16.0"
+status: draft
+zig: "0.17.0"
 summary: Use non-exhaustive enums as compact, type-distinct indexes while retaining explicit conversion, bounds, generation, and serialization checks.
-updated: 2026-09-04
+updated: 2026-10-04
 sources:
+  - "[[zig-0.17.0-stdlib]]"
   - "[[matklad-zig-newtype-index-pattern]]"
   - "[[matklad-static-allocation-compilers]]"
   - "[[matklad-memory-safety-hardest-problem]]"
@@ -25,7 +26,7 @@ platforms:
 A non-exhaustive `enum(u32)` gives an index its own type while allowing every
 `u32` representation. Distinct index types prevent accidentally passing, for
 example, a connection index to a buffer table. Convert deliberately with
-`@enumFromInt` and `@intFromEnum` at the array boundary.
+`@fromBackingInt` and `@backingInt` at the array boundary.
 
 This is type distinction, not encapsulation or validity. Any code can construct
 an arbitrary value, and a value can still be out of bounds or stale.
@@ -68,7 +69,7 @@ at access time, however. If a slot may be released and reused, pair the index
 with a generation (and, where values cross owners, an owner identity) so a
 stale handle cannot silently select a new object.
 
-The [Zig 0.16 proof](../proofs/newtype_index.zig) ports the source pattern,
+The [Zig 0.17 proof](../proofs/newtype_index.zig) ports the source pattern,
 checks the compact representation and named sentinels, and demonstrates access
 through the owning collection. It does not attempt to compile an intentional
 wrong-type call.

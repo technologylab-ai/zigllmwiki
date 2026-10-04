@@ -2,11 +2,12 @@
 id: buffer-hygiene-and-division-intent
 title: Buffer hygiene and division intent
 kind: pattern
-status: source-verified
-zig: "0.16.0"
+status: draft
+zig: "0.17.0"
 summary: Initialize every externally observable byte, clear reused storage according to its disclosure contract, encode fields explicitly, and name integer division rounding behavior.
-updated: 2026-09-04
+updated: 2026-10-04
 sources:
+  - "[[zig-0.17.0-stdlib]]"
   - "[[source-tigerstyle]]"
   - "[[zig-0.16.0-language-reference]]"
   - "[[zig-0.16.0-stdlib]]"
@@ -122,7 +123,7 @@ positive ceiling, and division by zero. They ran with Zig 0.16.0 on aarch64
 macOS on 2026-09-04.
 
 The proof does not serialize a native struct and does not claim secure erasure.
-It demonstrates program-visible initialization and Zig 0.16 operation
+It demonstrates program-visible initialization and Zig 0.17 operation
 semantics only.
 
 Related: [[integer-widths-and-boundaries]], [[invariants-and-assertions]],

@@ -339,3 +339,16 @@ std.Io's interface. All implementation/review/evidence agents and timed runners
 finished their selected work; remaining M4 work is queued. Windows tuning gates
 remain deferred, and M3-006 postponed. The wiki's complete local/retrieval and
 clean pushed Mac/Linux gates govern this publication.
+
+
+## Zig 0.17 project migration and explicit wiki upgrade — 2026-10-04
+
+[[zig-0.17.0-release-notes]], [[zig-0.17.0-stdlib]], and [[zig-0.17-project-ports-2026-10-04]] are new pinned records.
+The project snapshot preserves native receipts, exact source identities, first failures, and cleanup.
+The migration guide follows the Baz dependency ports and records their exclusions.
+The user then authorized the complete wiki upgrade.
+Current proofs and source guidance now target exact 0.17.0; earlier verification labels were invalidated.
+Backend source review exposes shipped Dispatch, Uring, and Kqueue vtable mismatches.
+Expected compiler-error witnesses keep those gaps active in verification.
+Historical source and snapshot bytes remain unchanged.
+Full native, retrieval, and publication-artifact gates are running.

@@ -3,10 +3,11 @@ id: bounded-http-server-design
 title: bounded/http — HTTP/1.1 framework MVP and design
 kind: pattern
 status: draft
-zig: "0.16.0"
+zig: "0.17.0"
 summary: bounded/http provides bounded HTTP ownership on Linux, macOS, and Windows, with pinned native fixtures and explicit performance and deployment limits.
 updated: 2026-09-06
 sources:
+  - "[[zig-0.17.0-stdlib]]"
   - "[[bounded-http-naming-2026-09-06]]"
   - "[[bounded-http-followup-2026-09-06]]"
   - "[[bounded-http-windows-iocp-2026-09-06]]"
@@ -352,7 +353,7 @@ fixtures submitted320 spans from64 distinct cells, then exercised short sends,
 flush/close order,64-cell retained cancellation and finite cold service among
 seven backpressured depth128 pipelines. Linux cancellation permitted a normal
 target-terminal race. The320-span result is specific to these custom adapters;
-Zig0.16's conservative std.c macOS constant remains16 despite the SDK's1024
+Zig 0.17's conservative std.c macOS constant remains16 despite the SDK's1024
 and successful native witness. No portable std.Io limit is inferred.
 
 Three shuffled samples per matrix configuration leave time-order uncertainty:
@@ -584,7 +585,7 @@ constant. Its TCP/UDP loopback path copies. [[linux-network-zero-copy]]
 Proposed platform substrates are a custom bounded Linux `io_uring` loop,
 macOS nonblocking sockets with `kqueue`, and Windows overlapped sockets with
 IOCP. These share an application operation/ownership model. Readiness and
-completion semantics remain backend-specific. Zig 0.16's high-level evented
+completion semantics remain backend-specific. Zig 0.17's high-level evented
 implementations are not ready-made production server runtimes, and passing
 `std.Io` does not select these mechanisms. Regular-file work needs its own
 bounded strategy, especially on macOS. [[platform-io-backend-decision-table]]
@@ -682,7 +683,7 @@ exception; an unconditional zero-copy claim would then be inaccurate. Transport
 fragmentation must not allocate one unbounded descriptor per receive.
 
 A conceptual borrow/consume cursor is a better core contract than promising
-that any Reader operation is zero-copy. Exact Zig 0.16 `Io.Reader.take/peek`
+that any Reader operation is zero-copy. Exact Zig 0.17 `Io.Reader.take/peek`
 can refill and invalidate earlier views. `std.http.Server.Request.head` strings
 are invalidated when body streaming is initialized. An adapter must state
 whether it borrows, copies or suspends; the stdlib cannot silently provide a
@@ -741,7 +742,7 @@ admit traffic. If setup fails, stop and join the threads actually started and
 release their resources. No request-path spawn, elastic growth or per-request
 thread/future allocation belongs in this proposed strict core.
 
-Exact Zig 0.16 `std.Thread.SpawnConfig` exposes stack size and allocator;
+Exact Zig 0.17 `std.Thread.SpawnConfig` exposes stack size and allocator;
 `join` waits for completion and frees spawn resources. Stack sizes are subject
 to platform implementation behavior, and spawning at startup is not a proof
 of resident pages or real-time scheduling. Shipped `Io.Threaded` task dispatch

@@ -35,7 +35,7 @@ const Entry = extern struct {
 };
 
 const Buffer = extern struct { len: u32, ptr: [*]u8 };
-// Layout from the exact Zig 0.16 bundled psdk_inc/_wsadata.h.
+// Layout from the exact Zig 0.17 bundled psdk_inc/_wsadata.h.
 const WsaData = if (@sizeOf(usize) == 8) extern struct {
     version: u16,
     high_version: u16,
@@ -281,9 +281,9 @@ const Harness = struct {
         }
         self.metrics.submitted += 1;
         if (immediate) {
-            self.metrics.immediate[@intFromEnum(kind)] += 1;
+            self.metrics.immediate[@backingInt(kind)] += 1;
         } else {
-            self.metrics.pending[@intFromEnum(kind)] += 1;
+            self.metrics.pending[@backingInt(kind)] += 1;
         }
         return 0;
     }
@@ -609,11 +609,11 @@ fn exercise(harness: *Harness, pair: Pair) !void {
 
     // Accepted empty receive proves genuine pending work and a per-entry
     // failed result. This does not use APC alerts or Threaded.batchCancel.
-    const before_pending = harness.metrics.pending[@intFromEnum(Kind.receive)];
+    const before_pending = harness.metrics.pending[@backingInt(Kind.receive)];
     try accepted(harness, 0, .receive, 1, 0);
     try std.testing.expectEqual(
         before_pending + 1,
-        harness.metrics.pending[@intFromEnum(Kind.receive)],
+        harness.metrics.pending[@backingInt(Kind.receive)],
     );
     try std.testing.expectError(error.CapacityExhausted, harness.submit(0, .receive, 1, 0));
     try harness.cancel(0);

@@ -2,11 +2,12 @@
 id: evented-io-backends
 title: Evented I/O backend landscape
 kind: platform
-status: draft
-zig: "0.16.0"
-summary: Zig 0.16 has a production Threaded backend and unfinished evented experiments; OS-specific recommendations still require proof.
-updated: 2026-09-04
+status: source-verified
+zig: "0.17.0"
+summary: Zig 0.17 selects Threaded by default; experimental evented backends have source-visible interface and operation gaps.
+updated: 2026-10-04
 sources:
+  - "[[zig-0.17.0-stdlib]]"
   - "[[zig-0.16.0-release-notes]]"
   - "[[zig-0.16.0-stdlib]]"
   - "[[source-tigerstyle]]"
@@ -17,7 +18,10 @@ sources:
   - "[[tigerbeetle-io-source]]"
   - "[[apple-xnu-kqueue-aio]]"
   - "[[microsoft-windows-iocp]]"
-proofs: []
+proofs:
+  - proofs/dispatch_017_io_compile_error.zig
+  - proofs/uring_017_io_compile_error.zig
+  - proofs/kqueue_017_io_compile_error.zig
 platforms:
   - linux
   - macos
@@ -28,19 +32,38 @@ platforms:
 
 ## Remember
 
-For Zig 0.16.0, `std.Io.Threaded` is feature-complete, well-tested, and selected
-by `main`. The standard-library tree contains evented work, but the release
-notes do not present it as a finished production replacement.
+Zig 0.17.0 constructs `std.Io.Threaded` in the default `main` runtime.
+The source also selects unfinished evented implementations.
+A selected type does not establish a working `std.Io` interface. [[zig-0.17.0-stdlib]]
 
-## Release state
+## Zig 0.17 source review
 
-| Implementation | Zig 0.16 release state | Do not infer |
+The review inspected `lib/std/Io.zig`, `Io/Threaded.zig`, `Io/Uring.zig`, `Io/Kqueue.zig`, and `Io/Dispatch.zig`.
+The files match the immutable release commit. [[zig-0.17.0-stdlib]]
+
+| Implementation | Exact 0.17 source state | Evidence boundary |
 | --- | --- | --- |
-| `Io.Threaded` | Feature-complete, well-tested, default from `main`. | That `async` always gets another thread. |
-| `Io.Evented` | Experimental work in progress using userspace stack switching/work stealing. | Stable API, production readiness, or allocation behavior. |
-| `Io.Uring` | Linux `io_uring` proof of concept; release notes call out missing networking, error handling, test coverage, and minimal task-stack allocations. | A complete HTTP-server backend. |
-| `Io.Kqueue` | Proof of concept only. | General-purpose macOS file and network support. |
-| `Io.Dispatch` | Based on macOS Grand Central Dispatch. | Feature parity with Threaded or Uring. |
+| `Io.Threaded` | Default `main` implementation. Allocates task records and may grow its worker pool. | `async` can run inline. Windows concurrent network batches remain unavailable. |
+| `Io.Evented` | Selects Uring on Linux, Kqueue on four BSD targets, and Dispatch on Apple targets. Requires supported fibers. Windows selects `void`. | Selection establishes type identity, not interface compatibility. |
+| `Io.Uring` | `io()` assigns removed `processReplacePath`. Binding and message receive have source implementations; sending and reading remain stubs. Writing and network batching panic. | The exact compiler rejects the I/O interface. Low-level ring proofs test a separate wrapper. |
+| `Io.Kqueue` | `io()` still assigns removed networking vtable fields. Many operation paths panic. | The exact compiler first rejects removed `fileWriteStreaming`. Apple targets do not select this backend. |
+| `Io.Dispatch` | `io()` assigns removed `processReplacePath`. Network operation tags panic. Each allocated fiber reserves at least 60 MiB. | The exact 0.17 compiler rejects the I/O interface. Initialization and teardown remain unqualified. |
+
+`Io.VTable` has no `processReplacePath`, `netRead`, `netSend`, or `netReceive` field.
+Uring and Dispatch still initialize `processReplacePath`.
+Kqueue still initializes the removed networking fields.
+These source mismatches block use of the corresponding I/O interfaces. [[zig-0.17.0-stdlib]]
+
+The registered [Dispatch](../proofs/dispatch_017_io_compile_error.zig),
+[Uring](../proofs/uring_017_io_compile_error.zig), and
+[Kqueue](../proofs/kqueue_017_io_compile_error.zig) witnesses require specific shipped-source compile failures.
+The checker rejects other failures and unexpected successful compilation.
+These gates establish interface blockers, not runtime behavior.
+
+Dispatch teardown no longer has the old slice-only allocator restriction.
+Zig 0.17 `Allocator.free` accepts the fixed-size pointer-to-array used by `Dispatch.deinit`.
+That change does not establish fiber, cancellation, or networking behavior.
+The dated 0.16 observations remain historical evidence on the platform pages.
 
 ## Research boundary
 
@@ -51,7 +74,7 @@ mapping from workload and OS to the right mechanism:
 - macOS/BSD: [[macos-kqueue-and-aio|`kqueue` readiness and POSIX AIO]], plus
   remaining dispatch I/O, worker-thread, and runtime comparison work.
 - Windows: [[windows-iocp-and-overlapped-io|overlapped I/O and completion
-  ports]], including cancellation and the exact Zig 0.16 Threaded/NtDll/APC
+  ports]], including cancellation and the exact Zig 0.17 Threaded/NtDll/APC
   mapping. Threaded is not an IOCP backend.
 
 Primary Linux, Apple, and Microsoft interface semantics and pinned
@@ -72,14 +95,14 @@ The pinned TigerBeetle source now provides a concrete comparison, summarized in
 | Windows | IOCP with overlapped file and socket operations | Not every action is overlapped, and no public general-cancellation protocol is exposed. |
 
 This is evidence about TigerBeetle's custom interface, not about the unfinished
-Zig 0.16 evented `std.Io` backends. It confirms why “use `kqueue` instead of
+Zig 0.17 evented `std.Io` backends. It confirms why “use `kqueue` instead of
 `io_uring`” is too coarse: socket readiness and asynchronous regular-file I/O
 are different problems.
 
 Regardless of backend, an asynchronous operation owns a resumption record and
 may retain buffers until completion. TigerBeetle places fixed operation contexts
 inside the components that own their concurrency limits. This is a useful
-architecture pattern, not yet a verified recipe for Zig 0.16's experimental
+architecture pattern, not yet a verified recipe for Zig 0.17's experimental
 evented implementations.
 
 Related: [[std-io]], [[io-threaded]], [[async-vs-concurrent]], [[io-uring]],

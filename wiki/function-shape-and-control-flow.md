@@ -2,11 +2,12 @@
 id: function-shape-and-control-flow
 title: Function shape and centralized control flow
 kind: pattern
-status: runtime-verified
-zig: "0.16.0"
+status: draft
+zig: "0.17.0"
 summary: Keep one parent responsible for decisions and state transitions, push bounded repetitive mechanics into narrow leaves, and replace recursion with explicit capacity.
-updated: 2026-09-04
+updated: 2026-10-04
 sources:
+  - "[[zig-0.17.0-stdlib]]"
   - "[[source-tigerstyle]]"
   - "[[matklad-push-ifs-up-fors-down]]"
   - "[[matklad-size-matters]]"

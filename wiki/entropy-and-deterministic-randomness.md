@@ -2,11 +2,12 @@
 id: entropy-and-deterministic-randomness
 title: Entropy and deterministic randomness
 kind: principle
-status: runtime-verified
-zig: "0.16.0"
+status: draft
+zig: "0.17.0"
 summary: Use randomSecure when fresh external entropy must either succeed or fail, and isolate ordinary process randomness from deterministic simulation and replay.
-updated: 2026-09-04
+updated: 2026-10-04
 sources:
+  - "[[zig-0.17.0-stdlib]]"
   - "[[zig-0.16.0-stdlib]]"
   - "[[zig-0.16.0-release-notes]]"
 proofs:

@@ -1,4 +1,25 @@
-# Project handoff — 2026-09-28
+# Project handoff — Zig 0.17 upgrade, 2026-10-04
+
+## Active upgrade checkpoint
+
+The user explicitly authorized the full wiki upgrade after the Baz dependency ports.
+The active compiler is exact Zig 0.17.0.
+Current pages cite new release sources; historical records retain their original bytes and compiler scope.
+Prior 0.16 verification labels were invalidated before source review and new native gates.
+The three old 0.16 baseline/migration maps are superseded and route to the current baseline.
+
+The [migration guide](docs/zig-0.16-to-0.17-migration.md) captures cast semantics, reflection, package caches, fixtures, and test budgets.
+[[zig-0.17-project-ports-2026-10-04]] preserves the project packet and its exclusions.
+The proof graph adds five independent semantic oracles and three expected compiler-error witnesses.
+Dispatch and Uring fail on removed process vtable members; Kqueue fails on a removed write member.
+Dispatch initialization also fails through its interface constructor.
+The Apple C-shim proof remains separate; no current std.Dispatch instance is qualified.
+
+The proof-only Mac Debug and Safe gates passed, with platform skips recorded.
+Full verification, retrieval/site checks, and native Linux/Windows qualification are in progress.
+Timing entry points require Safe; the timed verification executable always uses Safe.
+Application performance comparisons were not run.
+Earlier checkpoints below preserve their original evidence limits.
 
 ## Bounded curation review — 2026-09-28
 

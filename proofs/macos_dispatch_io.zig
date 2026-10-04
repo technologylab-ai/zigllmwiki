@@ -56,14 +56,6 @@ const DispatchFile = struct {
     }
 };
 
-fn readWithStdIo(
-    io: std.Io,
-    file: std.Io.File,
-    buffer: []u8,
-) !usize {
-    return file.readPositionalAll(io, buffer, 0);
-}
-
 fn benchmarkStdIo(
     clock_io: std.Io,
     operation_io: std.Io,
@@ -101,6 +93,7 @@ fn benchmarkDispatchIo(
 /// equal-size positional reads; it is not evidence about cold storage,
 /// concurrent queue depth, tail latency, writes, or durability.
 pub fn main(init: std.process.Init) !void {
+    if (builtin.mode != .safe) return error.PerformanceRequiresReleaseSafe;
     if (builtin.os.tag != .macos) return error.UnsupportedPlatform;
 
     const file_size = 1024 * 1024;
@@ -131,23 +124,10 @@ pub fn main(init: std.process.Init) !void {
     var native_dispatch = try DispatchFile.open(path);
     defer native_dispatch.close();
 
-    var dispatch: std.Io.Dispatch = undefined;
-    try dispatch.init(std.heap.page_allocator, .{});
-    const dispatch_io = dispatch.io();
-    var dispatch_file = try std.Io.Dir.openFileAbsolute(dispatch_io, path, .{});
-    defer dispatch_file.close(dispatch_io);
-
     const threaded_elapsed = try benchmarkStdIo(
         init.io,
         init.io,
         threaded_file,
-        buffer,
-        iterations,
-    );
-    const dispatch_elapsed = try benchmarkStdIo(
-        init.io,
-        dispatch_io,
-        dispatch_file,
         buffer,
         iterations,
     );
@@ -161,19 +141,17 @@ pub fn main(init: std.process.Init) !void {
     std.debug.print(
         "hot-cache positional read: {d} x {d} bytes\n" ++
             "std.Io.Threaded: {d} ns\n" ++
-            "std.Io.Dispatch: {d} ns\n" ++
             "Apple Dispatch I/O joined by shim: {d} ns\n",
         .{
             iterations,
             file_size,
             threaded_elapsed.toNanoseconds(),
-            dispatch_elapsed.toNanoseconds(),
             native_elapsed.toNanoseconds(),
         },
     );
 }
 
-test "Zig 0.16 reads a regular file through Apple Dispatch I/O" {
+test "Zig 0.17 reads a regular file through Apple Dispatch I/O" {
     if (builtin.os.tag != .macos) return error.SkipZigTest;
 
     var temporary = std.testing.tmpDir(.{});
@@ -200,32 +178,24 @@ test "Zig 0.16 reads a regular file through Apple Dispatch I/O" {
     try std.testing.expectEqualStrings(expected, &buffer);
 }
 
-test "Zig 0.16 std.Io.Evented maps to Dispatch and runs a positional read" {
+test "Zig 0.17 macOS Evented selects the source-blocked Dispatch type" {
     if (builtin.os.tag != .macos) return error.SkipZigTest;
-    comptime std.debug.assert(std.Io.Evented == std.Io.Dispatch);
-
-    var temporary = std.testing.tmpDir(.{});
-    defer temporary.cleanup();
-
-    const expected = "std.Io.Dispatch uses its own regular-file path";
-    try temporary.dir.writeFile(std.testing.io, .{
-        .sub_path = "payload",
-        .data = expected,
-    });
-
-    var dispatch: std.Io.Dispatch = undefined;
-    try dispatch.init(std.heap.page_allocator, .{});
-    // Zig 0.16.0's Dispatch.deinit does not compile because it passes a
-    // pointer-to-array to Allocator.free. This proof therefore runs in its own
-    // test process and leaves the backend's init resources to process exit.
-    const io = dispatch.io();
-
-    var file = try temporary.dir.openFile(io, "payload", .{});
-    defer file.close(io);
-
-    var buffer: [expected.len]u8 = undefined;
-    var future = io.async(readWithStdIo, .{ io, file, &buffer });
-    const bytes_read = try future.await(io);
-    try std.testing.expectEqual(expected.len, bytes_read);
-    try std.testing.expectEqualStrings(expected, &buffer);
+    comptime {
+        std.debug.assert(std.Io.Evented == std.Io.Dispatch);
+        std.debug.assert(@hasDecl(std.Io.Dispatch, "init"));
+        std.debug.assert(@hasDecl(std.Io.Dispatch, "deinit"));
+        std.debug.assert(@hasDecl(std.Io.Dispatch, "io"));
+        const init_type = @typeInfo(@TypeOf(std.Io.Dispatch.init)).@"fn";
+        std.debug.assert(init_type.param_types[0].? == *std.Io.Dispatch);
+        std.debug.assert(init_type.param_types[1].? == std.mem.Allocator);
+        std.debug.assert(init_type.param_types[2].? == std.Io.Dispatch.InitOptions);
+        const io_type = @typeInfo(@TypeOf(std.Io.Dispatch.io)).@"fn";
+        std.debug.assert(io_type.param_types[0].? == *std.Io.Dispatch);
+        std.debug.assert(io_type.return_type.? == std.Io);
+        const deinit_type = @typeInfo(@TypeOf(std.Io.Dispatch.deinit)).@"fn";
+        std.debug.assert(deinit_type.param_types[0].? == *std.Io.Dispatch);
+        std.debug.assert(deinit_type.return_type.? == void);
+    }
+    // Function signatures do not prove their lazily analyzed bodies compile.
+    // The separate negative witness invokes both init() and io().
 }

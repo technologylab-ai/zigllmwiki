@@ -20,7 +20,7 @@ fn countArguments(args: std.process.Args, allocator: std.mem.Allocator) !usize {
 }
 
 /// This executable entry point is built and run by `zig build verify`, proving
-/// that Zig 0.16's runtime accepts and supplies the full process initializer.
+/// that Zig 0.17's runtime accepts and supplies the full process initializer.
 pub fn main(init: std.process.Init) !void {
     const runtime: Runtime = .{
         .io = init.io,

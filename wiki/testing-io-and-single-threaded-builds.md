@@ -2,11 +2,12 @@
 id: testing-io-and-single-threaded-builds
 title: Testing Io and single-threaded builds
 kind: pattern
-status: runtime-verified
-zig: "0.16.0"
+status: draft
+zig: "0.17.0"
 summary: Choose std.testing.io for host-backed integration tests, std.Io.failing for a fixed hostile capability profile, and explicit single-threaded builds to prove code handles unavailable concurrency.
-updated: 2026-09-04
+updated: 2026-10-04
 sources:
+  - "[[zig-0.17.0-stdlib]]"
   - "[[zig-0.16.0-language-reference]]"
   - "[[zig-0.16.0-release-notes]]"
   - "[[zig-0.16.0-stdlib]]"
@@ -59,7 +60,7 @@ having library code import `std.testing.io` itself; see
 
 ## What `-fsingle-threaded` changes
 
-The Zig 0.16 language contract says `-fsingle-threaded` makes
+The Zig 0.17 language contract says `-fsingle-threaded` makes
 `builtin.single_threaded` true, treats thread-local variables as ordinary
 container-level variables, and permits single-threaded optimizations in
 userland APIs. `std.Thread.spawn` becomes a compile error. In a build script,

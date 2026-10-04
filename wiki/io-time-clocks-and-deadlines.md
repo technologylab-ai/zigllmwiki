@@ -2,11 +2,12 @@
 id: io-time-clocks-and-deadlines
 title: std.Io clocks, durations, deadlines, timeouts, and sleeping
 kind: pattern
-status: runtime-verified
-zig: "0.16.0"
+status: draft
+zig: "0.17.0"
 summary: Choose a clock by suspend and wall-time semantics, capture one absolute deadline for a multi-step budget, and treat sleeping as cancelable I/O whose progress depends on the implementation.
-updated: 2026-09-04
+updated: 2026-10-04
 sources:
+  - "[[zig-0.17.0-stdlib]]"
   - "[[zig-0.16.0-stdlib]]"
   - "[[zig-0.16.0-release-notes]]"
   - "[[fi-zig-0.16-migration]]"
@@ -62,7 +63,7 @@ Do not mistake nanosecond storage for nanosecond clock resolution.
 `Io.Timestamp` and `Io.Duration` each store a signed `i96` nanosecond count.
 They provide explicit constructors/conversions; conversions to seconds,
 milliseconds, and microseconds truncate toward zero and return `i64`.
-`Io.Duration` formats through `{f}` in Zig 0.16; the old `{D}` format is gone.
+`Io.Duration` formats through `{f}` in Zig 0.17; the old `{D}` format is gone.
 
 Prefer `Clock.Timestamp` and `Clock.Duration` inside deadline logic. These wrap
 the raw value together with its clock. Their comparison and arithmetic methods
@@ -122,7 +123,7 @@ A timeout racing a successful operation has the same terminal race as any
 other cancellation: reconcile the actual completion before releasing buffers
 or handles.
 
-The production Zig 0.16 `std.Io.Threaded` implementation sleeps through
+The production Zig 0.17 `std.Io.Threaded` implementation sleeps through
 platform blocking/parking facilities. A direct sleep occupies the current
 thread. If scheduled with `async`, resource saturation may execute that sleep
 inline before the caller can reach its selection logic. Request `concurrent`
@@ -137,6 +138,14 @@ same absolute deadline with a bounded attempt count. This is an observed Zig
 0.16 `Io.Threaded`/Windows timer seam, not a relaxation of the interface's
 “until the timestamp” contract. Never replace the recheck with a fresh relative
 duration, which would extend the original budget.
+
+## Separate behavior deadlines from observation budgets
+
+A server request deadline, idle timeout, client timeout, and test watchdog serve different purposes.
+Give the observation and cleanup budgets enough slack for scheduling and terminal evidence.
+Use bounded condition polling when the test depends on progress.
+Keep deliberately short behavior deadlines when those deadlines define the tested policy.
+[[zig-0.17-upgrade-assessment]] records a fixture with unchanged request deadlines and a separate generous idle limit.
 
 ## Strictly monotonic application time
 
@@ -154,7 +163,7 @@ guard to timestamp external facts or replace wall-clock chronology.
 
 ## Evidence and review checklist
 
-The [time proof](../proofs/io_time.zig) verifies Zig 0.16 duration conversion
+The [time proof](../proofs/io_time.zig) verifies Zig 0.17 duration conversion
 and `{f}` formatting, clock-tagged deadline arithmetic, timeout conversion,
 bounded rechecking of one absolute deadline, cancellation of a
 `std.Io.Threaded` sleep, and the pure strict-guard transition. It ran with Zig

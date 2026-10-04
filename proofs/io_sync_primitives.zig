@@ -141,7 +141,7 @@ test "futex wait is guarded by an atomic predicate loop" {
     try future.await(io);
 }
 
-// These witnesses deliberately inspect the exact 0.16 Queue implementation's
+// These witnesses deliberately inspect the exact 0.17 Queue implementation's
 // mutex and pending lists. They do not make those fields a portable API.
 // Each fixture has one worker, one watchdog, and one or two element slots.
 const QueueWatchdog = struct {

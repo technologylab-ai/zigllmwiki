@@ -12,7 +12,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-OPTIMIZE_MODES = ("Debug", "ReleaseSafe", "ReleaseFast", "ReleaseSmall")
+OPTIMIZE_MODES = ("debug", "safe", "fast", "small", "Debug", "ReleaseSafe", "ReleaseFast", "ReleaseSmall")
 
 
 def sha256(path: Path) -> str:
@@ -28,7 +28,7 @@ def main() -> int:
     parser.add_argument("--source", required=True, help="repository-relative Zig source")
     parser.add_argument("--symbol", required=True, help="symbol expected in emitted assembly")
     parser.add_argument("--output-dir", required=True, help="explicit artifact directory")
-    parser.add_argument("--optimize", choices=OPTIMIZE_MODES, default="ReleaseSafe")
+    parser.add_argument("--optimize", choices=OPTIMIZE_MODES, default="safe")
     parser.add_argument("--target", help="explicit Zig target triple")
     parser.add_argument("--cpu", help="explicit Zig CPU/features string")
     parser.add_argument("--zig", default="zig", help="exact Zig executable")

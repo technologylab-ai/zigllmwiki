@@ -1,7 +1,7 @@
 # Zig LLM Wiki
 
 A source-driven, LLM-maintained knowledge base for writing robust systems
-software with Zig 0.16.x.
+software with exact Zig 0.17.0.
 
 The wiki is optimized for coding agents first and humans second. It combines
 current Zig APIs, `std.Io` semantics, concurrency and cancellation, operating
@@ -30,8 +30,14 @@ proofs.
   macOS, Linux, Windows, cancellation, timing, or hosted-verification claims.
 
 The required compiler version is recorded in [.zig-version](.zig-version).
-The initial baseline is Zig 0.16.0, the current stable 0.16.x release as of
-2026-09-04.
+The active baseline is Zig 0.17.0, upgraded on 2026-10-04.
+Dated Zig 0.16 source records and runtime receipts preserve their original scope.
+
+The [Zig 0.16 to 0.17 migration guide](docs/zig-0.16-to-0.17-migration.md)
+records the Baz dependency ports, semantic traps, and native verification limits.
+The upgrade ports current proofs and invalidates earlier verification labels before requalification.
+Default verification uses Debug for correctness proofs and ReleaseSafe for the timed fixture.
+The guide records the separate 0.16 ReleaseSafe macOS Dispatch baseline failure.
 
 ## Repository shape
 

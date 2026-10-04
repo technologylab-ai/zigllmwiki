@@ -1,6 +1,6 @@
 ---
 name: zig-wiki
-description: Consult, ingest, lint, maintain, or upgrade the source-driven Zig 0.16 systems-programming wiki in this repository. Use for std.Io, concurrency, TigerStyle, platform I/O, or wiki health work; do not use as a generic Zig coding skill when the repository wiki is not involved.
+description: Consult, ingest, lint, maintain, or upgrade the source-driven Zig 0.17 systems-programming wiki in this repository. Use for std.Io, concurrency, TigerStyle, platform I/O, or wiki health work; do not use as a generic Zig coding skill when the repository wiki is not involved.
 ---
 
 # Zig Wiki

@@ -2,10 +2,10 @@
 id: zig-0-16-api-migration-traps
 title: Zig 0.16 API migration traps
 kind: map
-status: source-verified
-zig: "0.16.0"
+status: superseded
+zig: "n/a"
 summary: Repair common pre-0.16 language, allocation, filesystem, diagnostics, build, and fuzzing patterns without importing obsolete API or representation assumptions.
-updated: 2026-09-04
+updated: 2026-10-04
 sources:
   - "[[zig-0.16.0-release-notes]]"
   - "[[zig-0.16.0-stdlib]]"
@@ -15,6 +15,10 @@ platforms:
 ---
 
 # Zig 0.16 API migration traps
+
+This page preserves the dated 0.16 migration context.
+Current guidance targets [[zig-0.17-baseline]] and [[zig-0.17-upgrade-assessment]].
+Do not use this historical map as the current API reference.
 
 ## Remember
 

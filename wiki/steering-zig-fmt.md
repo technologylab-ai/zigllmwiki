@@ -2,11 +2,12 @@
 id: steering-zig-fmt
 title: Steering zig fmt
 kind: pattern
-status: source-verified
-zig: "0.16.0"
-summary: Use trailing commas, array line breaks, and deliberate expression boundaries to select readable layouts while retaining canonical Zig 0.16 formatting.
-updated: 2026-09-04
+status: draft
+zig: "0.17.0"
+summary: Use trailing commas, array line breaks, and deliberate expression boundaries to select readable layouts while retaining canonical Zig 0.17 formatting.
+updated: 2026-10-04
 sources:
+  - "[[zig-0.17.0-stdlib]]"
   - "[[matklad-steering-zig-fmt]]"
   - "[[zig-0.16.0-style-guide]]"
 proofs:

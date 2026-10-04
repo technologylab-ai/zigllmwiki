@@ -31,7 +31,7 @@ and replication solve different parts of that problem.
 The example here is TigerBeetle at
 `47aeb2212a255273dda508288412e537d11e4b7c`. These are source-verified design and
 implementation facts, followed by explicitly labeled transfer recommendations.
-They are not a port, a Zig 0.16 `std.Io` contract, or new runtime durability
+They are not a port, a Zig 0.17 `std.Io` contract, or new runtime durability
 evidence. [[tigerbeetle-storage-source]]
 
 ## Which layer decides what
@@ -213,7 +213,7 @@ a cache or receiving an asynchronous completion.
 All selected storage, recovery, and operating documents were read at the pin;
 the source record lists the precise implementation symbols inspected. No
 TigerBeetle engine was built or run during this ingest, and no executable Zig
-was copied from it. The existing file proof covers the Zig 0.16 API mechanics
+was copied from it. The existing file proof covers the Zig 0.17 API mechanics
 described by [[files-buffering-and-atomic-persistence]]; it does not prove the
 checkpoint, replication, or power-loss protocol above.
 

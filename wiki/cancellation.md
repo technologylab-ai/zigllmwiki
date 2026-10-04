@@ -2,11 +2,12 @@
 id: cancellation
 title: Cancellation, shutdown, and crash recovery
 kind: concept
-status: source-verified
-zig: "0.16.0"
+status: draft
+zig: "0.17.0"
 summary: Cancellation of in-flight work is a request-and-acknowledgement protocol whose resource lifetime must not be confused with error unwinding, graceful shutdown, or crash recovery.
-updated: 2026-09-04
+updated: 2026-10-04
 sources:
+  - "[[zig-0.17.0-stdlib]]"
   - "[[zig-0.16.0-stdlib]]"
   - "[[matklad-cancelation-terminology]]"
   - "[[matklad-neat-io-threaded]]"
@@ -48,7 +49,7 @@ Use distinct words for distinct layers:
 Matklad calls the first two “synchronous cancelation” and “asynchronous
 cancelation.” The important part is the semantic distinction, not the spelling.
 
-## Zig 0.16 `std.Io` contract
+## Zig 0.17 `std.Io` contract
 
 `Future.cancel` is equivalent to awaiting while also placing a cancellation
 request. A task observes `error.Canceled` at a cancellation point: an `Io`
@@ -72,7 +73,7 @@ boundary rather than an application failure.
 
 The portable contract is cancellation request and acknowledgement; the means
 of interrupting a blocking syscall belongs to the concrete implementation. On
-Linux and other supported POSIX targets, Zig 0.16 `Io.Threaded` installs a
+Linux and other supported POSIX targets, Zig 0.17 `Io.Threaded` installs a
 do-nothing `SIGIO` handler without restart semantics. A canceler marks the
 worker as blocked-and-canceling, sends `SIGIO` to that specific thread, and
 retries with exponential backoff if the signal races syscall entry. When the

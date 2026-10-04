@@ -2,10 +2,10 @@
 id: zig-0-16-release-inventory
 title: Zig 0.16 release-note scope inventory
 kind: map
-status: source-verified
-zig: "0.16.0"
+status: superseded
+zig: "n/a"
 summary: Every named Zig 0.16 release-note topic is routed to current guidance, a numbered roadmap item, an upgrade watch, or an explicit out-of-scope decision.
-updated: 2026-09-04
+updated: 2026-10-04
 sources:
   - "[[zig-0.16.0-release-notes]]"
 proofs: []
@@ -14,6 +14,10 @@ platforms:
 ---
 
 # Zig 0.16 release-note scope inventory
+
+This page preserves the dated 0.16 migration context.
+Current guidance targets [[zig-0.17-baseline]] and [[zig-0.17-upgrade-assessment]].
+Do not use this historical map as the current API reference.
 
 ## How to use this map
 

@@ -2,11 +2,12 @@
 id: io-synchronization-primitives
 title: std.Io synchronization primitives
 kind: concept
-status: source-verified
-zig: "0.16.0"
+status: draft
+zig: "0.17.0"
 summary: Choose synchronization by state and ownership; Queue minimums do not remove mutex contention, partial-transfer accounting, or the need to join blocked participants.
 updated: 2026-09-05
 sources:
+  - "[[zig-0.17.0-stdlib]]"
   - "[[zig-0.16.0-release-notes]]"
   - "[[zig-0.16.0-stdlib]]"
 proofs:
@@ -21,7 +22,7 @@ platforms:
 
 ## Remember
 
-Zig 0.16's synchronization waits accept the caller's `std.Io`. A wait may
+Zig 0.17's synchronization waits accept the caller's `std.Io`. A wait may
 suspend a task, block an implementation worker, observe cancellation, or wake
 spuriously according to the primitive and concrete backend. Do not reason about
 them as thin aliases for one operating-system thread API.
@@ -143,7 +144,7 @@ cancelable and uncancelable acquisition variants plus nonblocking `tryLock` and
 implementation may touch its internal mutex.
 
 Match `unlock` only with exclusive acquisition and `unlockShared` with every
-successful shared acquisition. In the 0.16 implementation, queued writers
+successful shared acquisition. In the 0.17 implementation, queued writers
 disable the reader fast path; shared acquisition falls back to the internal
 mutex. The public contract does not promise a
 general fairness or starvation bound. If a latency guarantee depends on
@@ -190,7 +191,7 @@ an implementation resource, not a public pool API to couple library code to.
 ## Evidence
 
 Six baseline tests in the [synchronization proof](../proofs/io_sync_primitives.zig)
-use Zig 0.16 `std.testing.io`: event cancellation/reset after join; canceled
+use Zig 0.17 `std.testing.io`: event cancellation/reset after join; canceled
 mutex acquisition and reuse; condition predicate handoff; queue capacity,
 close, and drain; shared/exclusive lock and semaphore balance; and an atomic
 futex predicate loop. It ran on aarch64 macOS on 2026-09-04. Interface claims

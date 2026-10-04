@@ -2,11 +2,12 @@
 id: error-handling-and-diagnostics
 title: Error handling and diagnostics
 kind: concept
-status: source-verified
-zig: "0.16.0"
+status: draft
+zig: "0.17.0"
 summary: Use Zig error sets for typed recovery branches, keep programmer invariants on the assertion/panic path, and carry human-facing evidence through a separate bounded diagnostics interface.
-updated: 2026-09-04
+updated: 2026-10-04
 sources:
+  - "[[zig-0.17.0-stdlib]]"
   - "[[zig-0.16.0-stdlib]]"
   - "[[matklad-error-codes-for-control-flow]]"
   - "[[matklad-diagnostics-factory]]"
