@@ -3,6 +3,11 @@ name: Windows runtime verification
 on:
   workflow_dispatch:
     inputs:
+      native_arm64_runtime:
+        description: Include the experimental ARM64 proof suite (x64 compiler emulation)
+        type: boolean
+        required: false
+        default: false
       native_arm64_diagnostics:
         description: Reproduce known native ARM64 compiler failures separately from runtime qualification
         type: boolean
@@ -22,17 +27,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - arch: x86_64
-            runner: windows-latest
-            os_arch: X64
-            pe_machine: "8664"
-          - arch: aarch64
-            runner: windows-11-arm
-            os_arch: Arm64
-            pe_machine: "aa64"
-    runs-on: ${{ matrix.runner }}
-    timeout-minutes: 60
+        arch: ${{ fromJSON((inputs.native_arm64_runtime || inputs.native_arm64_diagnostics) && '["x86_64","aarch64"]' || '["x86_64"]') }}
+    runs-on: ${{ matrix.arch == 'aarch64' && 'windows-11-arm' || 'windows-latest' }}
+    # Cold Debug/Safe builds under compiler emulation and the separate native
+    # proof probes need headroom beyond the previous one-mode qualification.
+    timeout-minutes: 90
     env:
       PYTHONDONTWRITEBYTECODE: "1"
       ZIG_PLATFORM: ${{ matrix.arch }}-windows
@@ -40,8 +39,8 @@ jobs:
       # run 33921810785. Its x64 compiler built ARM64 binaries that then passed
       # on the ARM64 OS. Compiler emulation and test execution remain distinct.
       COMPILER_PLATFORM: x86_64-windows
-      EXPECTED_OS_ARCH: ${{ matrix.os_arch }}
-      EXPECTED_PE_MACHINE: ${{ matrix.pe_machine }}
+      EXPECTED_OS_ARCH: ${{ matrix.arch == 'aarch64' && 'Arm64' || 'X64' }}
+      EXPECTED_PE_MACHINE: ${{ matrix.arch == 'aarch64' && 'aa64' || '8664' }}
 
     steps:
       - name: Prepare the out-of-tree evidence packet

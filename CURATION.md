@@ -351,4 +351,9 @@ Current proofs and source guidance now target exact 0.17.0; earlier verification
 Backend source review exposes shipped Dispatch, Uring, and Kqueue vtable mismatches.
 Expected compiler-error witnesses keep those gaps active in verification.
 Historical source and snapshot bytes remain unchanged.
-Full native, retrieval, and publication-artifact gates are running.
+[[zig-0.17-final-verification-2026-10-04]] adds the final immutable receipt.
+Full Mac/Linux/Windows x64 Debug/Safe, retrieval and tracked-site checks passed.
+The experimental full ARM64 gate is deferred by the user; five standalone Debug probes passed separately.
+The Linux infinite-sleep defect was reproduced, then moved to an explicit opt-in step.
+The final evidence ingest passed structural, retrieval, workflow and full Mac verification checks.
+The five repository ports are ready for draft-PR review. Historical source bytes remain unchanged.

@@ -1,6 +1,6 @@
 # Project handoff — Zig 0.17 upgrade, 2026-10-04
 
-## Active upgrade checkpoint
+## Completed upgrade checkpoint
 
 The user explicitly authorized the full wiki upgrade after the Baz dependency ports.
 The active compiler is exact Zig 0.17.0.
@@ -15,8 +15,27 @@ Dispatch and Uring fail on removed process vtable members; Kqueue fails on a rem
 Dispatch initialization also fails through its interface constructor.
 The Apple C-shim proof remains separate; no current std.Dispatch instance is qualified.
 
-The proof-only Mac Debug and Safe gates passed, with platform skips recorded.
-Full verification, retrieval/site checks, and native Linux/Windows qualification are in progress.
+[[zig-0.17-final-verification-2026-10-04]] preserves the final receipt and all first failures.
+The ordinary graph at `4fee1f67df666a27980d7eef0653699ddb242d8f` passed full
+Debug/Safe on Mac and native omarx1: 93/93 steps per mode, with exact-input caches identified.
+Fresh Linux Safe execution passed 80/88 tests with eight platform skips.
+Windows x64 passed both modes: 93/93 steps and 81/88 tests, seven skips.
+The user deferred the long-running experimental ARM64 full gate; the run is canceled overall.
+Its five separate native ARM64 Debug probes passed and retain their narrower scope.
+Windows ARM64 runtime is now opt-in, distinct from native compiler diagnostics.
+All owned Mac/Linux reservations and children were cleaned.
+
+The revised time proof checks infinite-sleep delegation through an injected oracle.
+A separate Linux subprocess reproduced the exact shipped integer-overflow SIGABRT.
+Normal verification only compiles that program; intentional reproduction requires
+`zig build verify-linux-none-sleep-defect` and can activate OS crash monitors.
+Three evented backend compile blockers remain explicit, separate from working application OS adapters.
+Python tooling passed 42 tests; all 25 retrieval queries met policy.
+The tracked 206-document site and deterministic comparison passed before final evidence ingestion.
+The final evidence ingest passed structural lint across 53 pages and 88 sources,
+retrieval policy, workflow validation, and full Mac Debug/Safe verification.
+The five repository ports are reviewable draft PRs; no owned background gate remains.
+Earlier run identities are not renamed.
 Timing entry points require Safe; the timed verification executable always uses Safe.
 Application performance comparisons were not run.
 Earlier checkpoints below preserve their original evidence limits.

@@ -9,6 +9,8 @@ The compiler's exact source defines APIs and semantics.
 Read the [release notes](https://ziglang.org/download/0.17.0/release-notes.html) after that source.
 The pinned [source record](../sources/zig-0.17.0-stdlib.md) identifies the release commit and inspected files.
 The [project evidence record](../sources/zig-0.17-project-ports-2026-10-04.md) identifies revisions, gates, and limits.
+The [final verification record](../sources/zig-0.17-final-verification-2026-10-04.md)
+closes the application and ordinary wiki gates, with the experimental full ARM64 gate deferred.
 
 ## Port the complete dependency graph
 
@@ -215,6 +217,18 @@ Distinguish the server request deadline, idle timeout, client timeout, and harne
 Give clients and watchdogs enough time to observe the intended server result.
 Prefer bounded polling for a condition over an assumed scheduling delay.
 An external watchdog should leave time for child cleanup and evidence capture.
+Budget cold compilation and follow-up native probes separately when a compiler
+runs under emulation. The wiki's old Windows ARM64 gate covered one full Debug
+build; the upgraded gate covers Debug and Safe plus separate native probes.
+Its watchdog now allows 90 minutes. Compiler process architecture and the
+architecture of executed proof binaries must remain separate in every receipt.
+Windows x64 passed the upgraded suite. The additional ARM64 job had a runner
+and remained in full verification for nearly an hour; live per-proof logs
+were unavailable. The user chose to defer that experimental gate.
+Do not infer an unavailable runner or a particular hang from that observation.
+The wiki's ARM64 runtime suite is now opt-in (`native_arm64_runtime=true`).
+Its five separate Debug Windows probes passed as native ARM64 executables
+after cancellation; those narrower results do not replace the incomplete full gate.
 
 The engine's hosted Mac continuation test initially failed after an idle pause.
 Its idle limit was 500 ms, and the pause left roughly 100 ms of scheduling slack.
@@ -285,6 +299,9 @@ Mustache's optional compile-time suite remains disabled in its established build
 Five historical sample/benchmark Zig files remain outside its exported package and verification graph.
 This migration covers the dependency graph consumed by Baz.
 It does not claim those excluded historical programs were ported.
+The engine's preserved benchmark preparation recipe also remains a historical
+0.16 reproducer outside the exported graph. Use an archived engine commit whose
+compiler pin matches that recipe; a 0.17 performance comparison needs its own port.
 The application upgrade ran no performance comparison.
 Wiki verification runs its Safe timing fixture, which supplies no application throughput evidence.
 

@@ -19,12 +19,17 @@ produce Zig 0.17.0 code that:
 
 ## Zig 0.17 upgrade — 2026-10-04
 
-Status: running verification.
+Status: done for the authorized scope; the experimental full ARM64 gate remains deferred.
 The user authorized the full compiler, proof, current-guidance, workflow, and README upgrade.
 [[zig-0.17-baseline]] owns the active target; [[zig-0.17-upgrade-assessment]] routes migration findings.
 New source records preserve exact release and project identities without rewriting older evidence.
 Prior verification labels are invalidated before requalification.
-Complete the full Debug/Safe Mac and Linux gates, retrieval/site checks, and native Windows qualification.
+Full Debug/Safe Mac, Linux and Windows x64 gates passed, with retrieval/site checks.
+[[zig-0.17-final-verification-2026-10-04]] preserves final receipts and first failures.
+The user deferred the experimental ARM64 full gate; its separate Debug probes retain narrower scope.
+Intentional Linux crash reproduction is opt-in and excluded from ordinary verification.
+The final evidence ingest passed structural, retrieval, workflow and full Mac verification checks.
+All five repository ports remain reviewable draft PRs.
 Keep the shipped Dispatch/Uring/Kqueue compile blockers visible through their expected-error witnesses.
 Keep dated 0.16 platform receipts separate from current proof results.
 

@@ -10,6 +10,7 @@ sources:
   - "[[zig-0.17.0-release-notes]]"
   - "[[zig-0.17.0-stdlib]]"
   - "[[zig-0.17-project-ports-2026-10-04]]"
+  - "[[zig-0.17-final-verification-2026-10-04]]"
 proofs:
   - proofs/zig_017_semantics.zig
 platforms:
@@ -38,6 +39,8 @@ The upgrade invalidates prior labels before requalifying current pages and proof
 [[zig-0.17.0-stdlib]] provides exact compiler and library semantics.
 [[zig-0.17.0-release-notes]] provides release context.
 [[zig-0.17-project-ports-2026-10-04]] provides project revisions and verification limits.
+[[zig-0.17-final-verification-2026-10-04]] closes final application and ordinary wiki gates.
+The experimental full ARM64 Windows gate is deferred; its narrower standalone probes remain separate.
 
 ## Related active guidance
 

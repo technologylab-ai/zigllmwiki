@@ -209,8 +209,10 @@ claim.
 
 ## Windows through GitHub Actions
 
-Windows runtime evidence currently comes from GitHub-hosted Windows VMs via
-a matrix of `windows-latest` (x64) and `windows-11-arm` (ARM64). No local Windows VM on `maxross` or `omarx1`, or
+Windows runtime evidence comes from GitHub-hosted Windows VMs: the default
+`windows-latest` x64 job and an experimental, opt-in `windows-11-arm` ARM64 job.
+Enable the latter with `native_arm64_runtime=true`; its full 0.17 qualification
+is deferred at the user's request. No local Windows VM on `maxross` or `omarx1`, or
 self-hosted Windows runner, is part of this repository's testing setup.
 The common verifier also cross-compiles Windows proofs on macOS and Linux;
 those builds provide compile-only evidence. The most recently recorded hosted
@@ -228,16 +230,18 @@ gh run watch RUN_ID --exit-status
 ```
 
 The workflow has `contents: read` only. Its standard path downloads the
-`x86_64-windows` archive named by `.zig-version` from Zig's official index and
-verifies SHA-256. On x64 the compiler and tests run natively. On ARM64 that
+`x86_64-windows` archive named by `.zig-version` from the checked-in
+`.github/zig-release.json` metadata and verifies SHA-256. This supports exact
+signed releases omitted from the download index. On x64 the compiler and tests
+run natively. On the optional ARM64 path that
 **x64 compiler runs under Windows emulation**, while all project tests target
 `aarch64-windows` with CPU `baseline` and execute as **ARM64 processes** on the
 ARM64 OS. Compiler and emitted-test PE machines and actual OS architecture are
 checked separately. Host JSON records those distinctions alongside image,
 Windows build/UBR, CPU, RAM, logical filesystems and reported disk models.
 
-The x64 common gate is `zig build verify --summary all`; the ARM64 common gate
-is `zig build verify -Dtarget=aarch64-windows -Dcpu=baseline --summary all`.
+Both jobs run `zig build verify -Doptimize=MODE -j2 --summary all` for `debug`
+and `safe`. The optional ARM64 job adds `-Dtarget=aarch64-windows -Dcpu=baseline`.
 The ARM64 job additionally inspects generated code with explicit ARM64 target
 and baseline CPU, since the ordinary inspector inherits its compiler's x64
 host default. This path uses the same unmodified exact compiler release; it
@@ -324,14 +328,16 @@ Windows lessons that must not regress:
 - Zig 0.16.0 `Threaded.batchCancel` waits for an APC/alert before sending
   cancellation requests for a pending batch. A watchdog-backed witness must
   distinguish an explicit wake used to release that wait from unassisted
-  cancellation progress. See [[windows-iocp-and-overlapped-io]].
+  cancellation progress. The same ordering remains in exact 0.17 source.
+  See [[windows-iocp-and-overlapped-io]].
 - New native harnesses must keep control blocks and buffers live until terminal
   reconciliation even on a failed assertion. A process watchdog may terminate
   a stuck proof; it must not unwind a stack still borrowed by the kernel.
 - Zig 0.16.0 `dirOpenFileWtf16` requests asynchronous mode when not following
   symlinks but returns `File.flags.nonblocking = false`. Use explicit NT/Win32
   opens for a custom overlapped fixture instead of inferring mode from this
-  wrapper metadata. The first M3-004 run caught that mismatch.
+  wrapper metadata. The first M3-004 run caught that mismatch. Zig 0.17 fixes
+  this wrapper's synchronous flag; retain the older defect as dated evidence.
 - PowerShell `Tee-Object` does not create a file when a clean `git status`
   emits nothing. Capture status as an array and explicitly write the packet
   file before checking it; a missing file is not a dirty checkout.
@@ -376,7 +382,7 @@ review remains independent of write authority.
 
 ## Standalone M4 HTTP gates
 
-The public sibling `bounded-http` contains the runnable bounded/http application.
+The public sibling `bounded-http` contains the runnable [bounded/http](https://technologylab-ai.github.io/bounded-http/) application.
 The application registers its modules through its own `zig build verify`.
 The [naming decision](../sources/bounded-http-naming-2026-09-06.md) defines the project names.
 The HTTP project's first source-hashed packet is
@@ -384,7 +390,8 @@ The HTTP project's first source-hashed packet is
 Run its Debug and ReleaseSafe verifiers, build ReleaseSafe, then its Python
 generic, inline, gather, batch and arena lifecycle integration suites, the comparator receipt
 tests, and `tools/smoke.py`. The smoke orchestrator rejects a binary
-whose READY marker does not report ReleaseSafe. Its Linux SSH wrapper follows
+whose READY marker does not report `optimize=safe` (the legacy `ReleaseSafe`
+label is also accepted). Its Linux SSH wrapper follows
 this runbook's validated temporary-directory, exact compiler and clean-input
 rules, and adds finite build/integration/process watchdogs.
 
