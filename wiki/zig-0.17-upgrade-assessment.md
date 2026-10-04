@@ -5,13 +5,14 @@ kind: map
 status: draft
 zig: "0.17.0"
 summary: Route explicit 0.17 upgrades through cast audits, dependency ports, native gates, and recorded migration traps.
-updated: 2026-10-04
+updated: 2026-10-05
 sources:
   - "[[zig-0.17.0-release-notes]]"
   - "[[zig-0.17.0-stdlib]]"
   - "[[zig-0.17-project-ports-2026-10-04]]"
   - "[[zig-0.17-final-verification-2026-10-04]]"
   - "[[omajot-zig-0.17-2026-10-04]]"
+  - "[[omagma-zig-0.17-stdlib-followup-2026-10-05]]"
 proofs:
   - proofs/zig_017_semantics.zig
 platforms:
@@ -33,6 +34,8 @@ The upgrade invalidates prior labels before requalifying current pages and proof
 - Preserve reflection column indices, optional defaults, and public cleanup hooks.
 - Preserve string and sentinel behavior when replacing removed array repetition.
 - Update build APIs, final dependency pins, and machine-readable optimization tags.
+- Recheck corrected `CLOSE_RANGE` flags against literal values and kernel behavior; nearby comments can remain stale.
+- Retain checked `privileged_headers` workarounds and explicit authorization redirect controls.
 - Separate request deadlines from idle limits and test watchdogs.
 - Recheck infinite-sleep semantics and distinguish experimental std.Io backend blockers from OS adapters.
 - Fetch current main before qualifying consumers, and preserve embedded package assets.
@@ -47,6 +50,10 @@ The experimental full ARM64 Windows gate is deferred; its narrower standalone pr
 
 [[omajot-zig-0.17-2026-10-04]] adds final Baz integration and Omajot native qualification.
 Its separate helper diagnosis records an optional casing lifetime defect outside the consumed scalar table.
+
+[[omagma-zig-0.17-stdlib-followup-2026-10-05]] adds corrected Linux descriptor flags and unchanged HTTP header behavior.
+The record separates source conclusions from the probes' native Linux scope.
+[[networking-and-dns-racing]] explains authorization overrides and explicit redirect controls.
 
 ## Related active guidance
 

@@ -36,6 +36,14 @@ The wiki integration lives in [PR #6](https://github.com/technologylab-ai/zigllm
 Keep the shipped Dispatch/Uring/Kqueue compile blockers visible through their expected-error witnesses.
 Keep dated 0.16 platform receipts separate from current proof results.
 
+## Omagma standard-library follow-up — 2026-10-05
+
+Status: done for source capture and synthesis; verification is running.
+[[omagma-zig-0.17-stdlib-followup-2026-10-05]] pins corrected descriptor flags and unchanged HTTP header behavior.
+The migration map and networking guide expose stale numeric comments and explicit credential-forwarding controls.
+Application bug histories remain in Omagma.
+The maintained proof graph is unchanged; the experimental Windows ARM64 gate remains deferred.
+
 ## Windows HTTP implementation — 2026-09-06
 
 [[bounded-http-windows-shards-2026-09-06]] pins qualified feature `419de5445901a87ea6973020df5b13a420917483` and its identical-tree merge `1c74a4e379c365ec0a201e6fe3df1a5a9718d504`.

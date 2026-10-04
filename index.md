@@ -5,7 +5,7 @@ kind: map
 status: draft
 zig: "0.17.0"
 summary: Retrieval map for current Zig systems programming, std.Io, TigerStyle, and platform I/O.
-updated: 2026-10-04
+updated: 2026-10-05
 sources:
   - "[[zig-0.17.0-stdlib]]"
 proofs: []
@@ -25,7 +25,7 @@ Read this page first, then follow only the pages needed for the task.
 - [[zig-0.17-baseline]] — active version, evidence standard, and upgrade rule.
 - [[zig-0.16-baseline]] — historical baseline and its dated evidence boundary.
 - [[zig-0.17-upgrade-assessment]] — explicit dependency upgrades, logical-bit casts,
-  reflection, embedded assets, Unicode, ownership defects, test budgets, and native port evidence.
+  reflection, embedded assets, Unicode, OS flags, HTTP headers, test budgets, and native port evidence.
 - [[zig-0.16-release-inventory]] — every named 0.16 release-note topic routed
   to current guidance, a numbered roadmap item, a watch, or an explicit
   out-of-scope decision.
@@ -57,7 +57,7 @@ Read this page first, then follow only the pages needed for the task.
   state, truncation, atomic namespace publication, and the directory-durability
   seam.
 - [[networking-and-dns-racing]] — hostname lookup queues, connection racing,
-  absolute deadlines, stream ownership, datagrams, and admission limits.
+  absolute deadlines, stream ownership, HTTP authorization headers, redirects, datagrams, and admission limits.
 - [[child-process-lifecycles]] — bounded output capture, process deadlines,
   pipe ownership, termination tags, and wait/kill cleanup.
 - [[entropy-and-deterministic-randomness]] — infallible process randomness,

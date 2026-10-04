@@ -5,9 +5,10 @@ kind: pattern
 status: draft
 zig: "0.17.0"
 summary: Bound DNS and connection-result queues, use one absolute deadline, drain and close losing connections, and keep stream and datagram ownership distinct.
-updated: 2026-10-04
+updated: 2026-10-05
 sources:
   - "[[zig-0.17.0-stdlib]]"
+  - "[[omagma-zig-0.17-stdlib-followup-2026-10-05]]"
   - "[[zig-0.16.0-stdlib]]"
   - "[[zig-0.16.0-release-notes]]"
   - "[[fi-zig-0.16-migration]]"
@@ -102,6 +103,24 @@ The listen option `kernel_backlog` defaults to 128. It bounds connections the
 kernel may hold on the application's behalf, not live streams already accepted
 or tasks processing them. Admission should still check an application-owned
 maximum before assigning per-connection buffers and work slots.
+
+## Exact HTTP client header behavior
+
+Exact Zig 0.17 `std.http.Client.Request.sendHead` does not emit `privileged_headers`.
+The client validates and stores that list, but neither action establishes wire emission.
+The standard `headers.authorization` override and ordinary `extra_headers` are emitted.
+The same privileged-header omission exists in exact 0.16.
+
+The redirect code can clear `privileged_headers`, but retains `headers.authorization`.
+Do not assume privileged-header stripping protects an authorization override.
+Disable automatic redirects or enforce an explicit credential-forwarding policy for the destination.
+Keep borrowed header bytes valid through every send or resend.
+
+[[omagma-zig-0.17-stdlib-followup-2026-10-05]] pins these source conclusions and selected native Linux evidence.
+Omagma's synthetic peer verifies the override's bearer bytes and rejected redirects with no followed request.
+Those tests do not directly reproduce the omission or qualify cross-host stripping.
+The credential-free TLS check supplies separate reachability evidence.
+The [migration guide](../docs/zig-0.16-to-0.17-migration.md) records the workaround and qualification boundaries.
 
 ## Datagrams
 

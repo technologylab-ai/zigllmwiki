@@ -1368,3 +1368,15 @@ Five application PRs merged with merge commits and qualified-tree equality.
 The ordinary wiki proof inputs remain unchanged by this content ingest.
 The experimental full Windows ARM64 gate remains deferred.
 No intentional crash reproduction or application performance comparison ran.
+
+## 2026-10-05 — Omagma standard-library follow-up
+
+Captured [[omagma-zig-0.17-stdlib-followup-2026-10-05]] before updating migration and networking guidance.
+The snapshot preserves 14 selected files and exact compiler, Linux UAPI, project, and hosted run identities.
+Zig 0.17 corrects the Linux descriptor flag layout, while nearby numeric comments retain older values.
+The HTTP client still omits privileged headers and retains authorization overrides during redirects.
+The guidance requires explicit credential-forwarding controls and borrowed header storage through every send.
+The synthesis separates source conclusions from native Linux fixture evidence.
+Application bug histories and private receipts remain in Omagma.
+The maintained proof graph and historical source records remain unchanged.
+The handoff's active compiler instruction now matches the exact 0.17 baseline.
