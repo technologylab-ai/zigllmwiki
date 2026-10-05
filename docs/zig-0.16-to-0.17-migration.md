@@ -14,6 +14,7 @@ The [final verification record](../sources/zig-0.17-final-verification-2026-10-0
 closes the initial application and ordinary wiki gates, with the experimental full ARM64 gate deferred.
 The [Omajot follow-up record](../sources/omajot-zig-0.17-2026-10-04.md) adds final Baz integration and consumer evidence.
 The [Omagma follow-up record](../sources/omagma-zig-0.17-stdlib-followup-2026-10-05.md) adds descriptor-flag and HTTP-header findings.
+The [terminal follow-up record](../sources/omagma-zig-0.17-terminal-followup-2026-10-05.md) adds allocator removal, libc wrappers, and input-fragment findings.
 
 ## Port the complete dependency graph
 
@@ -120,6 +121,17 @@ Do not generalize that representation shortcut to arbitrary element types.
 A helper file also triggered duplicate ownership when two modules imported it independently.
 Share a dedicated module, or keep a fixture private to one module.
 Do not import the same file into separate module roots by relative path.
+
+### Replace removed sentinel allocation helpers
+
+Exact 0.16 defines deprecated `Allocator.dupeZ` as a wrapper around `dupeSentinel(T, m, 0)`.
+Exact 0.17 removes `dupeZ` and retains `dupeSentinel`.
+For a byte path, use `allocator.dupeSentinel(u8, path, 0)` to obtain owned `[:0]u8` storage.
+Ordinary `dupe` returns an unsentinel slice and does not preserve the termination contract.
+Free the original sentinel slice with the same allocator.
+Sentinel allocation does not validate embedded NUL bytes; validate paths before passing them to C APIs.
+The [terminal follow-up](../sources/omagma-zig-0.17-terminal-followup-2026-10-05.md) pins both exact allocator sources.
+This removal is a release API change, separate from the terminal bugs described below.
 
 ## Migrate reflection as related columns
 
@@ -248,6 +260,22 @@ Run the dependency's oracle suites and the application's native TUI tests.
 A successful compile does not qualify Unicode behavior.
 Keep their results separately scoped.
 
+### Qualify fragmented terminal input
+
+The pinned POSIX libvaxis loop can consume incomplete UTF-8 bytes instead of retaining them for another read.
+The pinned uucode iterator substitutes U+FFFD; the parser can still expose the original incomplete bytes as key text.
+The loop's separate malformed-input discard branch is not established as the cause of Omagma's lost-emoji witness.
+Treat the missing persisted bytes as reported project evidence and the parser behavior as a source conclusion.
+This finding does not establish a Zig compiler regression.
+
+Retain incomplete codepoints with an explicit byte bound and a bounded malformed-input policy.
+Bound pending control sequences separately from codepoint length.
+Give queued text an owner beyond the parser buffer's reuse.
+Test forced read splits with literal expected bytes and independently persisted output.
+Complete-codepoint preservation does not establish identical grapheme grouping across reads.
+Omajot shares the pinned POSIX loop, but its different input consumers do not establish the same application failure.
+Read [[buffer-hygiene-and-division-intent]] and the [terminal follow-up](../sources/omagma-zig-0.17-terminal-followup-2026-10-05.md).
+
 Uucode's generated `[N]int` to `[N]packed Row` cast preserves logical bits and row indices.
 Zigimg's SIMD mask intentionally maps lane zero to bit zero for `@ctz`.
 Zigimg replaces selected extern-structure casts with field assignments.
@@ -355,6 +383,20 @@ A dependency can require libc and propagate that requirement.
 Libvaxis does so in this graph; Omajot's Linux build is a static musl binary.
 Keep historical size measurements dated.
 Measure the new compiler separately before making new size or performance claims.
+
+### Inspect linked-libc terminal wrappers
+
+Exact 0.16 and 0.17 `std.posix.tcgetpgrp` and `tcsetpgrp` select `std.c` when libc is linked.
+Both callers use pointer-shaped raw wrapper signatures, while both releases omit the corresponding C declarations.
+The reported linked-libc executable build exposes this pre-existing gap.
+Libc `tcgetpgrp(fd)` returns a PID; `tcsetpgrp(fd, pid)` takes a scalar PID.
+Do not copy raw pointer signatures into C declarations.
+Correct C declarations would also require adapting the POSIX callers.
+Linux-specific adapters can use raw Linux ioctl wrappers with `std.os.linux.errno`.
+Those adapters do not provide portable terminal behavior.
+Compile the actual executable and editor paths; unit-test roots can leave those paths unanalyzed.
+Qualify foreground restoration and child exit through independent PTY checks, including error paths.
+Read [[child-process-lifecycles]] and the [terminal follow-up](../sources/omagma-zig-0.17-terminal-followup-2026-10-05.md).
 
 ### Recheck OS flag layouts and comments
 

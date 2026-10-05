@@ -25,7 +25,7 @@ Read this page first, then follow only the pages needed for the task.
 - [[zig-0.17-baseline]] — active version, evidence standard, and upgrade rule.
 - [[zig-0.16-baseline]] — historical baseline and its dated evidence boundary.
 - [[zig-0.17-upgrade-assessment]] — explicit dependency upgrades, logical-bit casts,
-  reflection, embedded assets, Unicode, OS flags, HTTP headers, test budgets, and native port evidence.
+  reflection, sentinel allocation, OS flags, HTTP headers, terminal input, and native port evidence.
 - [[zig-0.16-release-inventory]] — every named 0.16 release-note topic routed
   to current guidance, a numbered roadmap item, a watch, or an explicit
   out-of-scope decision.
@@ -59,7 +59,7 @@ Read this page first, then follow only the pages needed for the task.
 - [[networking-and-dns-racing]] — hostname lookup queues, connection racing,
   absolute deadlines, stream ownership, HTTP authorization headers, redirects, datagrams, and admission limits.
 - [[child-process-lifecycles]] — bounded output capture, process deadlines,
-  pipe ownership, termination tags, and wait/kill cleanup.
+  pipe ownership, linked-libc foreground terminal groups, and wait/kill cleanup.
 - [[entropy-and-deterministic-randomness]] — infallible process randomness,
   fallible fresh entropy, and deterministic replay boundaries.
 - [[testing-io-and-single-threaded-builds]] — host-backed test I/O, the fixed
@@ -124,7 +124,7 @@ Read this page first, then follow only the pages needed for the task.
   short check/use gaps, const borrowing, final-address construction, and
   suspension-aware revalidation.
 - [[buffer-hygiene-and-division-intent]] — complete observable-byte
-  initialization, reusable-buffer clearing, explicit encoding, and named
+  initialization, UTF-8 read boundaries, queued-text ownership, explicit encoding, and named
   exact/floor/ceiling arithmetic.
 - [[deterministic-simulation-testing]] — seeded virtual time, fault injection,
   assertions, and replay.

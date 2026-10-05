@@ -4,10 +4,11 @@ title: Buffer hygiene and division intent
 kind: pattern
 status: draft
 zig: "0.17.0"
-summary: Initialize every externally observable byte, clear reused storage according to its disclosure contract, encode fields explicitly, and name integer division rounding behavior.
-updated: 2026-10-04
+summary: Initialize observable bytes, retain incomplete UTF-8 input and queued text, encode fields explicitly, and name division rounding behavior.
+updated: 2026-10-05
 sources:
   - "[[zig-0.17.0-stdlib]]"
+  - "[[omagma-zig-0.17-terminal-followup-2026-10-05]]"
   - "[[source-tigerstyle]]"
   - "[[zig-0.16.0-language-reference]]"
   - "[[zig-0.16.0-stdlib]]"
@@ -61,6 +62,32 @@ reserved space, and decode with length/range/reserved-byte checks. See
 its Zig contract states. It does not automatically establish a portable
 protocol, validate input, clear old storage, or make an OS ABI safe on every
 target.
+
+## UTF-8 read boundaries and queued text
+
+A read boundary can divide a Unicode codepoint, including during grapheme lookahead.
+The pinned POSIX libvaxis loop can consume incomplete original bytes as key text instead of requesting continuation.
+The pinned uucode iterator substitutes U+FFFD for truncated input.
+The loop's separate malformed-input discard branch does not establish the cause of Omagma's missing-emoji witness.
+[[omagma-zig-0.17-terminal-followup-2026-10-05]] separates these source conclusions from reported PTY byte mismatches.
+
+Retain incomplete codepoints until enough bytes arrive, within an explicit storage bound.
+Distinguish incomplete input from malformed input and choose a bounded rejection or replacement policy.
+Bound pending control sequences too; a larger read buffer only moves a codepoint boundary.
+Omagma's adapter retains up to three trailing bytes and limits pending sequences to 1,024 bytes.
+A full unresolved sequence ends input with `InputSequenceTooLong`.
+That adapter does not validate every malformed UTF-8 fragment.
+Preserving complete codepoints does not guarantee identical grapheme grouping across reads.
+
+Give queued text owned storage beyond the parser buffer's reuse.
+Release rejected reservations and retain accepted text until the consumer finishes.
+Omagma's consumer borrows text until the next `nextEvent` call begins, or until loop stop.
+A blocked or failed `nextEvent` call still ends the prior borrow.
+Longer retention requires another copy or ownership transfer.
+Independent PTY checks should force read splits and compare literal expected bytes with persisted output.
+The captured Omagma report records eight fragmented inputs and preservation of the original 2,349-byte body.
+These project results do not promote the wiki's buffer proof into terminal runtime evidence.
+Omajot shares the POSIX input graph, but a matching Omajot failure has not been reproduced.
 
 ## Ordinary zeroing is not guaranteed secure erasure
 

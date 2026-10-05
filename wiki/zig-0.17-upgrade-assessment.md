@@ -13,6 +13,7 @@ sources:
   - "[[zig-0.17-final-verification-2026-10-04]]"
   - "[[omajot-zig-0.17-2026-10-04]]"
   - "[[omagma-zig-0.17-stdlib-followup-2026-10-05]]"
+  - "[[omagma-zig-0.17-terminal-followup-2026-10-05]]"
 proofs:
   - proofs/zig_017_semantics.zig
 platforms:
@@ -33,13 +34,16 @@ The upgrade invalidates prior labels before requalifying current pages and proof
 - Audit each `@bitCast` by logical bits, native memory bytes, or protocol byte order.
 - Preserve reflection column indices, optional defaults, and public cleanup hooks.
 - Preserve string and sentinel behavior when replacing removed array repetition.
+- Replace removed `Allocator.dupeZ` with `dupeSentinel` and preserve original sentinel-slice ownership.
 - Update build APIs, final dependency pins, and machine-readable optimization tags.
 - Recheck corrected `CLOSE_RANGE` flags against literal values and kernel behavior; nearby comments can remain stale.
 - Retain checked `privileged_headers` workarounds and explicit authorization redirect controls.
+- Inspect linked-libc `tcgetpgrp` and `tcsetpgrp` gaps separately from new compiler regressions.
 - Separate request deadlines from idle limits and test watchdogs.
 - Recheck infinite-sleep semantics and distinguish experimental std.Io backend blockers from OS adapters.
 - Fetch current main before qualifying consumers, and preserve embedded package assets.
 - Run direct dependency suites; inspect Unicode changes, fixture skips, and escaped borrowed slices.
+- Test incomplete UTF-8 read boundaries and queued key-text ownership in the selected terminal input path.
 - Record native verification and excluded historical dependency samples.
 
 [[zig-0.17.0-stdlib]] provides exact compiler and library semantics.
@@ -54,6 +58,12 @@ Its separate helper diagnosis records an optional casing lifetime defect outside
 [[omagma-zig-0.17-stdlib-followup-2026-10-05]] adds corrected Linux descriptor flags and unchanged HTTP header behavior.
 The record separates source conclusions from the probes' native Linux scope.
 [[networking-and-dns-racing]] explains authorization overrides and explicit redirect controls.
+
+[[omagma-zig-0.17-terminal-followup-2026-10-05]] adds allocator removal and separately classified terminal findings.
+[[child-process-lifecycles]] explains the pre-existing linked-libc foreground-wrapper gap.
+[[buffer-hygiene-and-division-intent]] explains bounded incomplete input and queued-text ownership.
+Reported Omagma PTY results remain separate from the wiki's maintained proofs.
+Shared Omajot source exposure does not establish an Omajot failure.
 
 ## Related active guidance
 

@@ -1400,3 +1400,23 @@ No new omarx1 gate ran because Omagma held its live reservation.
 The prepared native scope closed without acquiring or changing that lock.
 No intentional crash witness or new Windows runtime gate ran.
 These completion records change no proof, compiler, build, or captured source input.
+
+## 2026-10-05 — Omagma allocator and terminal findings
+
+Captured [[omagma-zig-0.17-terminal-followup-2026-10-05]] before updating existing migration, process and buffer guidance.
+The snapshot preserves 27 exact source, fixture, report and hosted-metadata files with individual hashes.
+All eleven installed Zig inputs match their immutable upstream source bytes.
+The allocator comparison establishes deprecated `dupeZ` removal and retained sentinel allocation ownership.
+The linked-libc foreground-wrapper gap already exists in exact 0.16.
+The pinned dependency parser can consume incomplete UTF-8 bytes without requesting continuation.
+The synthesis does not attribute Omagma's reported emoji loss to the separate malformed-input discard branch.
+The adapter's bounds, text expiry at the next `nextEvent` call, and incomplete malformed-input coverage remain explicit.
+The captured Omagma report and fixture retain their own native PTY scope.
+Shared Omajot source exposure remains separate from an unobserved Omajot failure.
+The maintained proof graph, runtime labels, and all earlier captured sources remain unchanged.
+Private receipts and application bug histories remain outside the synthesis.
+
+Independent semantic reviews corrected consumed-text expiry at the start of the next `nextEvent` call.
+The source record distinguishes terminal-settings checks from unasserted foreground process-group IDs.
+Exact 0.17 structural lint passed with zero issues across 53 pages and 91 sources.
+All 25 retrieval cases passed policy: MRR 0.98, hit@3 1.0, and recall@5 0.96.

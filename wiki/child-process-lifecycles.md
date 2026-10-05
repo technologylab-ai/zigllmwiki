@@ -5,9 +5,10 @@ kind: pattern
 status: draft
 zig: "0.17.0"
 summary: Choose run for bounded collected output or spawn for explicit pipe ownership, use one absolute deadline, and terminate every child through wait or kill.
-updated: 2026-10-04
+updated: 2026-10-05
 sources:
   - "[[zig-0.17.0-stdlib]]"
+  - "[[omagma-zig-0.17-terminal-followup-2026-10-05]]"
   - "[[zig-0.16.0-stdlib]]"
   - "[[zig-0.16.0-release-notes]]"
   - "[[fi-zig-0.16-migration]]"
@@ -79,6 +80,25 @@ early errors while a normal successful `wait` makes the defer harmless.
 Uncancelable kill is a shutdown guarantee and a latency risk. Bound the number
 of live children, stop admission first, and keep platform escalation behavior
 in the process owner rather than scattering it across worker tasks.
+
+## Foreground terminal groups with linked libc
+
+Exact 0.17 `std.posix.tcgetpgrp` and `tcsetpgrp` select `std.c` when libc is linked.
+The callers use raw pointer signatures, while `std.c` omits both declarations.
+The same source gap exists in exact 0.16.
+The reported linked-libc executable compilation exposes missing members, rather than a new compiler regression.
+
+Libc `tcgetpgrp(fd)` returns a PID; `tcsetpgrp(fd, pid)` takes a scalar PID.
+Adding pointer-shaped C declarations would preserve the wrong ABI.
+Correct declarations would also require adapting the callers.
+Linux-specific code can use raw Linux ioctl wrappers with `std.os.linux.errno`.
+Keep that workaround explicitly scoped to Linux.
+
+Compile the executable paths that launch an external editor.
+A passing unit-test root can leave those paths unanalyzed.
+Use an independent PTY to check foreground transfer, child exit, and restoration after success or failure.
+[[omagma-zig-0.17-terminal-followup-2026-10-05]] pins exact source and separately reported Omagma PTY qualification.
+The maintained process proof does not qualify these terminal operations.
 
 ## Common failures
 

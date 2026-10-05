@@ -1,5 +1,19 @@
 # Project handoff — Zig 0.17 follow-up, 2026-10-05
 
+## Omagma allocator and terminal follow-up — 2026-10-05
+
+[[omagma-zig-0.17-terminal-followup-2026-10-05]] preserves 27 selected inputs before synthesis.
+Exact source comparison establishes `Allocator.dupeZ` removal and preserves original sentinel-slice cleanup.
+The linked-libc foreground-wrapper gap already exists in 0.16.
+The POSIX input parser can consume incomplete original UTF-8 bytes as key text.
+The separate malformed-input discard branch is not established as the cause of Omagma's reported emoji loss.
+The buffer page records adapter limits and consumed-text expiry when the next `nextEvent` call begins.
+The pinned report and fixture retain Omagma's own PTY qualification.
+No new terminal runtime, compile-failure witness, or Omajot failure was reproduced by this ingest.
+Application bug narratives and private receipts remain outside the synthesis.
+The maintained proof graph and runtime verification labels are unchanged.
+Run the ordinary exact-revision publication gates before merging further content changes.
+
 ## Omagma standard-library follow-up — 2026-10-05
 
 [[omagma-zig-0.17-stdlib-followup-2026-10-05]] pins selected release-source findings before synthesis.

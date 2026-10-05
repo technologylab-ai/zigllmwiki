@@ -36,6 +36,16 @@ The wiki integration lives in [PR #6](https://github.com/technologylab-ai/zigllm
 Keep the shipped Dispatch/Uring/Kqueue compile blockers visible through their expected-error witnesses.
 Keep dated 0.16 platform receipts separate from current proof results.
 
+## Omagma allocator and terminal follow-up — 2026-10-05
+
+Status: done for source capture and synthesis.
+[[omagma-zig-0.17-terminal-followup-2026-10-05]] pins allocator removal, a pre-existing libc gap, and dependency input behavior.
+The migration guide, child-process page and buffer page retain distinct API, source and reported-runtime classifications.
+The synthesis qualifies the UTF-8 cause, bounded adapter behavior, and queued-text lifetime.
+Shared Omajot source exposure does not establish an Omajot failure.
+No application repair, new terminal experiment, or maintained proof change belongs to this ingest.
+Publication still requires the ordinary exact-revision gates under the platform runbook.
+
 ## Omagma standard-library follow-up — 2026-10-05
 
 Status: done for source capture, synthesis, semantic review, and Mac/hosted-Linux verification.
