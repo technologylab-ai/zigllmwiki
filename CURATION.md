@@ -30,6 +30,18 @@ The official Zig 0.16 release notes are fully inventoried by named section in
 roadmap destination; it does not copy the release notes or claim that queued
 topics have already been synthesized.
 
+## Omagma allocator and terminal follow-up — 2026-10-05
+
+[[omagma-zig-0.17-terminal-followup-2026-10-05]] captures 27 selected source, fixture, report and hosted-metadata files.
+The migration guide distinguishes actual `Allocator.dupeZ` removal from a pre-existing linked-libc terminal-wrapper gap.
+Process guidance preserves the C versus raw Linux signature and error-decoder boundary.
+Buffer guidance separates incomplete UTF-8 source behavior from the reported persisted-byte witness.
+The malformed-input discard branch is not presented as the established cause of that witness.
+The selected adapter retains explicit storage and consumer-lifetime limits.
+Shared Omajot source exposure remains separate from an unobserved Omajot failure.
+Private receipts and application bug narratives remain outside the synthesis.
+The maintained proof graph and runtime verification labels are unchanged.
+
 ## Omagma standard-library follow-up — 2026-10-05
 
 [[omagma-zig-0.17-stdlib-followup-2026-10-05]] captures 14 source and hosted-metadata files before synthesis.
